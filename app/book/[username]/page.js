@@ -106,62 +106,84 @@ export default function Page({ params }) {
           />
         )}
         <h1 className="text-[24px] text-left font-bold cursor-default leading-[28.8px] tracking-[-2%]" >You're booking with <span className="whitespace-nowrap" >{businessName}</span></h1>
-        <div className="flex [flex-flow:column_nowrap] gap-[12px] mx-[16px] my-[0]">
+        <div className="w-full flex [flex-flow:column_nowrap] gap-[12px] mx-[16px] my-[0]">
           <TextField
-            className={`w-full ${shouldDarken
-              ? "text-white border-white focus:ring-white"
-              : "text-black border-black focus:ring-black"
-              } transition-all focus:ring-2 focus:ring-opacity-50`}
+            className="w-full"
             id="full-name"
             label="Full Name"
             variant="outlined"
             required
-            InputProps={{
-              className: shouldDarken ? "text-white" : "text-black",
-            }}
-            InputLabelProps={{
-              className: shouldDarken ? "text-white" : "text-black",
-            }}
             sx={{
-              "& .MuiOutlinedInput-root": {
-                "& fieldset": {
-                  borderColor: shouldDarken ? "white" : "black",
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: shouldDarken ? 'white' : 'black',
+                  transition: 'all 0.3s ease',
                 },
-                "&:hover fieldset": {
-                  borderColor: shouldDarken ? "white" : "black",
+                '&:hover fieldset': {
+                  borderColor: shouldDarken ? 'white' : 'black',
+                  borderWidth: 2,
                 },
-                "&.Mui-focused fieldset": {
-                  borderColor: shouldDarken ? "white" : "black",
+                '&.Mui-focused fieldset': {
+                  borderColor: shouldDarken ? 'white' : 'black',
+                  boxShadow: shouldDarken
+                    ? '0 0 0 2px rgba(255,255,255,0.5)'
+                    : '0 0 0 2px rgba(0,0,0,0.5)',
+                  borderWidth: 1,
+                },
+                color: shouldDarken ? 'white' : 'black',
+              },
+              '& .MuiInputLabel-root': {
+                color: shouldDarken ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)',
+                '&.Mui-focused': {
+                  color: shouldDarken ? 'white' : 'black',
+                },
+              },
+            }}
+            InputProps={{
+              sx: {
+                '& input': {
+                  color: shouldDarken ? 'white' : 'black',
                 },
               },
             }}
           />
 
           <TextField
-            className={`w-full ${shouldDarken
-              ? "text-white border-white focus:ring-white"
-              : "text-black border-black focus:ring-black"
-              } transition-all focus:ring-2 focus:ring-opacity-50`}
+            className="w-full"
             id="phone-number"
             label="Phone Number"
             variant="outlined"
             required
-            InputProps={{
-              className: shouldDarken ? "text-white" : "text-black",
-            }}
-            InputLabelProps={{
-              className: shouldDarken ? "text-white" : "text-black",
-            }}
             sx={{
-              "& .MuiOutlinedInput-root": {
-                "& fieldset": {
-                  borderColor: shouldDarken ? "white" : "black",
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: shouldDarken ? 'white' : 'black',
+                  transition: 'all 0.3s ease',
                 },
-                "&:hover fieldset": {
-                  borderColor: shouldDarken ? "white" : "black",
+                '&:hover fieldset': {
+                  borderColor: shouldDarken ? 'white' : 'black',
+                  borderWidth: 2,
                 },
-                "&.Mui-focused fieldset": {
-                  borderColor: shouldDarken ? "white" : "black",
+                '&.Mui-focused fieldset': {
+                  borderColor: shouldDarken ? 'white' : 'black',
+                  boxShadow: shouldDarken
+                    ? '0 0 0 2px rgba(255,255,255,0.5)'
+                    : '0 0 0 2px rgba(0,0,0,0.5)',
+                  borderWidth: 1,
+                },
+                color: shouldDarken ? 'white' : 'black',
+              },
+              '& .MuiInputLabel-root': {
+                color: shouldDarken ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)',
+                '&.Mui-focused': {
+                  color: shouldDarken ? 'white' : 'black',
+                },
+              },
+            }}
+            InputProps={{
+              sx: {
+                '& input': {
+                  color: shouldDarken ? 'white' : 'black',
                 },
               },
             }}
