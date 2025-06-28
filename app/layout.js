@@ -12,7 +12,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Schedulee | Booking App",
+  title: "Schedulee.app | Booking App",
   description: "A booking app",
 };
 
