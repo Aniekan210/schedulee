@@ -54,7 +54,7 @@ export default async function Page({ params }) {
             style={{ objectFit: 'contain' }}
           />
         }
-        <h1>{businessName}<h1/>
+        <h1>{businessName}</h1>
       </div>
     </div>
   );
