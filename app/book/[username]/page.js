@@ -90,7 +90,7 @@ const newColor = `#${toHex(newR)}${toHex(newG)}${toHex(newB)}`;
     style={ {backgroundColor: newColor} }
   >
     <div
-      className={`w-full max-w-[400px] h-full max-h-[650px] px-4 py-6 flex flex-col overflow-x-hidden overflow-y-auto gap-4 rounded-xl [box-shadow:0_0_10px_0_rgba(0,0,0,0.85)] items-center ${
+      className={`w-full max-w-[400px] h-full max-h-[650px] px-4 py-6 flex flex-col overflow-x-hidden overflow-y-auto gap-4 rounded-xl [box-shadow:0_0_10px_0_rgba(0,0,0,0.55)] items-center ${
         shouldDarken ? "text-white" : "text-black"
       }`}
       style={ {backgroundColor: bgColor} }

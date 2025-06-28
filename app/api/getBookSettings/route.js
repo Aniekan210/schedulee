@@ -5,7 +5,7 @@ export async function GET(request) {
   try {
     //code to get settigs from db
     let settings = {
-        bgColor: "#bd4131",
+        bgColor: "#84bfe0",
         logoUrl: "",
         businessName: "Aniekan's Business"
     };
