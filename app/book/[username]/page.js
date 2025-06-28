@@ -1,13 +1,33 @@
 'use client';
 
 import Image from "next/image";
-import { getBookingPageSettings } from '@/app/server.js';
+import { useEffect, useState } from "react";
 
 
-export default async function Page({ params }) {
-  const { uniqueName } = await params;
+export default function Page({ params }) {
+  const { username } = await params;
+  const [settings, setSettings] = useState(null);
 
-  const settings = await getBookingPageSettings(uniqueName);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+   useEffect(() => {
+
+    const fetchSettings = async () => {
+      try {
+        const response = await fetch(`/api/getBookSettings?username=${username}`);
+        const data = await response.json();
+        setSettings(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSettings();
+  }, []);
+
 
   const businessName = settings['businessName'];
   const bgColor = settings['bgColor'];
