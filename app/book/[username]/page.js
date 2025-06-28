@@ -1,6 +1,7 @@
 'use client';
 
 import Image from "next/image";
+import TextField from '@mui/material/TextField';
 import { useEffect, useState } from "react";
 
 
@@ -98,13 +99,18 @@ export default function Page({ params }) {
           <Image
             src={logoUrl}
             alt="Logo"
-            width={500}
-            height={300}
+            width={120}
+            height={60}
             priority={true}
             className="object-contain"
           />
         )}
-        <h1 className="text-[24px] text-center font-bold cursor-default" >You're booking with {businessName}</h1>
+        <h1 className="text-[24px] text-center font-bold cursor-default" >You're booking with <span className="whitespace-nowrap" >{businessName}</span></h1>
+        <div>
+          <TextField className="w-full" id="full-name" label="Full Name" variant="outlined" required />
+          <TextField id="phone-number" label="Phone Number" variant="outlined" required />
+
+        </div>
       </div>
     </div>
   );
