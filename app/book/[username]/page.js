@@ -6,7 +6,11 @@ import { useEffect, useState } from "react";
 
 export default function Page({ params }) {
   const { username } = params;
-  const [settings, setSettings] = useState(null);
+  const [settings, setSettings] = useState({
+    bgColor: "#ffffff",
+        logoUrl: "",
+        businessName: "Aniekan's"
+  });
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
