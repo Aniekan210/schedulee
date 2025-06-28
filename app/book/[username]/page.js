@@ -1,10 +1,12 @@
 'use client';
 
 import Image from "next/image";
+import { saveUserData } from '@/app/server.js';
 
 
 export default async function Page({ params }) {
   const { uniqueName } = await params;
+
   const settings = await getBookingPageSettings(uniqueName);
 
   const businessName = settings['businessName'];

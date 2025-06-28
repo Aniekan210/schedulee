@@ -5,7 +5,7 @@ export async function getBookingPageSettings(username) {
   let settings = {
     bgColor: "#ff2578",
     logoUrl: "",
-    businessName: process.env.NEXT_PRIVATE
+    businessName: "Aniekan's Business"
   };
 
   return settings;
