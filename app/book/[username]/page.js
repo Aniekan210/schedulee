@@ -1,7 +1,7 @@
 'use client';
 
 import Image from "next/image";
-import { saveUserData } from '@/app/server.js';
+import { getBookingPageSettings } from '@/app/server.js';
 
 
 export default async function Page({ params }) {
