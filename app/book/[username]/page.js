@@ -33,7 +33,7 @@ export default async function Page({ params }) {
   const newB = Math.min(255, Math.max(0, Math.round(b * factor)));
 
   const toHex = (c) => c.toString(16).padStart(2, '0');
-  const newColor = `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+  const newColor = `#${toHex(newR)}${toHex(newG)}${toHex(newB)}`;
 
   return (
     <div
@@ -54,7 +54,7 @@ export default async function Page({ params }) {
             style={{ objectFit: 'contain' }}
           />
         }
-
+        <h1>{businessName}<h1/>
       </div>
     </div>
   );
