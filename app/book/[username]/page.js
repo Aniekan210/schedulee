@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 
 export default function Page({ params }) {
-  const { username } = await params;
+  const { username } = params;
   const [settings, setSettings] = useState(null);
 
   const [loading, setLoading] = useState(true);
