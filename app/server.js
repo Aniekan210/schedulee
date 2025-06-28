@@ -1,4 +1,4 @@
-"use server"
+'use server';
 
 export async function getBookingPageSettings(username) {
   //do some stuff to get settings
