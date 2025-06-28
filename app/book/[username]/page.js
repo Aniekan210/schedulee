@@ -90,7 +90,7 @@ export default function Page({ params }) {
       style={{ backgroundColor: newColor }}
     >
       <div
-        className={`w-full max-w-[360px] h-full max-h-[650px] px-4 py-6 flex flex-col overflow-x-hidden overflow-y-auto gap-4 rounded-[10px] [box-shadow:0_1px_3px_rgba(0,0,0,0.12),_0_10px_20px_rgba(0,0,0,0.08)] items-center ${shouldDarken ? "text-white" : "text-black"
+        className={`w-full max-w-[360px] h-full max-h-[650px] flex flex-col overflow-x-hidden overflow-y-auto gap-4 rounded-[10px] [box-shadow:0_1px_3px_rgba(0,0,0,0.12),_0_10px_20px_rgba(0,0,0,0.08)] items-center ${shouldDarken ? "text-white" : "text-black"
           }`}
         style={{ backgroundColor: bgColor }}
       >
@@ -104,7 +104,7 @@ export default function Page({ params }) {
             className="object-contain"
           />
         )}
-        <h1 className="text-[24px] text-center font-bold" >{businessName}</h1>
+        <h1 className="text-[24px] text-center font-bold cursor-default" >You're booking with {businessName}</h1>
       </div>
     </div>
   );

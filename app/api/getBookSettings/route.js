@@ -6,7 +6,7 @@ export async function GET(request) {
     //code to get settigs from db
     let settings = {
         bgColor: "#84bfe0",
-        logoUrl: "",
+        logoUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTXsZmib0oY_RGJbewv7i1FqOcvmIaNDRNRsw&s",
         businessName: "Aniekan's Business"
     };
 
