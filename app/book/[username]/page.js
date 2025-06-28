@@ -86,12 +86,14 @@ const newColor = `#${toHex(newR)}${toHex(newG)}${toHex(newB)}`;
 
  return (
   <div
-    className={`w-screen h-screen grid place-items-center overflow-hidden bg-[${newColor}]`}
+    className={`w-screen h-screen grid place-items-center overflow-hidden`}
+    style={ {backgroundColor: newColor} }
   >
     <div
-      className={`w-full max-w-[400px] h-full max-h-[650px] px-4 py-6 flex flex-col overflow-x-hidden overflow-y-auto gap-4 rounded-xl items-center bg-[${bgColor}] ${
+      className={`w-full max-w-[400px] h-full max-h-[650px] px-4 py-6 flex flex-col overflow-x-hidden overflow-y-auto gap-4 rounded-xl items-center ${
         shouldDarken ? "text-white" : "text-black"
       }`}
+      style={ {backgroundColor: bgColor} }
     >
       {logoUrl !== "" && (
         <Image
