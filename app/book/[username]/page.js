@@ -517,8 +517,8 @@ export default function BookingPage({ params }) {
               variant={buttonVariant}
               className={cn(
                 "w-full py-6 text-lg font-semibold transition-all",
-                isFormComplete &&
-                  "bg-gray-800 text-white hover:bg-gray-700 dark:bg-gray-200 dark:text-gray-900 dark:hover:bg-gray-300"
+                isFormComplete && "hover:opacity-90", // Add hover effect
+                !isFormComplete && "opacity-50 cursor-not-allowed" // Use opacity for disabled state
               )}
               disabled={isSubmitting || !isFormComplete}
             >

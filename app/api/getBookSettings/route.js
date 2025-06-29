@@ -5,9 +5,9 @@ export async function GET(request) {
   try {
     //code to get settigs from db
     let settings = {
-      bgColor: "#432255",
-      logoUrl: "/logotest.avif",
-      businessName: "Aniekan's Business",
+      bgColor: "#ffffff",
+      logoUrl: "/logo.avif",
+      businessName: "Schedulee.app",
     };
 
     return new Response(JSON.stringify(settings), {

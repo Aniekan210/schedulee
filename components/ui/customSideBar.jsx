@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 
 export default function DashboardSidebar({ trialDays = 14, isActive = false }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -78,9 +79,12 @@ export default function DashboardSidebar({ trialDays = 14, isActive = false }) {
               isCollapsed ? "justify-center" : "px-6"
             )}
           >
-            <div className="h-8 w-8 rounded-md bg-blue-500 flex items-center justify-center">
-              <span className="text-white font-bold text-lg">S</span>
-            </div>
+            <Image 
+              width={32}
+              height={32}
+              src="/logo.avif"
+              alt="logo"
+            />
             {!isCollapsed && (
               <span className="font-semibold ml-2 text-lg">Schedulee.app</span>
             )}
@@ -126,20 +130,23 @@ export default function DashboardSidebar({ trialDays = 14, isActive = false }) {
           )}>
             {!isActive ? (
               !isCollapsed && (
-                <div className="px-3 py-2 bg-blue-50 rounded-lg text-sm text-blue-800 flex items-center transition-all duration-200 hover:bg-blue-100">
+                <a href="/upgrade" className="px-3 py-2 text-sm text-primary rounded-md flex items-center transition-all duration-200 hover:bg-blue-100">
                   <span className="animate-pulse mr-2">⏳</span>
                   <span>Trial: {trialDays} days left</span>
-                </div>
+                </a>
               )
             ) : (
               !isCollapsed && (
-                <Button
+                <a href="/cancel-plan">
+                  <Button
                   variant="outline"
                   className="w-full justify-start text-red-600 hover:bg-red-50 hover:text-red-700 border-red-200"
                 >
                   <X className="h-4 w-4 mr-2" />
                   Cancel Plan
                 </Button>
+                </a>
+                
               )
             )}
 

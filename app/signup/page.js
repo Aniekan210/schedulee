@@ -11,15 +11,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export default function LoginPage() {
+export default function SignUpPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [businessName, setBusinessName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
@@ -29,19 +29,30 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
 
+    if (!businessName.trim()) {
+      setError("Business name is required");
+      setLoading(false);
+      return;
+    }
+
     try {
-      const response = await fetch("/api/login", {
+      // Create user
+      const response = await fetch("/api/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({
+          email,
+          password,
+          business_name: businessName,
+        }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Login failed");
+        throw new Error(data.error || "Sign up failed");
       }
 
       router.push("/dashboard");
@@ -70,10 +81,10 @@ export default function LoginPage() {
             />
           </div>
           <CardTitle className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome to Schedulee.app
+            Get Started
           </CardTitle>
           <CardDescription className="text-gray-500">
-            Manage your bookings seamlessly
+            Create your booking management account
           </CardDescription>
         </CardHeader>
 
@@ -82,15 +93,16 @@ export default function LoginPage() {
             onClick={handleGoogleLogin}
             variant="outline"
             className="w-full flex items-center justify-center gap-3 mb-6 h-11 rounded-lg border-gray-300 hover:bg-gray-50"
+            disabled={loading}
           >
             <GoogleIcon />
             Continue with Google
           </Button>
 
           <div className="flex items-center my-6">
-            <Separator className="flex-1 bg-gray-200" />
+            <div className="flex-1 h-px bg-gray-200"></div>
             <span className="mx-4 text-sm text-gray-400">or</span>
-            <Separator className="flex-1 bg-gray-200" />
+            <div className="flex-1 h-px bg-gray-200"></div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -99,6 +111,21 @@ export default function LoginPage() {
                 {error}
               </div>
             )}
+
+            <div className="space-y-2.5">
+              <Label htmlFor="business" className="text-gray-700">
+                Business Name
+              </Label>
+              <Input
+                id="business"
+                type="text"
+                placeholder="My Awesome Business"
+                className="h-11 rounded-lg focus-visible:ring-blue-500 border-gray-300"
+                value={businessName}
+                onChange={(e) => setBusinessName(e.target.value)}
+                required
+              />
+            </div>
 
             <div className="space-y-2.5">
               <Label htmlFor="email" className="text-gray-700">
@@ -116,17 +143,9 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-2.5">
-              <div className="flex justify-between items-center">
-                <Label htmlFor="password" className="text-gray-700">
-                  Password
-                </Label>
-                <Link
-                  href="/forgot-password"
-                  className="text-sm text-blue-600 hover:text-blue-700 hover:underline"
-                >
-                  Forgot password?
-                </Link>
-              </div>
+              <Label htmlFor="password" className="text-gray-700">
+                Password
+              </Label>
               <Input
                 id="password"
                 type="password"
@@ -143,19 +162,19 @@ export default function LoginPage() {
               className="w-full h-11 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-medium"
               disabled={loading}
             >
-              {loading ? <Spinner /> : "Sign In"}
+              {loading ? <Spinner /> : "Create Account"}
             </Button>
           </form>
         </CardContent>
 
         <CardFooter className="px-8 py-6 border-t border-gray-100 bg-gray-50">
           <p className="text-sm text-center text-gray-600">
-            Don't have an account?{" "}
+            Already have an account?{" "}
             <Link
-              href="/signup"
+              href="/login"
               className="font-medium text-blue-600 hover:text-blue-700 hover:underline"
             >
-              Sign up
+              Log in
             </Link>
           </p>
         </CardFooter>
