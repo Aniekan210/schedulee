@@ -9,6 +9,7 @@ import {
   Clock,
   CheckCircle,
   XCircle,
+  Loader2,
 } from "lucide-react";
 import { format } from "date-fns";
 import { debounce } from "lodash";
@@ -24,6 +25,7 @@ import { cn } from "@/lib/utils";
 export default function BookingPage({ params }) {
   // ============= STATE MANAGEMENT =============
   const { username } = useParams();
+  const [isLoadingSettings, setIsLoadingSettings] = useState(true);
 
   // User settings from API
   const [settings, setSettings] = useState({
@@ -48,7 +50,7 @@ export default function BookingPage({ params }) {
     time: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   // ============= DATA FETCHING =============
   useEffect(() => {
@@ -61,6 +63,8 @@ export default function BookingPage({ params }) {
         setSettings(data);
       } catch (err) {
         console.error("Error fetching settings:", err);
+      } finally {
+        setIsLoadingSettings(false);
       }
     };
 
@@ -149,19 +153,17 @@ export default function BookingPage({ params }) {
       setAvailableTimes([]);
 
       try {
-        await new Promise((resolve) => setTimeout(resolve, 800));
-        const mockTimes = [
-          "09:00 AM",
-          "10:30 AM",
-          "11:00 AM",
-          "01:30 PM",
-          "02:15 PM",
-          "03:45 PM",
-          "04:30 PM",
-        ];
-        const available = mockTimes.filter(() => Math.random() > 0.3);
+        const response = await fetch(
+          `/api/getAvailableTimes?date=${selectedDate}`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch available times");
+        }
+        const data = await response.json();
         setAvailableTimes(
-          available.length ? available : ["No available times"]
+          data.availableTimes.length
+            ? data.availableTimes
+            : ["No available times"]
         );
       } catch (error) {
         console.error("Error fetching available times:", error);
@@ -227,12 +229,7 @@ export default function BookingPage({ params }) {
 
     try {
       await new Promise((resolve) => setTimeout(resolve, 1500));
-      console.log("Booking submitted:", {
-        ...formData,
-        date: format(date, "yyyy-MM-dd"),
-        time: selectedTime,
-      });
-      setSuccess(true);
+      setIsSuccess(true);
     } catch (error) {
       console.error("Booking error:", error);
     } finally {
@@ -256,6 +253,70 @@ export default function BookingPage({ params }) {
     selectedTime;
 
   // ============= RENDER =============
+  if (isLoadingSettings) {
+    return (
+      <div
+        className="min-h-screen w-full flex items-center justify-center"
+        style={{ backgroundColor: newColor }}
+      >
+        <div className="flex flex-col items-center">
+          <Loader2
+            className="h-12 w-12 animate-spin"
+            style={{ color: shouldDarken ? "white" : "black" }}
+          />
+          <p
+            className={`mt-4 text-lg ${
+              shouldDarken ? "text-white" : "text-black"
+            }`}
+          >
+            Loading booking page...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isSuccess) {
+    return (
+      <div
+        className="min-h-screen w-full flex items-center justify-center p-4"
+        style={{ backgroundColor: newColor }}
+      >
+        <div
+          className={`w-full max-w-md rounded-2xl shadow-xl overflow-hidden transition-all duration-300 ${textColor}`}
+          style={{ backgroundColor: bgColor }}
+        >
+          <div className="p-8 text-center">
+            <div className="flex justify-center mb-6">
+              <CheckCircle className="h-16 w-16 text-green-500" />
+            </div>
+            <h2 className="text-2xl font-bold mb-4">Booking Confirmed!</h2>
+            <p className="mb-6">
+              Your appointment with {businessName} has been scheduled.
+            </p>
+            <div className="bg-opacity-20 rounded-lg p-4 mb-6">
+              <p className="font-medium">{format(date, "PPP")}</p>
+              <p className="text-xl font-bold">{selectedTime}</p>
+            </div>
+            <p className="text-sm opacity-80 mb-6">
+              You'll receive a confirmation shortly.
+            </p>
+            <div className="mt-6 text-center text-xs opacity-70">
+              Powered by{" "}
+              <a
+                target="_blank"
+                href="/"
+                className="font-medium hover:underline"
+              >
+                schedulee.app
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className="min-h-screen w-full flex items-center justify-center p-4"
@@ -356,7 +417,7 @@ export default function BookingPage({ params }) {
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
-                      className={`w-full justify-start text-left font-normal ${borderColor} bg-transparent hover:border-3 ${
+                      className={`w-full justify-start text-left font-normal ${borderColor} bg-transparent hover:border-2 ${
                         errors.date ? "border-red-500" : ""
                       }`}
                       style={{
@@ -396,55 +457,51 @@ export default function BookingPage({ params }) {
                   </label>
                   {isLoadingTimes ? (
                     <div className="flex justify-center py-4">
-                      <div
-                        className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2"
-                        style={{
-                          borderColor: shouldDarken ? "#ffffff" : "#000000",
-                        }}
+                      <Loader2
+                        className="h-8 w-8 animate-spin"
+                        style={{ color: shouldDarken ? "white" : "black" }}
                       />
                     </div>
                   ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                      {availableTimes.map((time) => (
-                        <button
-                          key={time}
-                          type="button"
-                          onClick={() => {
-                            if (
-                              time !== "No available times" &&
-                              time !== "Error loading times"
-                            ) {
-                              setSelectedTime(time);
-                              setErrors((prev) => ({ ...prev, time: "" }));
-                            }
-                          }}
-                          disabled={
-                            time === "No available times" ||
-                            time === "Error loading times"
-                          }
-                          className={cn(
-                            "py-2 px-3 rounded-md text-sm font-medium transition-all",
-                            "flex items-center justify-center border",
-                            selectedTime === time
-                              ? `${activeBgColor} border-2 ${activeTextColor} font-semibold`
-                              : time === "No available times" ||
-                                time === "Error loading times"
-                              ? "opacity-70 cursor-not-allowed border-transparent"
-                              : `border-transparent hover:border-current ${textColor}`
-                          )}
-                        >
-                          {time === "No available times" ||
-                          time === "Error loading times" ? (
-                            <span className="text-center">{time}</span>
-                          ) : (
-                            <>
-                              <Clock className="w-4 h-4 mr-2" />
-                              {time}
-                            </>
-                          )}
-                        </button>
-                      ))}
-                    </div>
+                    <>
+                      {availableTimes.length === 1 &&
+                      (availableTimes[0] === "No available times" ||
+                        availableTimes[0] === "Error loading times") ? (
+                        <div className="flex justify-center py-4 text-sm font-medium opacity-70">
+                          {availableTimes[0]}
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                          {availableTimes.map((time) => (
+                            <button
+                              key={time}
+                              type="button"
+                              onClick={() => {
+                                if (
+                                  time !== "No available times" &&
+                                  time !== "Error loading times"
+                                ) {
+                                  setSelectedTime(time);
+                                  setErrors((prev) => ({ ...prev, time: "" }));
+                                }
+                              }}
+                              className={cn(
+                                "py-2 px-3 rounded-md text-sm font-medium transition-all",
+                                "flex items-center justify-center border",
+                                selectedTime === time
+                                  ? `${activeBgColor} border-2 ${activeTextColor} font-semibold`
+                                  : `border-transparent hover:border-current ${textColor}`
+                              )}
+                            >
+                              <>
+                                <Clock className="w-4 h-4 mr-2" />
+                                {time}
+                              </>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </>
                   )}
                   {errors.time && !isLoadingTimes && (
                     <p className="mt-1 text-sm text-red-500 flex items-center">
@@ -467,26 +524,7 @@ export default function BookingPage({ params }) {
             >
               {isSubmitting ? (
                 <div className="flex items-center justify-center">
-                  <svg
-                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
+                  <Loader2 className="h-5 w-5 animate-spin mr-3" />
                   Processing...
                 </div>
               ) : (
