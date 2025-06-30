@@ -12,12 +12,35 @@ export async function POST(request) {
 
     if (error) throw error;
 
-    // Return success response - client will handle the redirect
-    return NextResponse.json({
+    // Get the session cookies
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    // Set cookies manually if needed (alternative approach)
+    const response = NextResponse.json({
       success: true,
       user: data.user,
       session: data.session,
     });
+
+    // Set cookies if they're not automatically set
+    if (session) {
+      response.cookies.set("sb-access-token", session.access_token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+      });
+      response.cookies.set("sb-refresh-token", session.refresh_token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+      });
+    }
+
+    return response;
   } catch (error) {
     let errorMessage = "Login failed";
     let statusCode = 400;
