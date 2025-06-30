@@ -1,5 +1,6 @@
 "use client";
-
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,38 +12,33 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
+    const formData = new FormData(e.target);
+    const email = formData.get("email");
+    const password = formData.get("password");
+
     try {
       const response = await fetch("/api/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || "Login failed");
-      }
+      if (!response.ok) throw new Error(data.error || "Login failed");
 
       router.push("/dashboard");
     } catch (err) {
@@ -52,28 +48,29 @@ export default function LoginPage() {
     }
   };
 
-  const handleGoogleLogin = () => {
-    window.location.href = "/api/auth/google";
+  const handleGoogleLogin = async () => {
+    const { url } = await fetch("/api/auth/google").then((res) => res.json());
+    if (url != "") window.location.href = url;
   };
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-xl rounded-lg overflow-hidden border border-gray-100">
+      <Card className="w-full max-w-md shadow-lg rounded-xl border border-gray-100">
         <CardHeader className="p-8 text-center">
           <div className="flex justify-center mb-6">
             <Image
               src="/logo.avif"
-              alt="Schedulee.app Logo"
+              alt="Schedulee Logo"
               width={64}
               height={64}
-              className="h-16 w-16 object-contain"
+              className="h-14 w-14 object-contain"
             />
           </div>
-          <CardTitle className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome to Schedulee.app
+          <CardTitle className="text-2xl font-bold text-gray-900">
+            Welcome back
           </CardTitle>
-          <CardDescription className="text-gray-500">
-            Manage your bookings seamlessly
+          <CardDescription className="text-gray-500 mt-2">
+            Sign in to manage your bookings
           </CardDescription>
         </CardHeader>
 
@@ -82,40 +79,40 @@ export default function LoginPage() {
             onClick={handleGoogleLogin}
             variant="outline"
             className="w-full flex items-center justify-center gap-3 mb-6 h-11 rounded-lg border-gray-300 hover:bg-gray-50"
+            disabled={loading}
           >
             <GoogleIcon />
             Continue with Google
           </Button>
 
           <div className="flex items-center my-6">
-            <Separator className="flex-1 bg-gray-200" />
+            <div className="flex-1 h-px bg-gray-200"></div>
             <span className="mx-4 text-sm text-gray-400">or</span>
-            <Separator className="flex-1 bg-gray-200" />
+            <div className="flex-1 h-px bg-gray-200"></div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {error && (
-              <div className="text-sm text-red-500 p-3 bg-red-50 rounded-md border border-red-100">
-                {error}
-              </div>
-            )}
+          {error && (
+            <div className="mb-4 p-3 text-sm text-red-600 bg-red-50 rounded-md border border-red-100">
+              {error}
+            </div>
+          )}
 
-            <div className="space-y-2.5">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
               <Label htmlFor="email" className="text-gray-700">
-                Email address
+                Email
               </Label>
               <Input
                 id="email"
+                name="email"
                 type="email"
-                placeholder="your@email.com"
-                className="h-11 rounded-lg focus-visible:ring-blue-500 border-gray-300"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="h-11 rounded-lg focus:ring-blue-500 border-gray-300"
                 required
               />
             </div>
 
-            <div className="space-y-2.5">
+            <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <Label htmlFor="password" className="text-gray-700">
                   Password
@@ -129,11 +126,10 @@ export default function LoginPage() {
               </div>
               <Input
                 id="password"
+                name="password"
                 type="password"
                 placeholder="••••••••"
-                className="h-11 rounded-lg focus-visible:ring-blue-500 border-gray-300"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                className="h-11 rounded-lg focus:ring-blue-500 border-gray-300"
                 required
               />
             </div>
@@ -167,18 +163,24 @@ export default function LoginPage() {
 function Spinner() {
   return (
     <svg
+      className="animate-spin h-5 w-5 text-white"
       xmlns="http://www.w3.org/2000/svg"
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
       fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="animate-spin"
+      viewBox="0 0 24 24"
     >
-      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      ></circle>
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+      ></path>
     </svg>
   );
 }

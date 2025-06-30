@@ -1,5 +1,6 @@
 "use client";
-
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,55 +8,47 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
 
 export default function SignUpPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [businessName, setBusinessName] = useState("");
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const router = useRouter();
+  const [success, setSuccess] = useState(false);
+  const [emailSent, setEmailSent] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
+    setSuccess(false);
 
-    if (!businessName.trim()) {
-      setError("Business name is required");
-      setLoading(false);
-      return;
-    }
+    const formData = new FormData(e.target);
+    const email = formData.get("email");
+    const password = formData.get("password");
+    const businessName = formData.get("businessName");
 
     try {
-      // Create user
       const response = await fetch("/api/signup", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          password,
-          business_name: businessName,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, business_name: businessName }),
       });
 
       const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || "Sign up failed");
-      }
+      if (!response.ok) throw new Error(data.error || "Registration failed");
 
-      router.push("/dashboard");
+      if (data.needsConfirmation) {
+        setEmailSent(email);
+        setSuccess(true);
+      } else {
+        router.push("/dashboard");
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -63,121 +56,145 @@ export default function SignUpPage() {
     }
   };
 
-  const handleGoogleLogin = () => {
-    window.location.href = "/api/auth/google";
+  const handleGoogleSignup = async () => {
+    try {
+      const response = await fetch("/api/auth/google");
+      const { url } = await response.json();
+      if (url) window.location.href = url;
+    } catch (err) {
+      setError("Failed to initiate Google sign in");
+    }
   };
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-xl rounded-lg overflow-hidden border border-gray-100">
+      <Card className="w-full max-w-md shadow-lg rounded-xl border border-gray-100">
         <CardHeader className="p-8 text-center">
           <div className="flex justify-center mb-6">
             <Image
               src="/logo.avif"
-              alt="Schedulee.app Logo"
+              alt="Schedulee Logo"
               width={64}
               height={64}
-              className="h-16 w-16 object-contain"
+              className="h-14 w-14 object-contain"
             />
           </div>
-          <CardTitle className="text-3xl font-bold text-gray-900 mb-2">
-            Get Started
+          <CardTitle className="text-2xl font-bold text-gray-900">
+            {success ? "Check your email" : "Create your account"}
           </CardTitle>
-          <CardDescription className="text-gray-500">
-            Create your booking management account
+          <CardDescription className="text-gray-500 mt-2">
+            {success
+              ? `We've sent a confirmation link to ${emailSent}. Please check your inbox to verify your email.`
+              : "Start managing your bookings in minutes"}
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="px-8 pb-6">
-          <Button
-            onClick={handleGoogleLogin}
-            variant="outline"
-            className="w-full flex items-center justify-center gap-3 mb-6 h-11 rounded-lg border-gray-300 hover:bg-gray-50"
-            disabled={loading}
-          >
-            <GoogleIcon />
-            Continue with Google
-          </Button>
+        {!success ? (
+          <CardContent className="px-8 pb-6">
+            <Button
+              onClick={handleGoogleSignup}
+              variant="outline"
+              className="w-full flex items-center justify-center gap-3 mb-6 h-11 rounded-lg border-gray-300 hover:bg-gray-50"
+              disabled={loading}
+            >
+              <GoogleIcon />
+              Continue with Google
+            </Button>
 
-          <div className="flex items-center my-6">
-            <div className="flex-1 h-px bg-gray-200"></div>
-            <span className="mx-4 text-sm text-gray-400">or</span>
-            <div className="flex-1 h-px bg-gray-200"></div>
-          </div>
+            <div className="flex items-center my-6">
+              <div className="flex-1 h-px bg-gray-200"></div>
+              <span className="mx-4 text-sm text-gray-400">or</span>
+              <div className="flex-1 h-px bg-gray-200"></div>
+            </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
-              <div className="text-sm text-red-500 p-3 bg-red-50 rounded-md border border-red-100">
+              <div className="mb-4 p-3 text-sm text-red-600 bg-red-50 rounded-md border border-red-100">
                 {error}
               </div>
             )}
 
-            <div className="space-y-2.5">
-              <Label htmlFor="business" className="text-gray-700">
-                Business Name
-              </Label>
-              <Input
-                id="business"
-                type="text"
-                placeholder="My Awesome Business"
-                className="h-11 rounded-lg focus-visible:ring-blue-500 border-gray-300"
-                value={businessName}
-                onChange={(e) => setBusinessName(e.target.value)}
-                required
-              />
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="businessName" className="text-gray-700">
+                  Business Name
+                </Label>
+                <Input
+                  id="businessName"
+                  name="businessName"
+                  type="text"
+                  placeholder="Your Business Name"
+                  className="h-11 rounded-lg focus:ring-blue-500 border-gray-300"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-gray-700">
+                  Email
+                </Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  className="h-11 rounded-lg focus:ring-blue-500 border-gray-300"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-gray-700">
+                  Password
+                </Label>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  placeholder="••••••••"
+                  className="h-11 rounded-lg focus:ring-blue-500 border-gray-300"
+                  required
+                  minLength={6}
+                />
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full h-11 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-medium"
+                disabled={loading}
+              >
+                {loading ? <Spinner /> : "Create Account"}
+              </Button>
+            </form>
+          </CardContent>
+        ) : (
+          <CardContent className="px-8 pb-6 text-center">
+            <div className="my-6 p-4 bg-blue-50 text-blue-700 rounded-lg">
+              <p className="font-medium">
+                Didn't receive the email? Check your spam folder or{" "}
+                <button
+                  onClick={() => setSuccess(false)}
+                  className="text-blue-600 hover:underline"
+                >
+                  try again
+                </button>
+              </p>
             </div>
+          </CardContent>
+        )}
 
-            <div className="space-y-2.5">
-              <Label htmlFor="email" className="text-gray-700">
-                Email address
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="your@email.com"
-                className="h-11 rounded-lg focus-visible:ring-blue-500 border-gray-300"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="space-y-2.5">
-              <Label htmlFor="password" className="text-gray-700">
-                Password
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                className="h-11 rounded-lg focus-visible:ring-blue-500 border-gray-300"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full h-11 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-medium"
-              disabled={loading}
-            >
-              {loading ? <Spinner /> : "Create Account"}
-            </Button>
-          </form>
-        </CardContent>
-
-        <CardFooter className="px-8 py-6 border-t border-gray-100 bg-gray-50">
-          <p className="text-sm text-center text-gray-600">
-            Already have an account?{" "}
-            <Link
-              href="/login"
-              className="font-medium text-blue-600 hover:text-blue-700 hover:underline"
-            >
-              Log in
-            </Link>
-          </p>
-        </CardFooter>
+        {!success && (
+          <div className="px-8 py-6 border-t border-gray-100 bg-gray-50">
+            <p className="text-sm text-center text-gray-600">
+              Already have an account?{" "}
+              <Link
+                href="/login"
+                className="font-medium text-blue-600 hover:text-blue-700 hover:underline"
+              >
+                Log in
+              </Link>
+            </p>
+          </div>
+        )}
       </Card>
     </div>
   );
@@ -186,18 +203,24 @@ export default function SignUpPage() {
 function Spinner() {
   return (
     <svg
+      className="animate-spin h-5 w-5 text-white"
       xmlns="http://www.w3.org/2000/svg"
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
       fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="animate-spin"
+      viewBox="0 0 24 24"
     >
-      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      ></circle>
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+      ></path>
     </svg>
   );
 }

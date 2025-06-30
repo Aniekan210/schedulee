@@ -1,33 +1,23 @@
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabase/client";
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_API_KEY;
-  const supabase = createClient(supabaseUrl, supabaseKey);
-  const requestUrl = new URL(request.url);
-  const error = requestUrl.searchParams.get("error");
-
-  if (error) {
-    return NextResponse.redirect(`${requestUrl.origin}/signup?error=${error}`);
-  }
-
-  const { data, error: authError } = await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: {
-      redirectTo: `${requestUrl.origin}/api/auth/callback`,
-      queryParams: {
-        access_type: "offline",
-        prompt: "consent",
+  try {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/callback`,
       },
-    },
-  });
+    });
 
-  if (authError) {
-    return NextResponse.redirect(
-      `${requestUrl.origin}/signup?error=${authError.message}`
+    if (error) throw error;
+
+    // Return the URL for the client to redirect to
+    return NextResponse.json({ url: data.url });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "We couldn't connect to Google. Please try again." },
+      { status: 400 }
     );
   }
-
-  return NextResponse.redirect(data.url);
 }

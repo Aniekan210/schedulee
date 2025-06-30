@@ -1,77 +1,61 @@
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabase/client";
+import { NextResponse } from "next/server";
 
 export async function POST(request) {
   const { email, password, business_name } = await request.json();
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_API_KEY;
-  const supabase = createClient(supabaseUrl, supabaseKey);
+
+  if (!business_name?.trim()) {
+    return NextResponse.json(
+      { error: "Please provide a name for your business" },
+      { status: 400 }
+    );
+  }
 
   try {
-    // Create the user
+    // Create user with PKCE flow
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
       options: {
+        data: {
+          business_name,
+          is_paid: false,
+        },
         emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard`,
       },
     });
 
-    if (authError) {
-      throw authError;
+    if (authError) throw authError;
+
+    // Only create settings if we have a user ID (email might not be confirmed yet)
+    if (authData.user?.id) {
+      const { error: settingsError } = await supabase
+        .from("form_settings")
+        .upsert({
+          user_id: authData.user.id,
+          business_name,
+          logo_url: "",
+          bg_color: "#ffffff",
+        });
+
+      if (settingsError) throw settingsError;
     }
 
-    // Update user metadata
-    const { error: metadataError } = await supabase.auth.updateUser({
-      data: {
-        business_name,
-        is_paid: false,
-      },
+    return NextResponse.json({
+      success: true,
+      needsConfirmation: true, // Always require confirmation with PKCE flow
     });
-
-    if (metadataError) {
-      throw metadataError;
-    }
-
-    // Create default form settings
-    const { error: formSettingsError } = await supabase
-      .from("form_settings")
-      .insert({
-        user_id: authData.user.id,
-        business_name,
-        logo_url: "",
-        bg_color: "#ffffff",
-      });
-
-    if (formSettingsError) {
-      throw formSettingsError;
-    }
-
-    // Manually set session cookie for immediate login
-    const { data: sessionData, error: sessionError } =
-      await supabase.auth.getSession();
-
-    if (sessionError) {
-      throw sessionError;
-    }
-
-    return new Response(
-      JSON.stringify({
-        success: true,
-        session: sessionData.session,
-      }),
-      {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 400,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    let errorMessage = "Registration failed";
+
+    if (error.message.includes("User already registered")) {
+      errorMessage = "This email is already registered. Please log in instead.";
+    } else if (error.message.includes("password")) {
+      errorMessage = "Please choose a stronger password (min 6 characters)";
+    } else if (error.message.includes("email")) {
+      errorMessage = "Please provide a valid email address";
+    }
+
+    return NextResponse.json({ error: errorMessage }, { status: 400 });
   }
 }
