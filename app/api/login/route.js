@@ -8,17 +8,11 @@ export async function POST(request) {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
-      options: {
-        // PKCE parameters
-        flowType: "pkce",
-        // Redirect after login
-        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard`,
-      },
     });
 
     if (error) throw error;
 
-    // For API responses (not redirects)
+    // Return success response - client will handle the redirect
     return NextResponse.json({
       success: true,
       user: data.user,
@@ -38,6 +32,12 @@ export async function POST(request) {
       statusCode = 429;
     }
 
-    return NextResponse.json({ error: errorMessage }, { status: statusCode });
+    return NextResponse.json(
+      {
+        error: errorMessage,
+        status: statusCode,
+      },
+      { status: statusCode }
+    );
   }
 }

@@ -40,7 +40,12 @@ export default function LoginPage() {
 
       if (!response.ok) throw new Error(data.error || "Login failed");
 
-      router.push("/dashboard");
+      // Check if we have a session before redirecting
+      if (data.session) {
+        window.location.href = "/dashboard";
+      } else {
+        throw new Error("Login successful but no session found");
+      }
     } catch (err) {
       setError(err.message);
     } finally {

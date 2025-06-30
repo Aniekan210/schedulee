@@ -12,11 +12,11 @@ export async function GET() {
 
     if (error) throw error;
 
-    // Return the URL for the client to redirect to
+    // Return the URL for client-side redirect (matches your client code)
     return NextResponse.json({ url: data.url });
   } catch (error) {
     return NextResponse.json(
-      { error: "We couldn't connect to Google. Please try again." },
+      { error: "Failed to connect with Google" },
       { status: 400 }
     );
   }

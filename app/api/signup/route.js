@@ -5,8 +5,6 @@ export async function POST(request) {
   try {
     const { email, password, business_name } = await request.json();
 
-    console.log("hi 1");
-
     // Validate inputs
     if (!business_name?.trim()) {
       return NextResponse.json(
@@ -29,7 +27,7 @@ export async function POST(request) {
       );
     }
 
-    // Create user with PKCE flow
+    // Create user
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
@@ -42,16 +40,12 @@ export async function POST(request) {
       },
     });
 
-    if (authError) {
-      console.error("Signup error:", authError);
-      throw authError;
-    }
+    if (authError) throw authError;
 
-    // Successful response
+    // Success response matching client expectations
     return NextResponse.json({
       success: true,
-      needsConfirmation: true,
-      email: authData.user?.email, // Return email for confirmation message
+      email: authData.user?.email,
     });
   } catch (error) {
     console.error("Registration error:", error);
@@ -70,17 +64,6 @@ export async function POST(request) {
       statusCode = 400;
     }
 
-    console.log("hi 4");
-
-    return NextResponse.json(
-      {
-        error: errorMessage,
-        details:
-          process.env.NODE_ENV === "development" ? error.message : undefined,
-      },
-      {
-        status: statusCode,
-      }
-    );
+    return NextResponse.json({ error: errorMessage }, { status: statusCode });
   }
 }

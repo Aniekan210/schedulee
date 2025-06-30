@@ -5,18 +5,17 @@ import { createServerClient } from "@supabase/ssr";
 export async function GET(request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
-  const error = requestUrl.searchParams.get("error");
 
   if (!code) {
     return NextResponse.redirect(
-      `${requestUrl.origin}/login?error=${error || "Authentication failed"}`
+      `${requestUrl.origin}/login?error=Authentication failed`
     );
   }
 
   const cookieStore = cookies();
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY,
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_API_KEY,
     {
       cookies: {
         get(name) {
@@ -33,57 +32,28 @@ export async function GET(request) {
   );
 
   try {
-    const { data, error: exchangeError } =
-      await supabase.auth.exchangeCodeForSession(code);
+    // Exchange code for session
+    const { data: { user }, error } = await supabase.auth.exchangeCodeForSession(code);
+    if (error) throw error;
 
-    if (exchangeError) {
-      console.error("Code exchange error:", exchangeError);
-      return NextResponse.redirect(
-        `${requestUrl.origin}/login?error=${encodeURIComponent(
-          "Failed to authenticate"
-        )}`
-      );
-    }
+    // Set user metadata (matches your signup route)
+    const { error: updateError } = await supabase.auth.updateUser({
+      data: {
+        business_name: user.user_metadata?.name || user.email.split('@')[0] || "My Business",
+        is_paid: false,
+      }
+    });
 
-    const user = data?.user;
+    if (updateError) throw updateError;
 
-    if (user?.identities?.[0]?.provider === "google") {
-      const email = user.email;
-      const businessName =
-        email.split("@")[0] || user.user_metadata?.name || "My Business";
-
-      // Update user metadata
-      const { error: updateError } = await supabase
-        .from("users")
-        .update({
-          user_metadata: {
-            business_name: businessName,
-            is_paid: false,
-          },
-        })
-        .eq("id", user.id);
-
-      if (updateError) throw updateError;
-
-      // Upsert form settings
-      const { error: upsertError } = await supabase
-        .from("form_settings")
-        .upsert({
-          user_id: user.id,
-          business_name: businessName,
-          logo_url: "",
-          bg_color: "#ffffff",
-        });
-
-      if (upsertError) throw upsertError;
-    }
-
+    // Redirect to dashboard
     return NextResponse.redirect(`${requestUrl.origin}/dashboard`);
+    
   } catch (err) {
     console.error("Auth callback error:", err);
     return NextResponse.redirect(
       `${requestUrl.origin}/login?error=${encodeURIComponent(
-        err.message || "Authentication error"
+        err.message || "Authentication failed"
       )}`
     );
   }
