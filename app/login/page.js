@@ -1,4 +1,5 @@
 "use client";
+import { createClient } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,11 @@ export default function LoginPage() {
     const email = formData.get("email");
     const password = formData.get("password");
 
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_API_KEY
+    );
+
     try {
       const response = await fetch("/api/login", {
         method: "POST",
@@ -40,8 +46,21 @@ export default function LoginPage() {
 
       if (!response.ok) throw new Error(data.error || "Login failed");
 
-      // Check if we have a session before redirecting
+      // Initialize the session on the client side if session data exists
       if (data.session) {
+        const { error } = await supabase.auth.setSession({
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token,
+        });
+
+        if (error) throw error;
+
+        // Check if session is properly set
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        if (!session) throw new Error("Session initialization failed");
+
         window.location.href = "/dashboard";
       } else {
         throw new Error("Login successful but no session found");

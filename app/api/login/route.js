@@ -1,3 +1,4 @@
+// app/api/login/route.js
 import { supabase } from "@/lib/supabase/client";
 import { NextResponse } from "next/server";
 
@@ -12,35 +13,12 @@ export async function POST(request) {
 
     if (error) throw error;
 
-    // Get the session cookies
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    // Set cookies manually if needed (alternative approach)
-    const response = NextResponse.json({
+    // Return the session data
+    return NextResponse.json({
       success: true,
       user: data.user,
       session: data.session,
     });
-
-    // Set cookies if they're not automatically set
-    if (session) {
-      response.cookies.set("sb-access-token", session.access_token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-      });
-      response.cookies.set("sb-refresh-token", session.refresh_token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-      });
-    }
-
-    return response;
   } catch (error) {
     let errorMessage = "Login failed";
     let statusCode = 400;
@@ -55,12 +33,6 @@ export async function POST(request) {
       statusCode = 429;
     }
 
-    return NextResponse.json(
-      {
-        error: errorMessage,
-        status: statusCode,
-      },
-      { status: statusCode }
-    );
+    return NextResponse.json({ error: errorMessage }, { status: statusCode });
   }
 }

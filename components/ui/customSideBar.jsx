@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Calendar, Clock, LayoutTemplate, LogOut, ChevronRight, X } from "lucide-react";
+import { createClient } from "@supabase/supabase-js";
+import { Calendar, Clock, LayoutTemplate, LogOut, ChevronRight, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -11,6 +12,8 @@ import Image from "next/image";
 export default function DashboardSidebar({ trialDays = 14, isActive = false }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
   const pathname = usePathname();
 
   // Close sidebar when route changes
@@ -157,9 +160,44 @@ export default function DashboardSidebar({ trialDays = 14, isActive = false }) {
                 "w-full text-gray-700 hover:bg-gray-100 transition-colors duration-200",
                 isCollapsed ? "justify-center" : "justify-start"
               )}
+              onClick={async () => {
+                  setIsSigningOut(true);
+                  try {
+                    const supabase = createClient(
+                      process.env.NEXT_PUBLIC_SUPABASE_URL,
+                      process.env.NEXT_PUBLIC_SUPABASE_API_KEY
+                    );
+                    // 1. Sign out from Supabase
+                    const { error } = await supabase.auth.signOut();
+                    if (error) throw error;
+
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    
+                    // 3. Wait a brief moment for cleanup
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    
+                    // 4. Force full page reload to clear all state
+                    window.location.href = '/login';
+                  } catch (error) {
+                    console.error('Sign out error:', error);
+                    // Show error to user if needed
+                  } finally {
+                    setIsSigningOut(false);
+                  }
+              }}
+              disabled={isSigningOut}
             >
-              <LogOut className="h-4 w-4" />
-              {!isCollapsed && <span className="ml-2">Sign out</span>}
+              {isSigningOut ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <LogOut className="h-4 w-4" />
+              )}
+              {!isCollapsed && (
+                <span className="ml-2">
+                  {isSigningOut ? 'Signing out...' : 'Sign out'}
+                </span>
+              )}
             </Button>
           </div>
 
