@@ -9,8 +9,18 @@ export default function RootLayout({ children }) {
 
   useEffect(() => {
     const authCheck = async () => {
+      if (typeof window === "undefined") return;
+
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 5000); // 5s timeout
+
       try {
-        const res = await fetch("/api/authenticate");
+        const res = await fetch("/api/authenticate", {
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeout);
+
         const data = await res.json();
 
         if (data.error) {
@@ -25,11 +35,12 @@ export default function RootLayout({ children }) {
 
         setData(data);
 
-        // Add slight delay before redirect to ensure state is updated
+        // slight delay before redirect
         setTimeout(() => {
           router.push("/dashboard/bookings");
-        }, 100); // 100ms delay - barely noticeable but ensures smooth transition
+        }, 100);
       } catch (error) {
+        console.error("authCheck failed:", error);
         router.push("/login");
       }
     };
