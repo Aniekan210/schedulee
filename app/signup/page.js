@@ -70,6 +70,7 @@ export default function SignUpPage() {
   };
 
   const handleGoogleSignup = async () => {
+    console.log("hello");
     try {
       const response = await fetch("/api/auth/google");
       const { url } = await response.json();
