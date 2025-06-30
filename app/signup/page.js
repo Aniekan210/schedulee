@@ -33,24 +33,37 @@ export default function SignUpPage() {
     const businessName = formData.get("businessName");
 
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
       const response = await fetch("/api/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, business_name: businessName }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Registration failed");
+      }
 
       const data = await response.json();
 
-      if (!response.ok) throw new Error(data.error || "Registration failed");
-
-      if (data.needsConfirmation) {
+      if (data.success) {
         setEmailSent(email);
         setSuccess(true);
       } else {
-        router.push("/dashboard");
+        throw new Error(data.error || "Registration failed");
       }
     } catch (err) {
-      setError(err.message);
+      setError(
+        err.name === "AbortError"
+          ? "Request timed out. Please try again."
+          : err.message || "Registration failed. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -179,6 +192,12 @@ export default function SignUpPage() {
                 </button>
               </p>
             </div>
+            <Link
+              href="/login"
+              className="mt-4 inline-block text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline"
+            >
+              Go to login page
+            </Link>
           </CardContent>
         )}
 
