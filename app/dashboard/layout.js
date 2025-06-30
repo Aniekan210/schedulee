@@ -35,10 +35,7 @@ export default function RootLayout({ children }) {
 
         setData(data);
 
-        // slight delay before redirect
-        setTimeout(() => {
-          router.push("/dashboard/bookings");
-        }, 100);
+        router.push("/dashboard/bookings");
       } catch (error) {
         console.error("authCheck failed:", error);
         router.push("/login");
