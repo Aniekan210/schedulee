@@ -312,14 +312,7 @@ export default function Home() {
                 Start 14-Day Free Trial
               </Button>
             </Link>
-            <Button
-              variant="outline"
-              className="px-8 py-6 text-lg border-2 border-white text-white hover:bg-white/10"
-              onClick={() => document.getElementById('demo-video').scrollIntoView({ behavior: 'smooth' })}
-              aria-label="Watch demo video"
-            >
-              Watch Demo
-            </Button>
+            <DemoButton />
           </div>
           <p className="mt-4 text-blue-100">Only $8.99 CAD/month after trial. Cancel anytime.</p>
         </div>
