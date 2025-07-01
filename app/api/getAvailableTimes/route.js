@@ -1,7 +1,6 @@
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const date = searchParams.get("date");
-  console.log(date);
 
   // Here you would normally query your database or external service
   // For now, we'll use mock data similar to your original implementation
