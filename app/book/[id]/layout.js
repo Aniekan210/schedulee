@@ -1,22 +1,16 @@
-/**
- * Customer Booking Page Metadata
- * 
- * Defines SEO and social sharing for business booking pages
- * where customers schedule appointments.
- */
 export const metadata = {
-    title: "Book Your Appointment",
-    description: "Schedule directly with this business — powered by schedulee.app",
+    title: "Book an appointment | Powered by Schedulee.app",
+    description: "Schedule your appointment - Powered by Schedulee",
 
     openGraph: {
-        title: "Book Your Appointment",
-        description: "Reserve your spot with this business using schedulee.app",
+        title: "Book an appointment | Powered by Schedulee.app",
+        description: "Schedule your appointment - Powered by Schedulee",
         images: [
             {
                 url: "https://schedulee.app/logo.png",
                 width: 1200,
-                height: 1200,  // Your square logo
-                alt: "Schedulee Logo",
+                height: 1200,
+                alt: "Schedulee Booking",
             },
         ],
         type: "website",
@@ -25,17 +19,31 @@ export const metadata = {
 
     twitter: {
         card: "summary_large_image",
-        title: "Book Your Appointment",
-        description: "Schedule your appointment with this business",
-        images: ["https://schedulee.app/logo.png"],
+        title: "Book an appointment | Powered by Schedulee.app",
+        description: "Schedule your appointment - Powered by Schedulee",
+        images: "https://schedulee.app/logo.png",
+    },
+
+    robots: {
+        index: false,
+        follow: false,
+        nocache: true,
+        googleBot: {
+            index: false,
+            follow: false,
+            noimageindex: true,
+        },
+    },
+    alternates: {
+        canonical: "https://schedulee.app/",
     },
 };
 
-/**
- * Booking Page Layout
- * 
- * Clean wrapper for customer booking flows.
- */
+
 export default function BookingLayout({ children }) {
-    return <>{children}</>;
+    return (
+        <>
+            {children}
+        </>
+    );
 }
