@@ -2,53 +2,28 @@
 
 import { useAuth } from "@/context/auth-context";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  MoreVertical,
-  Edit,
-  Trash2,
-  Plus,
-  Calendar as CalendarIcon,
-  Filter,
-  ChevronLeft,
-  ChevronRight,
-  Copy,
+  MoreVertical, Edit, Trash2, Plus, Calendar as CalendarIcon,
+  Filter, ChevronLeft, ChevronRight, Copy,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
+  Popover, PopoverContent, PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
@@ -85,7 +60,6 @@ export default function BookingsOverviewPage() {
         console.error("Error fetching settings:", err);
       }
     };
-
     getSettings();
   }, [user]);
 
@@ -136,7 +110,9 @@ export default function BookingsOverviewPage() {
 
   const handleEdit = (booking) => {
     setCurrentBooking({
-      ...booking,
+      id: booking.id,
+      name: booking.name,
+      phone_number: booking.phone_number,
       date: booking.date,
       time: booking.time,
     });
@@ -152,9 +128,7 @@ export default function BookingsOverviewPage() {
     try {
       const response = await fetch("/api/bookings", {
         method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: bookingToDelete }),
       });
 
@@ -179,7 +153,7 @@ export default function BookingsOverviewPage() {
       const url = "/api/bookings";
 
       const requestBody = currentBooking.id
-        ? currentBooking // Keep existing format for PUT
+        ? currentBooking
         : {
           business_id: user?.id,
           name: currentBooking.name,
@@ -190,14 +164,11 @@ export default function BookingsOverviewPage() {
 
       const response = await fetch(url, {
         method,
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestBody),
       });
 
       if (response.ok) {
-        const data = await response.json();
         toast.success(
           `Booking ${currentBooking.id ? "updated" : "created"} successfully`
         );
@@ -205,10 +176,7 @@ export default function BookingsOverviewPage() {
         setIsDialogOpen(false);
       } else {
         const data = await response.json();
-        throw new Error(
-          data.error ||
-          `Failed to ${currentBooking.id ? "update" : "create"} booking`
-        );
+        throw new Error(data.error || "Failed to save booking");
       }
     } catch (error) {
       toast.error(error.message);
@@ -232,15 +200,11 @@ export default function BookingsOverviewPage() {
   };
 
   const handlePreviousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
+    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
   };
 
   const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
+    if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
   };
 
   const filterLabels = {
@@ -264,37 +228,28 @@ export default function BookingsOverviewPage() {
 
   return (
     <div className="container mx-auto px-4 py-6 space-y-6">
-      {/* Header Section */}
+      {/* Header */}
       <div className="grid gap-6">
         <div className="flex flex-col space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight">
-            Welcome, {businessName}
-          </h1>
+          <h1 className="text-3xl font-bold">Welcome, {businessName}</h1>
           <p className="text-muted-foreground">
             Manage your bookings and appointments
           </p>
         </div>
 
-        {/* Booking Link Card with improved truncation */}
+        {/* Booking Link Card */}
         <Card className="overflow-hidden">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium tracking-wide text-muted-foreground uppercase">
+            <CardTitle className="text-sm text-muted-foreground uppercase">
               Your Booking Link
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2 w-full">
-              <div className="flex-1 min-w-0 overflow-hidden">
-                <p className="text-sm font-mono p-2 bg-muted rounded-md truncate text-ellipsis whitespace-nowrap">
-                  {bookingLink}
-                </p>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={copyToClipboard}
-                className="shrink-0"
-              >
+              <p className="flex-1 min-w-0 truncate bg-muted p-2 rounded-md text-sm font-mono">
+                {bookingLink}
+              </p>
+              <Button variant="outline" size="sm" onClick={copyToClipboard}>
                 <Copy className="h-4 w-4 mr-2" />
                 Copy
               </Button>
@@ -303,50 +258,34 @@ export default function BookingsOverviewPage() {
         </Card>
       </div>
 
-      {/* Filters and Table Section */}
+      {/* Filters */}
       <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row justify-between gap-4">
-          {/* Filter Controls */}
-          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-            <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">Filter:</span>
-            </div>
+        <div className="flex flex-col sm:flex-row justify-between gap-4 items-start sm:items-center">
+          <div className="flex flex-wrap gap-3 items-center">
+            <Filter className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">Filter:</span>
             <Select value={filter} onValueChange={handleFilterChange}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Select filter" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="today">Today</SelectItem>
-                <SelectItem value="tomorrow">Tomorrow</SelectItem>
-                <SelectItem value="next7">Next 7 days</SelectItem>
-                <SelectItem value="upcoming">All upcoming</SelectItem>
-                <SelectItem value="past30">Past 30 days</SelectItem>
-                <SelectItem value="recent">Recently booked</SelectItem>
-                <SelectItem value="all">All bookings</SelectItem>
-                <SelectItem value="custom">Custom date</SelectItem>
+                {Object.entries(filterLabels).map(([key, label]) => (
+                  <SelectItem key={key} value={key}>
+                    {label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
 
             {filter === "custom" && (
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-[240px] justify-start text-left font-normal",
-                      !customDate && "text-muted-foreground"
-                    )}
-                  >
+                  <Button variant="outline" className="w-[240px] justify-start">
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {customDate ? (
-                      format(customDate, "PPP")
-                    ) : (
-                      <span>Pick a date</span>
-                    )}
+                    {format(customDate, "PPP")}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
+                <PopoverContent align="start" className="p-0">
                   <Calendar
                     mode="single"
                     selected={customDate}
@@ -356,23 +295,27 @@ export default function BookingsOverviewPage() {
                 </PopoverContent>
               </Popover>
             )}
+
+            {/* Refresh Button */}
+            <Button onClick={fetchBookings} variant="outline">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M4 4v6h6M20 20v-6h-6M4 10a9 9 0 0115.9-3.36M20 14a9 9 0 01-15.9 3.36" />
+              </svg>
+              Refresh
+            </Button>
           </div>
 
-          {/* Add Booking Button */}
-          <Button
-            onClick={handleAddNew}
-            className="sm:ml-auto bg-blue-500 hover:bg-blue-600"
-          >
-            <Plus className="w-4 h-4 mr-2" />
+          <Button onClick={handleAddNew} className="bg-blue-500 hover:bg-blue-600">
+            <Plus className="h-4 w-4 mr-2" />
             Add Booking
           </Button>
         </div>
 
         {/* Active Filter Badge */}
         <div className="flex items-center gap-2">
-          <Badge variant="outline" className="text-sm font-medium">
-            {filterLabels[filter] || "All Bookings"}
-          </Badge>
+          <Badge variant="outline">{filterLabels[filter]}</Badge>
           {!isLoading && bookings.length > 0 && (
             <span className="text-sm text-muted-foreground">
               {bookings.length} {bookings.length === 1 ? "booking" : "bookings"}
@@ -380,7 +323,7 @@ export default function BookingsOverviewPage() {
           )}
         </div>
 
-        {/* Table Card */}
+        {/* Table */}
         <Card>
           {isLoading ? (
             <TableSkeleton />
@@ -390,42 +333,24 @@ export default function BookingsOverviewPage() {
             </div>
           ) : (
             <>
-              <Table className="w-full">
+              <Table>
                 <TableHeader>
-                  <TableRow className="hover:bg-transparent">
-                    <TableHead className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">
-                      Customer
-                    </TableHead>
-                    <TableHead className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">
-                      Contact
-                    </TableHead>
-                    <TableHead className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">
-                      Date
-                    </TableHead>
-                    <TableHead className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">
-                      Time
-                    </TableHead>
-                    <TableHead className="h-12 px-4 text-right align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">
-                      Actions
-                    </TableHead>
+                  <TableRow>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Contact</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Time</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {bookings.map((booking) => (
-                    <TableRow key={booking.id} className="hover:bg-muted/50">
-                      <TableCell className="p-4 align-middle [&:has([role=checkbox])]:pr-0">
-                        {booking.name}
-                      </TableCell>
-                      <TableCell className="p-4 align-middle [&:has([role=checkbox])]:pr-0">
-                        {booking.phone_number}
-                      </TableCell>
-                      <TableCell className="p-4 align-middle [&:has([role=checkbox])]:pr-0">
-                        {format(new Date(booking.date), "MMM dd, yyyy")}
-                      </TableCell>
-                      <TableCell className="p-4 align-middle [&:has([role=checkbox])]:pr-0">
-                        {booking.time}
-                      </TableCell>
-                      <TableCell className="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-right">
+                    <TableRow key={booking.id}>
+                      <TableCell>{booking.name}</TableCell>
+                      <TableCell>{booking.phone_number}</TableCell>
+                      <TableCell>{format(new Date(booking.date), "MMM dd, yyyy")}</TableCell>
+                      <TableCell>{booking.time}</TableCell>
+                      <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="sm">
@@ -433,9 +358,7 @@ export default function BookingsOverviewPage() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={() => handleEdit(booking)}
-                            >
+                            <DropdownMenuItem onClick={() => handleEdit(booking)}>
                               <Edit className="h-4 w-4 mr-2" />
                               Edit
                             </DropdownMenuItem>
@@ -456,11 +379,11 @@ export default function BookingsOverviewPage() {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-between px-6 py-4 border-t">
-                  <div className="text-sm text-muted-foreground">
+                <div className="flex justify-between px-6 py-4 border-t">
+                  <span className="text-sm text-muted-foreground">
                     Page {currentPage} of {totalPages}
-                  </div>
-                  <div className="flex space-x-2">
+                  </span>
+                  <div className="flex gap-2">
                     <Button
                       variant="outline"
                       size="sm"
@@ -494,66 +417,64 @@ export default function BookingsOverviewPage() {
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Customer Name</Label>
+              <Input
+                id="name"
+                value={currentBooking?.name || ""}
+                onChange={(e) =>
+                  setCurrentBooking((prev) => ({
+                    ...prev,
+                    name: e.target.value,
+                  }))
+                }
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number</Label>
+              <Input
+                id="phone"
+                value={currentBooking?.phone_number || ""}
+                onChange={(e) =>
+                  setCurrentBooking((prev) => ({
+                    ...prev,
+                    phone_number: e.target.value,
+                  }))
+                }
+                required
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Customer Name</Label>
+                <Label htmlFor="date">Date</Label>
                 <Input
-                  id="name"
-                  value={currentBooking?.name || ""}
+                  type="date"
+                  id="date"
+                  value={currentBooking?.date || ""}
                   onChange={(e) =>
-                    setCurrentBooking({
-                      ...currentBooking,
-                      name: e.target.value,
-                    })
+                    setCurrentBooking((prev) => ({
+                      ...prev,
+                      date: e.target.value,
+                    }))
                   }
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
+                <Label htmlFor="time">Time</Label>
                 <Input
-                  id="phone"
-                  value={currentBooking?.phone || ""}
+                  type="time"
+                  id="time"
+                  value={currentBooking?.time || ""}
                   onChange={(e) =>
-                    setCurrentBooking({
-                      ...currentBooking,
-                      phone_number: e.target.value,
-                    })
+                    setCurrentBooking((prev) => ({
+                      ...prev,
+                      time: e.target.value,
+                    }))
                   }
                   required
                 />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="date">Date</Label>
-                  <Input
-                    id="date"
-                    type="date"
-                    value={currentBooking?.date || ""}
-                    onChange={(e) =>
-                      setCurrentBooking({
-                        ...currentBooking,
-                        date: e.target.value,
-                      })
-                    }
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="time">Time</Label>
-                  <Input
-                    id="time"
-                    type="time"
-                    value={currentBooking?.time || ""}
-                    onChange={(e) =>
-                      setCurrentBooking({
-                        ...currentBooking,
-                        time: e.target.value,
-                      })
-                    }
-                    required
-                  />
-                </div>
               </div>
             </div>
             <DialogFooter>
@@ -571,12 +492,9 @@ export default function BookingsOverviewPage() {
           <DialogHeader>
             <DialogTitle>Confirm Deletion</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <p className="text-muted-foreground">
-              Are you sure you want to delete this booking? This action cannot
-              be undone.
-            </p>
-          </div>
+          <p className="text-muted-foreground">
+            Are you sure you want to delete this booking?
+          </p>
           <DialogFooter>
             <Button
               variant="outline"
