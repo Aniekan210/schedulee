@@ -178,12 +178,22 @@ export default function BookingsOverviewPage() {
       const method = currentBooking.id ? "PUT" : "POST";
       const url = "/api/bookings";
 
+      const requestBody = currentBooking.id
+        ? currentBooking // Keep existing format for PUT
+        : {
+          business_id: user?.id,
+          name: currentBooking.name,
+          phone_number: currentBooking.phone_number,
+          booking_date: currentBooking.date,
+          booking_time: currentBooking.time,
+        };
+
       const response = await fetch(url, {
         method,
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(currentBooking),
+        body: JSON.stringify(requestBody),
       });
 
       if (response.ok) {
@@ -197,7 +207,7 @@ export default function BookingsOverviewPage() {
         const data = await response.json();
         throw new Error(
           data.error ||
-            `Failed to ${currentBooking.id ? "update" : "create"} booking`
+          `Failed to ${currentBooking.id ? "update" : "create"} booking`
         );
       }
     } catch (error) {

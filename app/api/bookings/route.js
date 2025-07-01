@@ -105,18 +105,33 @@ export async function POST(request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const bookingData = await request.json();
-    const { id, date, time, phone, ...rest } = bookingData;
+
+    // Validate required fields
+    if (!bookingData.name || !bookingData.phone_number || !bookingData.booking_date || !bookingData.booking_time) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    // Ensure business_id matches the authenticated user
+    if (bookingData.business_id && bookingData.business_id !== user.id) {
+      return NextResponse.json(
+        { error: "Invalid business_id" },
+        { status: 403 }
+      );
+    }
 
     const { data, error } = await supabase
       .from("bookings")
       .insert([
         {
-          ...rest,
-          phone_number: phone,
-          business_id: user.id,
-          booking_date: date,
-          booking_time: `${time}:00`,
-        },
+          ...bookingData,
+          business_id: user.id, // Override with authenticated user's ID
+          booking_time: bookingData.booking_time.includes(':')
+            ? bookingData.booking_time
+            : `${bookingData.booking_time}:00`, // Ensure time format
+        }
       ])
       .select();
 

@@ -22,45 +22,41 @@ import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-export default function BookingPage({ params }) {
-  // ============= STATE MANAGEMENT =============
+export default function BookingPage() {
   const { id } = useParams();
   const [isLoadingSettings, setIsLoadingSettings] = useState(true);
+  const [settings, setSettings] = useState(null);
 
-  // User settings from API
-  const [settings, setSettings] = useState({
-    bgColor: "",
-    logoUrl: "",
-    businessName: "",
-  });
-
-  // Form state
   const [date, setDate] = useState();
   const [selectedTime, setSelectedTime] = useState("");
   const [availableTimes, setAvailableTimes] = useState([]);
   const [isLoadingTimes, setIsLoadingTimes] = useState(false);
   const [formData, setFormData] = useState({
-    fullName: "",
+    name: "",
     phoneNumber: "",
   });
   const [errors, setErrors] = useState({
-    fullName: "",
+    name: "",
     phoneNumber: "",
     date: "",
     time: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [icsUrl, setIcsUrl] = useState(null);
 
-  // ============= DATA FETCHING =============
   useEffect(() => {
     const fetchSettings = async () => {
       try {
         const response = await fetch(`/api/getBookSettings?id=${id}`);
+        if (!response.ok) throw new Error("Failed to fetch settings");
         const data = await response.json();
+
+        if (!data || !data.businessName) throw new Error("Invalid booking ID");
         setSettings(data);
       } catch (err) {
         console.error("Error fetching settings:", err);
+        setSettings(null);
       } finally {
         setIsLoadingSettings(false);
       }
@@ -69,102 +65,26 @@ export default function BookingPage({ params }) {
     fetchSettings();
   }, [id]);
 
-  const { businessName, bgColor, logoUrl } = settings;
-
-  // ============= COLOR LOGIC =============
-  const hexColor = bgColor.replace("#", "");
-
-  // Parse hex to RGB (0-255)
-  const r = parseInt(hexColor.substring(0, 2), 16);
-  const g = parseInt(hexColor.substring(2, 4), 16);
-  const b = parseInt(hexColor.substring(4, 6), 16);
-
-  // Convert RGB to HSL
-  const r1 = r / 255,
-    g1 = g / 255,
-    b1 = b / 255;
-  const max = Math.max(r1, g1, b1),
-    min = Math.min(r1, g1, b1);
-  let h,
-    s,
-    l = (max + min) / 2;
-
-  if (max !== min) {
-    const d = max - min;
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-    if (max === r1) h = (g1 - b1) / d + (g1 < b1 ? 6 : 0);
-    else if (max === g1) h = (b1 - r1) / d + 2;
-    else h = (r1 - g1) / d + 4;
-    h /= 6;
-  }
-
-  // Calculate luminance
-  const luminance = 0.2126 * r1 + 0.7152 * g1 + 0.0722 * b1;
-  const shouldDarken = luminance < 0.5;
-
-  // Adjust lightness
-  l = Math.max(0, Math.min(1, l * (shouldDarken ? 0.5 : 0.9)));
-
-  // Convert HSL back to RGB
-  const hue2rgb = (p, q, t) => {
-    if (t < 0) t += 1;
-    if (t > 1) t -= 1;
-    return t < 1 / 6
-      ? p + (q - p) * 6 * t
-      : t < 0.5
-      ? q
-      : t < 2 / 3
-      ? p + (q - p) * (2 / 3 - t) * 6
-      : p;
-  };
-
-  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-  const p = 2 * l - q;
-  const newR = Math.round(hue2rgb(p, q, h + 1 / 3) * 255);
-  const newG = Math.round(hue2rgb(p, q, h) * 255);
-  const newB = Math.round(hue2rgb(p, q, h - 1 / 3) * 255);
-
-  // Convert to hex
-  const toHex = (c) => c.toString(16).padStart(2, "0");
-  const newColor = `#${toHex(newR)}${toHex(newG)}${toHex(newB)}`;
-
-  // UI decisions based on background
-  const textColor = shouldDarken ? "text-white" : "text-black";
-  const borderColor = shouldDarken ? "border-white/70" : "border-black/70";
-  const buttonVariant = shouldDarken ? "secondary" : "default";
-
-  // Neutral colors for active states
-  const activeBgColor = shouldDarken ? "bg-white/20" : "bg-black/10";
-  const activeTextColor = shouldDarken ? "text-white" : "text-black";
-
-  // ============= VALIDATION & HELPERS =============
-  const validatePhoneNumber = (phone) => {
-    const regex = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/;
-    return regex.test(phone);
-  };
-
-  // ============= API SIMULATION =============
+  // Memoize the debounced function with useCallback
   const fetchAvailableTimes = useCallback(
     debounce(async (selectedDate) => {
+      if (!selectedDate) return;
+
       setIsLoadingTimes(true);
       setSelectedTime("");
       setAvailableTimes([]);
-
       try {
         const response = await fetch(
-          `/api/getAvailableTimes?date=${selectedDate}`
+          `/api/getAvailableTimes?date=${format(selectedDate, 'yyyy-MM-dd')}`
         );
-        if (!response.ok) {
-          throw new Error("Failed to fetch available times");
-        }
+        if (!response.ok) throw new Error("Failed to fetch times");
         const data = await response.json();
         setAvailableTimes(
           data.availableTimes.length
             ? data.availableTimes
             : ["No available times"]
         );
-      } catch (error) {
-        console.error("Error fetching available times:", error);
+      } catch {
         setAvailableTimes(["Error loading times"]);
       } finally {
         setIsLoadingTimes(false);
@@ -173,64 +93,102 @@ export default function BookingPage({ params }) {
     []
   );
 
-  // ============= EVENT HANDLERS =============
   const handleDateSelect = (newDate) => {
     setDate(newDate);
     setSelectedTime("");
-    if (newDate) {
-      fetchAvailableTimes(newDate);
-    }
+    if (newDate) fetchAvailableTimes(newDate);
   };
+
+  const validatePhoneNumber = (phone) =>
+    /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/.test(phone);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Validate form
     let formIsValid = true;
-    const newErrors = {
-      fullName: "",
-      phoneNumber: "",
-      date: "",
-      time: "",
-    };
+    const newErrors = { name: "", phoneNumber: "", date: "", time: "" };
 
-    if (!formData.fullName.trim()) {
-      newErrors.fullName = "Full name is required";
+    if (!formData.name.trim()) {
+      newErrors.name = "Name is required";
       formIsValid = false;
     }
-
     if (!formData.phoneNumber.trim()) {
       newErrors.phoneNumber = "Phone number is required";
       formIsValid = false;
     } else if (!validatePhoneNumber(formData.phoneNumber)) {
-      newErrors.phoneNumber = "Please enter a valid phone number";
+      newErrors.phoneNumber = "Enter a valid phone number";
       formIsValid = false;
     }
-
     if (!date) {
-      newErrors.date = "Please select a date";
+      newErrors.date = "Select a date";
       formIsValid = false;
     }
-
     if (!selectedTime) {
-      newErrors.time = "Please select a time";
+      newErrors.time = "Select a time";
       formIsValid = false;
     }
 
     setErrors(newErrors);
-
     if (!formIsValid) {
       setIsSubmitting(false);
       return;
     }
 
     try {
-      // CHANGE TO ACTUALLY BOOK AND CREATE AN ICS FILE TO ADD TO CALENDAR
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const bookingData = {
+        business_id: id,
+        name: formData.name,
+        phone_number: formData.phoneNumber,
+        booking_date: format(date, 'yyyy-MM-dd'),
+        booking_time: selectedTime
+      };
+
+      const response = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(bookingData)
+      });
+
+      if (!response.ok) {
+        throw new Error('Booking failed');
+      }
+
+      // Create calendar event
+      const eventStart = new Date(date);
+      const [hours, minutes] = selectedTime.split(":");
+      eventStart.setHours(parseInt(hours, 10));
+      eventStart.setMinutes(parseInt(minutes, 10));
+
+      const eventEnd = new Date(eventStart.getTime() + 30 * 60 * 1000);
+      const pad = (n) => String(n).padStart(2, "0");
+      const formatICSDate = (d) =>
+        `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}T${pad(
+          d.getUTCHours()
+        )}${pad(d.getUTCMinutes())}00Z`;
+
+      const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Schedulee//EN
+BEGIN:VEVENT
+UID:${Date.now()}@schedulee.app
+DTSTAMP:${formatICSDate(new Date())}
+DTSTART:${formatICSDate(eventStart)}
+DTEND:${formatICSDate(eventEnd)}
+SUMMARY:Appointment with ${settings.businessName}
+DESCRIPTION:Scheduled via schedulee.app
+LOCATION:Online or In-Person
+END:VEVENT
+END:VCALENDAR`;
+
+      const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });
+      setIcsUrl(URL.createObjectURL(blob));
       setIsSuccess(true);
     } catch (error) {
       console.error("Booking error:", error);
+      // Consider adding user feedback here
     } finally {
       setIsSubmitting(false);
     }
@@ -245,71 +203,106 @@ export default function BookingPage({ params }) {
   };
 
   const isFormComplete =
-    formData.fullName &&
+    formData.name &&
     formData.phoneNumber &&
     validatePhoneNumber(formData.phoneNumber) &&
     date &&
     selectedTime;
 
-  // ============= RENDER =============
   if (isLoadingSettings) {
     return (
-      <div
-        className="min-h-screen w-full flex items-center justify-center"
-        style={{ backgroundColor: newColor }}
-      >
-        <div className="flex flex-col items-center">
-          <Loader2
-            className="h-12 w-12 animate-spin"
-            style={{ color: shouldDarken ? "white" : "black" }}
-          />
-          <p
-            className={`mt-4 text-lg ${
-              shouldDarken ? "text-white" : "text-black"
-            }`}
-          >
-            Loading booking page...
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <Loader2 className="h-10 w-10 animate-spin text-black" />
+      </div>
+    );
+  }
+
+  if (!settings) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center bg-gray-100 p-4">
+        <div className="bg-white max-w-md w-full rounded-2xl shadow-md p-8 text-center border border-gray-200">
+          <XCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-bold mb-2">Invalid Booking Link</h2>
+          <p className="text-sm text-gray-600">
+            This booking page ID is invalid or no longer active. Please check the link and try again.
           </p>
+          <div className="mt-6">
+            <a href="/" className="text-blue-600 hover:underline text-sm font-medium">
+              Go back to homepage
+            </a>
+          </div>
         </div>
       </div>
     );
   }
 
+  const { businessName, bgColor, logoUrl } = settings;
+
+  // Color calculations (unchanged from original)
+  const hexColor = bgColor.replace("#", "");
+  const r = parseInt(hexColor.substring(0, 2), 16);
+  const g = parseInt(hexColor.substring(2, 4), 16);
+  const b = parseInt(hexColor.substring(4, 6), 16);
+  const r1 = r / 255, g1 = g / 255, b1 = b / 255;
+  const max = Math.max(r1, g1, b1), min = Math.min(r1, g1, b1);
+  let h, s, l = (max + min) / 2;
+
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    if (max === r1) h = (g1 - b1) / d + (g1 < b1 ? 6 : 0);
+    else if (max === g1) h = (b1 - r1) / d + 2;
+    else h = (r1 - g1) / d + 4;
+    h /= 6;
+  }
+
+  const luminance = 0.2126 * r1 + 0.7152 * g1 + 0.0722 * b1;
+  const shouldDarken = luminance < 0.5;
+  l = Math.max(0, Math.min(1, l * (shouldDarken ? 0.5 : 0.9)));
+  const hue2rgb = (p, q, t) => {
+    if (t < 0) t += 1;
+    if (t > 1) t -= 1;
+    return t < 1 / 6 ? p + (q - p) * 6 * t : t < 0.5 ? q : t < 2 / 3 ? p + (q - p) * (2 / 3 - t) * 6 : p;
+  };
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+  const p = 2 * l - q;
+  const newR = Math.round(hue2rgb(p, q, h + 1 / 3) * 255);
+  const newG = Math.round(hue2rgb(p, q, h) * 255);
+  const newB = Math.round(hue2rgb(p, q, h - 1 / 3) * 255);
+  const toHex = (c) => c.toString(16).padStart(2, "0");
+  const newColor = `#${toHex(newR)}${toHex(newG)}${toHex(newB)}`;
+  const textColor = shouldDarken ? "text-white" : "text-black";
+  const borderColor = shouldDarken ? "border-white/70" : "border-black/70";
+  const buttonVariant = shouldDarken ? "secondary" : "default";
+  const activeBgColor = shouldDarken ? "bg-white/20" : "bg-black/10";
+  const activeTextColor = shouldDarken ? "text-white" : "text-black";
+
   if (isSuccess) {
     return (
-      <div
-        className="min-h-screen w-full flex items-center justify-center p-4"
-        style={{ backgroundColor: newColor }}
-      >
-        <div
-          className={`w-full max-w-md rounded-2xl shadow-xl overflow-hidden transition-all duration-300 ${textColor}`}
-          style={{ backgroundColor: bgColor }}
-        >
-          <div className="p-8 text-center">
-            <div className="flex justify-center mb-6">
-              <CheckCircle className="h-16 w-16 text-green-500" />
-            </div>
-            <h2 className="text-2xl font-bold mb-4">Booking Confirmed!</h2>
-            <p className="mb-6">
-              Your appointment with {businessName} has been scheduled.
-            </p>
-            <div className="bg-opacity-20 rounded-lg p-4 mb-6">
-              <p className="font-medium">{format(date, "PPP")}</p>
-              <p className="text-xl font-bold">{selectedTime}</p>
-            </div>
-            <p className="text-sm opacity-80 mb-6">
-              You'll receive a confirmation shortly.
-            </p>
-            <div className="mt-6 text-center text-xs opacity-70">
-              Powered by{" "}
-              <a
-                target="_blank"
-                href="/"
-                className="font-medium hover:underline"
-              >
-                schedulee.app
-              </a>
-            </div>
+      <div className="min-h-screen w-full flex items-center justify-center p-4" style={{ backgroundColor: newColor }}>
+        <div className={`w-full max-w-md rounded-2xl shadow-xl p-8 ${textColor}`} style={{ backgroundColor: bgColor }}>
+          <div className="flex justify-center mb-6">
+            <CheckCircle className="h-16 w-16 text-green-500" />
+          </div>
+          <h2 className="text-2xl font-bold mb-4 text-center">Booking Confirmed!</h2>
+          <p className="mb-4 text-center">Your appointment with {businessName} is booked for:</p>
+          <div className="bg-opacity-20 rounded-lg p-4 mb-6 text-center">
+            <p className="font-medium">{format(date, "PPP")}</p>
+            <p className="text-xl font-bold">{selectedTime}</p>
+          </div>
+          {icsUrl && (
+            <a
+              href={icsUrl}
+              download={`booking-${businessName}-${format(date, "yyyyMMdd")}.ics`}
+              className="block mb-4"
+            >
+              <Button variant="outline" className="w-full py-3 font-semibold">
+                Add to Calendar
+              </Button>
+            </a>
+          )}
+          <div className="text-center text-xs opacity-70">
+            Powered by <a href="/" className="font-medium hover:underline">schedulee.app</a>
           </div>
         </div>
       </div>
@@ -348,31 +341,30 @@ export default function BookingPage({ params }) {
             <div className="space-y-4">
               <div>
                 <label
-                  htmlFor="fullName"
+                  htmlFor="name"
                   className="block text-sm font-medium mb-1"
                 >
-                  Full Name
+                  Name
                 </label>
                 <Input
-                  id="fullName"
-                  name="fullName"
+                  id="name"
+                  name="name"
                   type="text"
-                  value={formData.fullName}
+                  value={formData.name}
                   onChange={handleInputChange}
-                  className={`w-full ${borderColor} bg-transparent focus-visible:ring-2 focus-visible:ring-opacity-50 ${
-                    errors.fullName ? "border-red-500" : ""
-                  }`}
+                  className={`w-full ${borderColor} bg-transparent focus-visible:ring-2 focus-visible:ring-opacity-50 ${errors.name ? "border-red-500" : ""
+                    }`}
                   style={{
-                    borderColor: errors.fullName
+                    borderColor: errors.name
                       ? "#ef4444"
                       : shouldDarken
-                      ? "rgba(255, 255, 255, 0.7)"
-                      : "rgba(0, 0, 0, 0.7)",
+                        ? "rgba(255, 255, 255, 0.7)"
+                        : "rgba(0, 0, 0, 0.7)",
                   }}
                 />
-                {errors.fullName && (
+                {errors.name && (
                   <p className="mt-1 text-sm text-red-500 flex items-center">
-                    <XCircle className="w-4 h-4 mr-1" /> {errors.fullName}
+                    <XCircle className="w-4 h-4 mr-1" /> {errors.name}
                   </p>
                 )}
               </div>
@@ -390,15 +382,14 @@ export default function BookingPage({ params }) {
                   type="tel"
                   value={formData.phoneNumber}
                   onChange={handleInputChange}
-                  className={`w-full ${borderColor} bg-transparent focus-visible:ring-2 focus-visible:ring-opacity-50 ${
-                    errors.phoneNumber ? "border-red-500" : ""
-                  }`}
+                  className={`w-full ${borderColor} bg-transparent focus-visible:ring-2 focus-visible:ring-opacity-50 ${errors.phoneNumber ? "border-red-500" : ""
+                    }`}
                   style={{
                     borderColor: errors.phoneNumber
                       ? "#ef4444"
                       : shouldDarken
-                      ? "rgba(255, 255, 255, 0.7)"
-                      : "rgba(0, 0, 0, 0.7)",
+                        ? "rgba(255, 255, 255, 0.7)"
+                        : "rgba(0, 0, 0, 0.7)",
                   }}
                 />
                 {errors.phoneNumber && (
@@ -416,16 +407,15 @@ export default function BookingPage({ params }) {
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
-                      className={`w-full justify-start text-left font-normal ${borderColor} bg-transparent hover:border-2 ${
-                        errors.date ? "border-red-500" : ""
-                      }`}
+                      className={`w-full justify-start text-left font-normal ${borderColor} bg-transparent hover:border-2 ${errors.date ? "border-red-500" : ""
+                        }`}
                       style={{
                         borderWidth: "2px",
                         borderColor: errors.date
                           ? "#ef4444"
                           : shouldDarken
-                          ? "rgba(255, 255, 255, 0.7)"
-                          : "rgba(0, 0, 0, 0.7)",
+                            ? "rgba(255, 255, 255, 0.7)"
+                            : "rgba(0, 0, 0, 0.7)",
                       }}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
@@ -464,8 +454,8 @@ export default function BookingPage({ params }) {
                   ) : (
                     <>
                       {availableTimes.length === 1 &&
-                      (availableTimes[0] === "No available times" ||
-                        availableTimes[0] === "Error loading times") ? (
+                        (availableTimes[0] === "No available times" ||
+                          availableTimes[0] === "Error loading times") ? (
                         <div className="flex justify-center py-4 text-sm font-medium opacity-70">
                           {availableTimes[0]}
                         </div>
@@ -516,8 +506,8 @@ export default function BookingPage({ params }) {
               variant={buttonVariant}
               className={cn(
                 "w-full py-6 text-lg font-semibold transition-all",
-                isFormComplete && "hover:opacity-90", // Add hover effect
-                !isFormComplete && "opacity-50 cursor-not-allowed" // Use opacity for disabled state
+                isFormComplete && "hover:opacity-90",
+                !isFormComplete && "opacity-50 cursor-not-allowed"
               )}
               disabled={isSubmitting || !isFormComplete}
             >
