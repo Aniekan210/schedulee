@@ -70,14 +70,12 @@ export default function SignUpPage() {
   };
 
   const handleGoogleSignup = async () => {
-    console.log("hello");
-    try {
-      const response = await fetch("/api/auth/google");
-      const { url } = await response.json();
-      if (url) window.location.href = url;
-    } catch (err) {
-      setError("Failed to initiate Google sign in");
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("sb-code-verifier");
     }
+
+    const { url } = await fetch("/api/auth/google").then((res) => res.json());
+    if (url != "") window.location.href = url;
   };
 
   return (

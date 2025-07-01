@@ -24,14 +24,14 @@ import { cn } from "@/lib/utils";
 
 export default function BookingPage({ params }) {
   // ============= STATE MANAGEMENT =============
-  const { username } = useParams();
+  const { id } = useParams();
   const [isLoadingSettings, setIsLoadingSettings] = useState(true);
 
   // User settings from API
   const [settings, setSettings] = useState({
-    bgColor: "#ffffff",
+    bgColor: "",
     logoUrl: "",
-    businessName: "Aniekan's",
+    businessName: "",
   });
 
   // Form state
@@ -56,9 +56,7 @@ export default function BookingPage({ params }) {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const response = await fetch(
-          `/api/getBookSettings?username=${username}`
-        );
+        const response = await fetch(`/api/getBookSettings?id=${id}`);
         const data = await response.json();
         setSettings(data);
       } catch (err) {
@@ -69,7 +67,7 @@ export default function BookingPage({ params }) {
     };
 
     fetchSettings();
-  }, [username]);
+  }, [id]);
 
   const { businessName, bgColor, logoUrl } = settings;
 
@@ -105,7 +103,7 @@ export default function BookingPage({ params }) {
   const shouldDarken = luminance < 0.5;
 
   // Adjust lightness
-  l = Math.max(0, Math.min(1, l * (shouldDarken ? 0.6 : 1.23)));
+  l = Math.max(0, Math.min(1, l * (shouldDarken ? 0.5 : 0.9)));
 
   // Convert HSL back to RGB
   const hue2rgb = (p, q, t) => {
@@ -228,6 +226,7 @@ export default function BookingPage({ params }) {
     }
 
     try {
+      // CHANGE TO ACTUALLY BOOK AND CREATE AN ICS FILE TO ADD TO CALENDAR
       await new Promise((resolve) => setTimeout(resolve, 1500));
       setIsSuccess(true);
     } catch (error) {

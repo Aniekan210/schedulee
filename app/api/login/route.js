@@ -1,11 +1,13 @@
 // app/api/login/route.js
-import { supabase } from "@/lib/supabase/client";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
 export async function POST(request) {
   const { email, password } = await request.json();
 
   try {
+    const supabase = await createSupabaseServerClient(); // ✅ await here!
+
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -13,7 +15,6 @@ export async function POST(request) {
 
     if (error) throw error;
 
-    // Return the session data
     return NextResponse.json({
       success: true,
       user: data.user,
@@ -23,12 +24,14 @@ export async function POST(request) {
     let errorMessage = "Login failed";
     let statusCode = 400;
 
-    if (error.message.includes("Invalid login credentials")) {
+    const msg = error.message || "";
+
+    if (msg.includes("Invalid login credentials")) {
       errorMessage = "Incorrect email or password";
-    } else if (error.message.includes("Email not confirmed")) {
+    } else if (msg.includes("Email not confirmed")) {
       errorMessage = "Please verify your email first";
       statusCode = 403;
-    } else if (error.message.includes("too many requests")) {
+    } else if (msg.includes("too many requests")) {
       errorMessage = "Too many attempts. Try again later";
       statusCode = 429;
     }

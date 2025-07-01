@@ -1,48 +1,45 @@
 // app/api/auth/callback/route.js
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase/client";
+import { cookies as getCookies } from "next/headers";
+import { createServerClient } from "@supabase/ssr";
 
 export async function GET(request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
 
   if (!code) {
-    return NextResponse.redirect(
-      `${requestUrl.origin}/login?error=Authentication failed`
-    );
+    return NextResponse.redirect(`${requestUrl.origin}/login?error=no_code`);
   }
 
-  try {
-    // Exchange code for session
-    const {
-      data: { session },
-      error,
-    } = await supabase.auth.exchangeCodeForSession(code);
-    if (error || !session) {
-      throw error || new Error("No session returned");
-    }
-
-    // Update user metadata
-    const { error: updateError } = await supabase.auth.updateUser({
-      data: {
-        business_name:
-          session.user.user_metadata?.name ||
-          session.user.email?.split("@")[0] ||
-          "My Business",
-        is_paid: false,
+  const cookieStore = await getCookies(); // ✅ Await this!
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_API_KEY,
+    {
+      cookies: {
+        get(name) {
+          return cookieStore.get(name)?.value;
+        },
+        set(name, value, options) {
+          cookieStore.set({ name, value, ...options });
+        },
+        remove(name, options) {
+          cookieStore.set({ name, value: "", ...options });
+        },
       },
-    });
+    }
+  );
 
-    if (updateError) throw updateError;
+  const {
+    data: { session },
+    error,
+  } = await supabase.auth.exchangeCodeForSession(code);
 
-    // Redirect to dashboard
-    return NextResponse.redirect(`${requestUrl.origin}/dashboard`);
-  } catch (err) {
-    console.error("Auth callback error:", err);
+  if (error || !session) {
     return NextResponse.redirect(
-      `${requestUrl.origin}/login?error=${encodeURIComponent(
-        err.message || "Authentication failed"
-      )}`
+      `${requestUrl.origin}/login?error=auth_failed`
     );
   }
+
+  return NextResponse.redirect(`${requestUrl.origin}/dashboard/bookings`);
 }

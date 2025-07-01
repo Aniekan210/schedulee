@@ -1,47 +1,26 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+
 import DashboardSidebar from "@/components/ui/customSideBar";
+import { AuthProvider, useAuth } from "@/context/auth-context";
+import { Toaster } from "@/components/ui/sonner";
 
 export default function RootLayout({ children }) {
-  const router = useRouter();
-  const [data, setData] = useState({ hasPaid: false, daysLeft: 14 });
+  return (
+    <AuthProvider>
+      <AuthContent>{children}</AuthContent>
+    </AuthProvider>
+  );
+}
 
-  useEffect(() => {
-    const authCheck = async () => {
-      try {
-        const res = await fetch("/api/authenticate");
-        const data = await res.json();
-
-        if (data.error) {
-          router.push("/login");
-          return;
-        }
-
-        if (!data.hasPaid && data.daysLeft === 0) {
-          router.push("/upgrade");
-          return;
-        }
-
-        setData(data);
-
-        // Add slight delay before redirect to ensure state is updated
-        setTimeout(() => {
-          router.push("/dashboard/bookings");
-        }, 100); // 100ms delay - barely noticeable but ensures smooth transition
-      } catch (error) {
-        router.push("/login");
-      }
-    };
-
-    authCheck();
-  }, [router]);
+function AuthContent({ children }) {
+  const { hasPaid, daysLeft } = useAuth();
 
   return (
     <main className="w-screen h-screen overflow-hidden flex [flex-flow:row_nowrap] m-0 p-0">
-      <DashboardSidebar isActive={data.hasPaid} trialDays={data.daysLeft} />
+      <DashboardSidebar isActive={hasPaid} trialDays={daysLeft} />
       <div className="w-full h-full overflow-x-hidden overflow-y-auto">
         {children}
+        <Toaster />
       </div>
     </main>
   );

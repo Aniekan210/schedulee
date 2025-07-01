@@ -1,10 +1,10 @@
-// app/api/auth/google/route.js
+// app/api/signout/route.js
+import { NextResponse } from "next/server";
 import { cookies as getCookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
-import { NextResponse } from "next/server";
 
-export async function GET() {
-  const cookieStore = await getCookies(); // ✅ must await
+export async function POST() {
+  const cookieStore = await getCookies();
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -24,16 +24,11 @@ export async function GET() {
     }
   );
 
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/callback`,
-    },
-  });
+  const { error } = await supabase.auth.signOut();
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 
-  return NextResponse.json({ url: data.url });
+  return NextResponse.json({ success: true });
 }

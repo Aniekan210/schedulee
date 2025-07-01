@@ -161,31 +161,32 @@ export default function DashboardSidebar({ trialDays = 14, isActive = false }) {
                 isCollapsed ? "justify-center" : "justify-start"
               )}
               onClick={async () => {
-                  setIsSigningOut(true);
-                  try {
-                    const supabase = createClient(
-                      process.env.NEXT_PUBLIC_SUPABASE_URL,
-                      process.env.NEXT_PUBLIC_SUPABASE_API_KEY
-                    );
-                    // 1. Sign out from Supabase
-                    const { error } = await supabase.auth.signOut();
-                    if (error) throw error;
+              setIsSigningOut(true);
+              try {
+                // 1. Send sign-out request to API route
+                const res = await fetch("/api/signout", {
+                  method: "POST",
+                });
 
-                    localStorage.clear();
-                    sessionStorage.clear();
-                    
-                    // 3. Wait a brief moment for cleanup
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                    
-                    // 4. Force full page reload to clear all state
-                    window.location.href = '/login';
-                  } catch (error) {
-                    console.error('Sign out error:', error);
-                    // Show error to user if needed
-                  } finally {
-                    setIsSigningOut(false);
-                  }
-              }}
+                // 2. Clear localStorage manually (client cleanup)
+                if (typeof window !== "undefined") {
+                  Object.keys(localStorage).forEach((key) => {
+                    if (key.startsWith("sb-")) {
+                      localStorage.removeItem(key);
+                    }
+                  });
+                }
+
+                // 3. Wait a bit and reload to reset client state
+                await new Promise((r) => setTimeout(r, 100));
+                window.location.href = "/login";
+              } catch (err) {
+                console.error("Sign out failed:", err);
+              } finally {
+                setIsSigningOut(false);
+              }
+            }}
+
               disabled={isSigningOut}
             >
               {isSigningOut ? (

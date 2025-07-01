@@ -61,7 +61,7 @@ export default function LoginPage() {
         } = await supabase.auth.getSession();
         if (!session) throw new Error("Session initialization failed");
 
-        window.location.href = "/dashboard";
+        window.location.href = "/dashboard/bookings";
       } else {
         throw new Error("Login successful but no session found");
       }
@@ -73,6 +73,10 @@ export default function LoginPage() {
   };
 
   const handleGoogleLogin = async () => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("sb-code-verifier");
+    }
+
     const { url } = await fetch("/api/auth/google").then((res) => res.json());
     if (url != "") window.location.href = url;
   };
