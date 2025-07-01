@@ -21,3 +21,7 @@ export const metadata = {
         images: ["https://schedulee.app/logo.png"],
     },
 };
+
+export default function BookingLayout({ children }) {
+    return <>{children}</>;
+}
