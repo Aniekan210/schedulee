@@ -56,7 +56,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { da } from "date-fns/locale";
 
 const ITEMS_PER_PAGE = 5;
 
@@ -210,7 +209,7 @@ export default function BookingsOverviewPage() {
     setCurrentBooking({
       id: "",
       name: "",
-      phone: "",
+      phone_number: "",
       date: format(new Date(), "yyyy-MM-dd"),
       time: "09:00",
     });
@@ -508,7 +507,7 @@ export default function BookingsOverviewPage() {
                   onChange={(e) =>
                     setCurrentBooking({
                       ...currentBooking,
-                      phone: e.target.value,
+                      phone_number: e.target.value,
                     })
                   }
                   required
