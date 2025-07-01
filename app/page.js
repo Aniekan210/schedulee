@@ -2,6 +2,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
+import { DemoButton, BackToTopButton } from "@/components/ui/interactiveButtons"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 
 export default function Home() {
@@ -89,14 +90,7 @@ export default function Home() {
                 Start 14-Day Free Trial
               </Button>
             </Link>
-            <Button
-              variant="outline"
-              className="px-8 py-6 text-lg border-2 hover:bg-gray-50"
-              onClick={() => document.getElementById('demo-video').scrollIntoView({ behavior: 'smooth' })}
-              aria-label="Watch demo video"
-            >
-              Watch Demo
-            </Button>
+            <DemoButton />
           </div>
           <p className="text-gray-500 font-medium">Only $8.99 CAD/month after trial</p>
         </div>
@@ -361,14 +355,7 @@ export default function Home() {
                   Support
                 </a>
               </div>
-              <Button
-                variant="outline"
-                className="mt-4 border-gray-600 text-white hover:bg-gray-800 hover:text-white"
-                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                aria-label="Back to top"
-              >
-                Back to Top
-              </Button>
+              <BackToTopButton />
             </div>
           </div>
 
