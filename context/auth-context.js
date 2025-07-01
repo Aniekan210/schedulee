@@ -20,7 +20,7 @@ export function AuthProvider({ children }) {
         const data = await res.json();
 
         if (data.error) {
-          router.push("/login");
+          router.push("/signup");
           return;
         }
 
@@ -34,7 +34,7 @@ export function AuthProvider({ children }) {
           isLoading: false,
         });
       } catch (error) {
-        router.push("/login");
+        router.push("/signup");
       }
     };
 
