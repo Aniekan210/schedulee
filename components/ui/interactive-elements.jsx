@@ -294,3 +294,90 @@ export function HowItWorksSection() {
     </section>
   )
 }
+
+export function BackToTop() {
+  const [isVisible, setIsVisible] = useState(false)
+
+  useEffect(() => {
+    const toggleVisibility = () => {
+      if (window.scrollY > 300) {
+        setIsVisible(true)
+      } else {
+        setIsVisible(false)
+      }
+    }
+
+    window.addEventListener('scroll', toggleVisibility)
+    return () => window.removeEventListener('scroll', toggleVisibility)
+  }, [])
+
+  return (
+    <button
+      className={`fixed bottom-6 right-6 w-12 h-12 rounded-full bg-indigo-600 flex items-center justify-center hover:bg-indigo-700 transition-all duration-300 shadow-lg hover:shadow-indigo-500/50 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
+      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      aria-label="Back to top"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+      </svg>
+    </button>
+  )
+}
+
+export function LottieAnimation({ animationName, className = "", isActive = false }) {
+  const [animationError, setAnimationError] = useState(false)
+  const [animationData, setAnimationData] = useState(null)
+
+  useEffect(() => {
+    try {
+      import(`@/public/animations/${animationName}.json`)
+        .then(data => setAnimationData(data.default))
+        .catch(() => {
+          console.error(`Animation "${animationName}" not found`)
+          setAnimationError(true)
+        })
+    } catch (e) {
+      console.error(`Animation import error: ${e.message}`)
+      setAnimationError(true)
+    }
+  }, [animationName])
+
+  if (animationError || !animationData) {
+    return (
+      <Placeholder 
+        name={`Animation: ${animationName}`} 
+        className={`w-full h-48 ${className}`}
+      />
+    )
+  }
+
+  if (!Lottie) {
+    return (
+      <Placeholder 
+        name="Animation player loading..." 
+        className={`w-full h-48 ${className}`}
+      />
+    )
+  }
+
+  const options = {
+    loop: true,
+    autoplay: isActive,
+    animationData,
+    rendererSettings: {
+      preserveAspectRatio: 'xMidYMid slice'
+    }
+  }
+
+  return (
+    <div className={`w-full h-full ${className}`}>
+      <Lottie 
+        options={options} 
+        height="100%" 
+        width="100%"
+        isStopped={!isActive}
+        isPaused={!isActive}
+      />
+    </div>
+  )
+}
