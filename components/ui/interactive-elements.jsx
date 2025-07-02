@@ -37,7 +37,7 @@ export function Placeholder({ name = "content", className = "", children }) {
   )
 }
 
-export function MobileMenu({ testimonials = [] }) {
+export function MobileMenu() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [lastScrollY, setLastScrollY] = useState(0)
   const [navVisible, setNavVisible] = useState(true)
@@ -223,31 +223,30 @@ export function TestimonialCarousel({ testimonials = [] }) {
               {safeTestimonials.map((testimonial, index) => (
                 <div 
                   key={index} 
-                  className="w-full flex-shrink-0 px-2 sm:px-4"
+                  className="w-full flex-shrink-0 px-4"
                 >
                   <Card className="bg-white border border-gray-100 hover:border-indigo-100 transition-all h-full group hover:shadow-sm">
-                    <CardContent className="p-6">
-                      <div className="flex items-center mb-4">
-                        {[...Array(5)].map((_, i) => (
-                          <svg
-                            key={i}
-                            xmlns="http://www.w3.org/2000/svg"
-                            className={`h-5 w-5 ${i < (testimonial?.stars || 0) ? 'text-amber-400 group-hover:text-amber-500' : 'text-gray-200 group-hover:text-gray-300'}`}
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                          </svg>
-                        ))}
-                      </div>
-                      <p className="text-gray-700 italic text-lg mb-6 group-hover:text-gray-800 transition-colors">"{testimonial?.quote || 'Great service!'}"</p>
-                      <div className="flex items-center">
-                        <div className="bg-indigo-100 rounded-full w-10 h-10 flex items-center justify-center text-indigo-600 font-bold mr-3 group-hover:bg-indigo-200 transition-colors">
-                          {testimonial?.author?.charAt(0) || 'U'}
+                    <CardContent className="p-8">
+                      <div className="flex flex-col items-center text-center">
+                        <div className="relative w-16 h-16 rounded-full overflow-hidden mb-6 border-2 border-indigo-100">
+                          <Image
+                            src={testimonial.avatar}
+                            alt={testimonial.author}
+                            width={64}
+                            height={64}
+                            className="object-cover"
+                          />
                         </div>
+                        <p className="text-gray-700 italic text-lg mb-6 group-hover:text-gray-800 transition-colors">
+                          "{testimonial.quote}"
+                        </p>
                         <div>
-                          <p className="font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">{testimonial?.author || 'Happy Customer'}</p>
-                          <p className="text-sm text-gray-500 group-hover:text-gray-600 transition-colors">Verified User</p>
+                          <p className="font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">
+                            {testimonial.author}
+                          </p>
+                          <p className="text-sm text-gray-500 group-hover:text-gray-600 transition-colors">
+                            Verified User
+                          </p>
                         </div>
                       </div>
                     </CardContent>
@@ -293,28 +292,27 @@ export function TestimonialCarousel({ testimonials = [] }) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[1, 2, 3].map((i) => (
               <Card key={i} className="bg-white border border-gray-100 h-full group hover:shadow-sm">
-                <CardContent className="p-6">
-                  <div className="flex items-center mb-4">
-                    {[...Array(5)].map((_, i) => (
-                      <svg
-                        key={i}
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 text-gray-200 group-hover:text-gray-300"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                      </svg>
-                    ))}
-                  </div>
-                  <p className="text-gray-700 italic text-lg mb-6 group-hover:text-gray-800 transition-colors">"This is a placeholder testimonial that would show real user feedback"</p>
-                  <div className="flex items-center">
-                    <div className="bg-indigo-100 rounded-full w-10 h-10 flex items-center justify-center text-indigo-600 font-bold mr-3 group-hover:bg-indigo-200 transition-colors">
-                      U
+                <CardContent className="p-8">
+                  <div className="flex flex-col items-center text-center">
+                    <div className="relative w-16 h-16 rounded-full overflow-hidden mb-6 border-2 border-indigo-100">
+                      <Image
+                        src={`https://randomuser.me/api/portraits/thumb/${i % 2 === 0 ? 'women' : 'men'}/${i * 10}.jpg`}
+                        alt="User"
+                        width={64}
+                        height={64}
+                        className="object-cover"
+                      />
                     </div>
+                    <p className="text-gray-700 italic text-lg mb-6 group-hover:text-gray-800 transition-colors">
+                      "This is a placeholder testimonial that would show real user feedback"
+                    </p>
                     <div>
-                      <p className="font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">Sample User</p>
-                      <p className="text-sm text-gray-500 group-hover:text-gray-600 transition-colors">Verified User</p>
+                      <p className="font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">
+                        Sample User
+                      </p>
+                      <p className="text-sm text-gray-500 group-hover:text-gray-600 transition-colors">
+                        Verified User
+                      </p>
                     </div>
                   </div>
                 </CardContent>
@@ -397,7 +395,7 @@ export function DemoVideo({ className = "" }) {
   )
 }
 
-export function LottieAnimation({ animationName, className = "" }) {
+export function LottieAnimation({ animationName, className = "", isActive = false }) {
   const [animationError, setAnimationError] = useState(false)
   const [animationData, setAnimationData] = useState(null)
 
@@ -435,7 +433,7 @@ export function LottieAnimation({ animationName, className = "" }) {
 
   const options = {
     loop: true,
-    autoplay: true,
+    autoplay: isActive,
     animationData,
     rendererSettings: {
       preserveAspectRatio: 'xMidYMid slice'
@@ -448,10 +446,97 @@ export function LottieAnimation({ animationName, className = "" }) {
         options={options} 
         height="100%" 
         width="100%"
-        isStopped={false}
-        isPaused={false}
+        isStopped={!isActive}
+        isPaused={!isActive}
       />
     </div>
+  )
+}
+
+export function HowItWorksSection() {
+  const [activeStep, setActiveStep] = useState(0)
+
+  return (
+    <section id="how-it-works" className="py-12 md:py-20">
+      <div className="container mx-auto max-w-6xl px-4 sm:px-6">
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-[1.2] tracking-[-0.02em]">
+            How Schedulee.app Works
+          </h2>
+          <p className="text-lg md:text-xl text-gray-600 leading-[1.5]">
+            Get set up and start accepting bookings in minutes
+          </p>
+        </div>
+        
+        <div className="flex flex-col lg:flex-row gap-12 items-center">
+          <div className="lg:w-1/2 order-2 lg:order-1">
+            <div className="space-y-8">
+              <div 
+                className="flex gap-6 group cursor-pointer"
+                onMouseEnter={() => setActiveStep(0)}
+                onClick={() => setActiveStep(0)}
+              >
+                <div className="bg-indigo-100 text-indigo-600 rounded-full w-12 h-12 flex items-center justify-center flex-shrink-0 text-lg font-bold group-hover:bg-indigo-200 transition-colors">
+                  1
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold mb-2 group-hover:text-indigo-600 transition-colors leading-[1.2] tracking-[-0.02em]">
+                    Customize Your Booking Page
+                  </h3>
+                  <p className="text-gray-600 group-hover:text-gray-700 transition-colors leading-[1.5]">
+                    Match your brand colors and add your services in just a few clicks.
+                  </p>
+                </div>
+              </div>
+              
+              <div 
+                className="flex gap-6 group cursor-pointer"
+                onMouseEnter={() => setActiveStep(1)}
+                onClick={() => setActiveStep(1)}
+              >
+                <div className="bg-indigo-100 text-indigo-600 rounded-full w-12 h-12 flex items-center justify-center flex-shrink-0 text-lg font-bold group-hover:bg-indigo-200 transition-colors">
+                  2
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold mb-2 group-hover:text-indigo-600 transition-colors leading-[1.2] tracking-[-0.02em]">
+                    Set Your Availability
+                  </h3>
+                  <p className="text-gray-600 group-hover:text-gray-700 transition-colors leading-[1.5]">
+                    Define your working hours and block off personal time as needed.
+                  </p>
+                </div>
+              </div>
+              
+              <div 
+                className="flex gap-6 group cursor-pointer"
+                onMouseEnter={() => setActiveStep(2)}
+                onClick={() => setActiveStep(2)}
+              >
+                <div className="bg-indigo-100 text-indigo-600 rounded-full w-12 h-12 flex items-center justify-center flex-shrink-0 text-lg font-bold group-hover:bg-indigo-200 transition-colors">
+                  3
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold mb-2 group-hover:text-indigo-600 transition-colors leading-[1.2] tracking-[-0.02em]">
+                    Share Your Link
+                  </h3>
+                  <p className="text-gray-600 group-hover:text-gray-700 transition-colors leading-[1.5]">
+                    Start accepting bookings immediately by sharing your unique page.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="lg:w-1/2 order-1 lg:order-2">
+            <div className="relative aspect-video rounded-xl overflow-hidden shadow-lg">
+              {activeStep === 0 && <LottieAnimation animationName="setup-step1" isActive />}
+              {activeStep === 1 && <LottieAnimation animationName="setup-step2" isActive />}
+              {activeStep === 2 && <LottieAnimation animationName="setup-step3" isActive />}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   )
 }
 
