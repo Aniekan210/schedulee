@@ -2,8 +2,7 @@
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import Image from "next/image"
-import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { motion } from "framer-motion"
+import { motion } from "motion/react"
 import {
   MobileMenu,
   TestimonialCarousel,
