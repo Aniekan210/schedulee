@@ -85,19 +85,15 @@ export function TestimonialCarousel({ testimonials = [] }) {
               style={{ width: `${safeTestimonials.length * 100}%` }}
             >
               {safeTestimonials.map((testimonial, index) => (
-                <div
-                  key={index}
-                  className="w-full flex-shrink-0 px-6 max-w-sm md:max-w-md mx-auto"
-                  style={{ width: `${100 / safeTestimonials.length}%` }}
-                >
-                  <Card className="bg-white border border-gray-200 hover:border-blue-500 transition-shadow shadow-sm hover:shadow-lg min-h-[320px] flex flex-col rounded-lg overflow-hidden">
+                <div key={index} className="flex">
+                  <Card className="bg-white border border-gray-200 hover:border-blue-500 transition-shadow shadow-sm hover:shadow-lg min-h-[320px] flex flex-col rounded-lg overflow-hidden w-full">
                     <CardContent className="p-8 flex flex-col flex-grow">
                       <div className="flex flex-col items-center text-center h-full">
-                        {/* Avatar with subtle shadow */}
-                        <div className="relative w-24 h-24 rounded-full overflow-hidden mb-6 shadow-sm">
+                        {/* Avatar with subtle border and shadow */}
+                        <div className="relative w-24 h-24 rounded-full overflow-hidden mb-6 shadow-sm border-2 border-white">
                           <Image
                             src={testimonial.avatar}
-                            alt={testimonial.author}
+                            alt={`Avatar of ${testimonial.author}`}
                             width={96}
                             height={96}
                             className="object-cover w-full h-full"
@@ -105,7 +101,7 @@ export function TestimonialCarousel({ testimonials = [] }) {
                         </div>
 
                         {/* Quote section with blue quote icon */}
-                        <div className="flex items-start gap-3 mb-6">
+                        <div className="flex items-center gap-3 mb-6">
                           <QuoteIcon className="w-6 h-6 text-blue-500 flex-shrink-0" />
                           <p className="text-gray-700 italic text-base md:text-lg leading-relaxed">
                             {testimonial.quote}
@@ -115,7 +111,7 @@ export function TestimonialCarousel({ testimonials = [] }) {
                         {/* Author info */}
                         <div>
                           <p className="font-semibold text-blue-600">{testimonial.author}</p>
-                          <p className="text-sm text-gray-300 uppercase tracking-wide mt-1">
+                          <p className="text-sm text-gray-500 uppercase tracking-wide mt-1">
                             Verified User
                           </p>
                         </div>
