@@ -1,4 +1,4 @@
-// components/interactive-elements.jsx
+// components/ui/interactive-elements.jsx
 "use client"
 
 import { useRef, useEffect, useState } from "react"
@@ -21,12 +21,14 @@ const Lottie = dynamic(
   { ssr: false }
 )
 
-// Generic placeholder component
-const Placeholder = ({ name = "content", className = "" }) => (
-  <div className={`bg-gray-100 rounded-lg flex items-center justify-center ${className}`}>
-    <span className="text-gray-500">{name} placeholder</span>
-  </div>
-)
+// Generic placeholder component - only one declaration
+export function Placeholder({ name = "content", className = "" }) {
+  return (
+    <div className={`bg-gray-100 rounded-lg flex items-center justify-center ${className}`}>
+      <span className="text-gray-500">{name} placeholder</span>
+    </div>
+  )
+}
 
 export function MobileMenu({ testimonials = [] }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -329,12 +331,4 @@ export function LottieAnimation({ animationName }) {
   }
 
   return <Lottie options={options} height="100%" width="100%" />
-}
-
-export function Placeholder({ name = "content", className = "" }) {
-  return (
-    <div className={`bg-gray-100 rounded-lg flex items-center justify-center ${className}`}>
-      <span className="text-gray-500">{name} placeholder</span>
-    </div>
-  )
 }
