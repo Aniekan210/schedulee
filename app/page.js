@@ -148,7 +148,7 @@ export default function Home() {
               </CardHeader>
             </Card>
           </div>
-        </di
+        </div>
       </section>
 
       <HowItWorksSection />
