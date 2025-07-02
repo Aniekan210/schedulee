@@ -1,5 +1,6 @@
 // app/page.js
 import { Button } from "@/components/ui/button"
+import { Link } from "next/link"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { MobileMenu, TestimonialCarousel, DemoVideo, LottieAnimation } from "@/components/ui/interactive-elements"
 
