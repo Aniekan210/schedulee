@@ -52,15 +52,10 @@ export default function Home() {
       <MobileMenu />
 
       {/* Hero Section */}
-      <section className="pt-24 pb-12 md:pt-32 md:pb-20 px-4 sm:px-6 relative overflow-hidden">
-        <div className="absolute inset-0 -z-10">
-          <DemoVideo className="w-full h-full" />
-          <div className="absolute inset-0 bg-black/10"></div>
-        </div>
-        
-        <div className="container mx-auto max-w-6xl relative z-10">
+      <section className="pt-24 pb-12 md:pt-32 md:pb-20 px-4 sm:px-6">
+        <div className="container mx-auto max-w-6xl">
           <div className="flex flex-col lg:flex-row items-center gap-12">
-            <div className="lg:w-1/2 text-center lg:text-left space-y-8 bg-white/90 backdrop-blur-sm p-8 rounded-xl shadow-lg">
+            <div className="lg:w-1/2 text-center lg:text-left space-y-8">
               <div>
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-[1.2] tracking-[-0.02em]">
                   Booking Made Beautiful <br />
@@ -87,6 +82,8 @@ export default function Home() {
               
               <p className="text-gray-500 font-medium">Only $8.99 CAD/month after trial</p>
             </div>
+            
+            <DemoVideo className="hidden lg:block" />
           </div>
         </div>
       </section>
@@ -149,7 +146,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* How It Works */}
       <HowItWorksSection />
 
       {/* Testimonials */}
@@ -164,7 +160,7 @@ export default function Home() {
             </p>
           </div>
           
-          <div className="max-w-2xl mx-auto">
+          <div className="max-w-4xl mx-auto">
             <TestimonialCarousel testimonials={DEFAULT_TESTIMONIALS} />
           </div>
         </div>
