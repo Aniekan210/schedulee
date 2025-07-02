@@ -70,6 +70,13 @@ export default function BookingsOverviewPage() {
     toast.success("Booking link copied to clipboard!");
   };
 
+  function formatDateToLocalYYYYMMDD(date) {
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const dd = String(date.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
   const fetchBookings = async () => {
     setIsLoading(true);
     if(!user)
@@ -84,7 +91,7 @@ export default function BookingsOverviewPage() {
         page: currentPage,
         itemsPerPage: ITEMS_PER_PAGE,
         ...(filter === "custom" && {
-          customDate: customDate.toISOString().split("T")[0],
+          customDate: formatDateToLocalYYYYMMDD(customDate),
         }),
       });
 
