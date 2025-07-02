@@ -115,7 +115,7 @@ export function TestimonialCarousel({ testimonials = [] }) {
                         {/* Author info */}
                         <div>
                           <p className="font-semibold text-blue-600">{testimonial.author}</p>
-                          <p className="text-sm text-blue-400 uppercase tracking-wide mt-1">
+                          <p className="text-sm text-gray-300 uppercase tracking-wide mt-1">
                             Verified User
                           </p>
                         </div>
