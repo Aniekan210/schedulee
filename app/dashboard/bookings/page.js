@@ -333,7 +333,7 @@ export default function BookingsOverviewPage() {
             </div>
           ) : (
             <>
-              <Table>
+              <Table className="px-4">
                 <TableHeader>
                   <TableRow>
                     <TableHead>Customer</TableHead>

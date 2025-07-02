@@ -42,13 +42,15 @@ export function TestimonialCarousel({ testimonials = [] }) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [loadingError, setLoadingError] = useState(false)
   const carouselRef = useRef(null)
+  const containerRef = useRef(null)
 
   const safeTestimonials = Array.isArray(testimonials) ? testimonials : []
 
   useEffect(() => {
     try {
-      if (carouselRef.current) {
-        carouselRef.current.style.transform = `translateX(-${currentIndex * 100}%)`
+      if (carouselRef.current && containerRef.current) {
+        const containerWidth = containerRef.current.offsetWidth
+        carouselRef.current.style.transform = `translateX(-${currentIndex * containerWidth}px)`
       }
     } catch (e) {
       console.error("Error with carousel animation:", e)
@@ -73,7 +75,7 @@ export function TestimonialCarousel({ testimonials = [] }) {
   }
 
   return (
-    <div className="relative w-full">
+    <div className="relative w-full" ref={containerRef}>
       <div className="relative h-full overflow-hidden">
         {safeTestimonials.length > 0 ? (
           <>
@@ -85,9 +87,10 @@ export function TestimonialCarousel({ testimonials = [] }) {
               {safeTestimonials.map((testimonial, index) => (
                 <div 
                   key={index} 
-                  className="w-full flex-shrink-0 px-4" // Keep some side padding
+                  className="w-full flex-shrink-0 px-4"
+                  style={{ width: `${100 / safeTestimonials.length}%` }}
                 >
-                  <Card className="bg-white border border-gray-100 hover:border-indigo-100 transition-all h-full group hover:shadow-sm min-h-[280px] flex flex-col max-w-md mx-auto"> {/* Added max-w-md and mx-auto */}
+                  <Card className="bg-white border border-gray-100 hover:border-indigo-100 transition-all h-full group hover:shadow-sm min-h-[280px] flex flex-col">
                     <CardContent className="p-6 flex flex-col flex-grow">
                       <div className="flex flex-col items-center text-center h-full">
                         <div className="relative w-20 h-20 rounded-full overflow-hidden mb-4 border-2 border-indigo-100">
@@ -120,9 +123,9 @@ export function TestimonialCarousel({ testimonials = [] }) {
             </div>
 
             {safeTestimonials.length > 1 && (
-              <div className="flex justify-center mt-6 gap-3">
+              <div className="flex justify-center mt-8 gap-3">
                 <button
-                  className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all shadow-sm hover:shadow-md group"
+                  className="w-12 h-12 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all shadow-sm hover:shadow-md group"
                   onClick={prevTestimonial}
                   aria-label="Previous testimonial"
                 >
@@ -135,13 +138,13 @@ export function TestimonialCarousel({ testimonials = [] }) {
                     <button
                       key={idx}
                       onClick={() => setCurrentIndex(idx)}
-                      className={`w-2.5 h-2.5 rounded-full transition-all ${idx === currentIndex ? 'bg-indigo-600' : 'bg-gray-300'}`}
+                      className={`w-3 h-3 rounded-full transition-all ${idx === currentIndex ? 'bg-indigo-600' : 'bg-gray-300'}`}
                       aria-label={`Go to testimonial ${idx + 1}`}
                     />
                   ))}
                 </div>
                 <button
-                  className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all shadow-sm hover:shadow-md group"
+                  className="w-12 h-12 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all shadow-sm hover:shadow-md group"
                   onClick={nextTestimonial}
                   aria-label="Next testimonial"
                 >
@@ -226,17 +229,17 @@ export function HowItWorksSection() {
 
   const steps = [
     {
-      icon: <CalendarDays className="h-8 w-8 text-indigo-600" />,
+      icon: <CalendarDays className="h-full w-full text-indigo-600" />,
       title: "Customize Your Booking Page",
       description: "Match your brand colors and add your services in just a few clicks."
     },
     {
-      icon: <Clock className="h-8 w-8 text-indigo-600" />,
+      icon: <Clock className="h-full w-full text-indigo-600" />,
       title: "Set Your Availability",
       description: "Define your working hours and block off personal time as needed."
     },
     {
-      icon: <Share2 className="h-8 w-8 text-indigo-600" />,
+      icon: <Share2 className="h-full w-full text-indigo-600" />,
       title: "Share Your Link",
       description: "Start accepting bookings immediately by sharing your unique page."
     }
@@ -439,7 +442,7 @@ export function MobileMenu() {
             Testimonials
           </Link>
           <Link href="/dashboard/bookings">
-            <Button className="bg-indigo-600 hover:bg-indigo-700 shadow-sm hover:shadow-indigo-400/20 transition-all group">
+            <Button className="bg-indigo-600 hover:bg-indigo-700 shadow-sm hover:shadow-indigo-400/20 transition-all group px-8 py-4">
               <span className="group-hover:scale-105 transition-transform">Get Started</span>
               <svg xmlns="http://www.w3.org/2000/svg" className="ml-1.5 h-4 w-4 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -468,7 +471,7 @@ export function MobileMenu() {
           <div className="flex flex-col space-y-4">
             <Link
               href="#features"
-              className="text-gray-600 hover:text-indigo-600 transition-colors font-medium py-2 flex items-center gap-2"
+              className="text-gray-600 hover:text-indigo-600 transition-colors font-medium py-3 flex items-center gap-2"
               onClick={() => setIsMenuOpen(false)}
             >
               <Settings className="h-5 w-5 text-indigo-400" />
@@ -476,7 +479,7 @@ export function MobileMenu() {
             </Link>
             <Link
               href="#how-it-works"
-              className="text-gray-600 hover:text-indigo-600 transition-colors font-medium py-2 flex items-center gap-2"
+              className="text-gray-600 hover:text-indigo-600 transition-colors font-medium py-3 flex items-center gap-2"
               onClick={() => setIsMenuOpen(false)}
             >
               <CalendarDays className="h-5 w-5 text-indigo-400" />
@@ -484,7 +487,7 @@ export function MobileMenu() {
             </Link>
             <Link
               href="#testimonials"
-              className="text-gray-600 hover:text-indigo-600 transition-colors font-medium py-2 flex items-center gap-2"
+              className="text-gray-600 hover:text-indigo-600 transition-colors font-medium py-3 flex items-center gap-2"
               onClick={() => setIsMenuOpen(false)}
             >
               <MessageSquare className="h-5 w-5 text-indigo-400" />
@@ -495,7 +498,7 @@ export function MobileMenu() {
               className="w-full mt-2"
               onClick={() => setIsMenuOpen(false)}
             >
-              <Button className="w-full bg-indigo-600 hover:bg-indigo-700 group">
+              <Button className="w-full bg-indigo-600 hover:bg-indigo-700 group px-8 py-6">
                 <span className="group-hover:scale-105 transition-transform">Get Started</span>
                 <svg xmlns="http://www.w3.org/2000/svg" className="ml-1.5 h-4 w-4 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />

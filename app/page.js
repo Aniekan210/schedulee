@@ -7,11 +7,10 @@ import {
   MobileMenu,
   TestimonialCarousel,
   DemoVideo,
-  LottieAnimation,
-  Placeholder,
-  BackToTop,
-  HowItWorksSection
+  HowItWorksSection,
+  BackToTop
 } from "@/components/ui/interactive-elements"
+import { Calendar, Palette, User } from "lucide-react"
 
 const DEFAULT_TESTIMONIALS = [
   {
@@ -68,14 +67,14 @@ export default function Home() {
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <Link href="/dashboard/bookings" aria-label="Start free trial">
-                  <Button className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-4 text-base sm:text-lg shadow-sm hover:shadow-md transition-all group w-full sm:w-auto">
+                  <Button className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-6 text-base sm:text-lg shadow-sm hover:shadow-md transition-all group w-full sm:w-auto">
                     <span className="group-hover:scale-105 transition-transform">Start 14-Day Free Trial</span>
                     <svg xmlns="http://www.w3.org/2000/svg" className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
                     </svg>
                   </Button>
                 </Link>
-                <Button variant="outline" className="px-6 py-4 text-base sm:text-lg border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all w-full sm:w-auto">
+                <Button variant="outline" className="px-8 py-6 text-base sm:text-lg border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all w-full sm:w-auto">
                   Learn More
                 </Button>
               </div>
@@ -103,8 +102,10 @@ export default function Home() {
           <div className="grid md:grid-cols-3 gap-8">
             <Card className="border border-gray-100 hover:shadow-sm transition-all group">
               <CardHeader className="items-center text-center">
-                <div className="w-full h-48 mb-6">
-                  <LottieAnimation animationName="calendar" isActive />
+                <div className="w-full h-48 mb-6 flex items-center justify-center">
+                  <div className="p-6 bg-indigo-50 rounded-full group-hover:bg-indigo-100 transition-colors">
+                    <Calendar className="h-12 w-12 text-indigo-600" />
+                  </div>
                 </div>
                 <CardTitle className="text-xl group-hover:text-indigo-600 transition-colors leading-[1.2] tracking-[-0.02em]">
                   Smart Availability
@@ -117,8 +118,10 @@ export default function Home() {
             
             <Card className="border border-gray-100 hover:shadow-sm transition-all group">
               <CardHeader className="items-center text-center">
-                <div className="w-full h-48 mb-6">
-                  <LottieAnimation animationName="customization" isActive />
+                <div className="w-full h-48 mb-6 flex items-center justify-center">
+                  <div className="p-6 bg-indigo-50 rounded-full group-hover:bg-indigo-100 transition-colors">
+                    <Palette className="h-12 w-12 text-indigo-600" />
+                  </div>
                 </div>
                 <CardTitle className="text-xl group-hover:text-indigo-600 transition-colors leading-[1.2] tracking-[-0.02em]">
                   Brand Customization
@@ -131,8 +134,10 @@ export default function Home() {
             
             <Card className="border border-gray-100 hover:shadow-sm transition-all group">
               <CardHeader className="items-center text-center">
-                <div className="w-full h-48 mb-6">
-                  <LottieAnimation animationName="no-login" isActive />
+                <div className="w-full h-48 mb-6 flex items-center justify-center">
+                  <div className="p-6 bg-indigo-50 rounded-full group-hover:bg-indigo-100 transition-colors">
+                    <User className="h-12 w-12 text-indigo-600" />
+                  </div>
                 </div>
                 <CardTitle className="text-xl group-hover:text-indigo-600 transition-colors leading-[1.2] tracking-[-0.02em]">
                   No Login Required
@@ -179,14 +184,14 @@ export default function Home() {
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-4">
                 <Link href="/dashboard/bookings" aria-label="Start free trial">
-                  <Button className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-4 text-base sm:text-lg shadow-sm hover:shadow-md transition-all group w-full sm:w-auto">
+                  <Button className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-6 text-base sm:text-lg shadow-sm hover:shadow-md transition-all group w-full sm:w-auto">
                     <span className="group-hover:scale-105 transition-transform">Start 14-Day Free Trial</span>
                     <svg xmlns="http://www.w3.org/2000/svg" className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
                     </svg>
                   </Button>
                 </Link>
-                <Button variant="outline" className="px-6 py-4 text-base sm:text-lg border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all w-full sm:w-auto">
+                <Button variant="outline" className="px-8 py-6 text-base sm:text-lg border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all w-full sm:w-auto">
                   Learn More
                 </Button>
               </div>

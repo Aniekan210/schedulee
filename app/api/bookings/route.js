@@ -1,6 +1,10 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
+function formatDateLocal(date) {
+  return date.toLocaleDateString("en-CA"); // outputs YYYY-MM-DD in local time
+}
+
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const filter = searchParams.get("filter") || "today";
@@ -27,51 +31,52 @@ export async function GET(request) {
       .order("booking_time", { ascending: true });
 
     switch (filter) {
-      case "today":
-        const todayStr = today.toISOString().split("T")[0];
-        query = query
-          .gte("booking_date", todayStr)
-          .lte("booking_date", todayStr);
+      case "today": {
+        const todayStr = formatDateLocal(today);
+        query = query.eq("booking_date", todayStr);
         break;
-      case "tomorrow":
+      }
+      case "tomorrow": {
         const tomorrow = new Date(today);
         tomorrow.setDate(today.getDate() + 1);
-        const tomorrowStr = tomorrow.toISOString().split("T")[0];
-        query = query
-          .gte("booking_date", tomorrowStr)
-          .lte("booking_date", tomorrowStr);
+        const tomorrowStr = formatDateLocal(tomorrow);
+        query = query.eq("booking_date", tomorrowStr);
         break;
-      case "next7":
+      }
+      case "next7": {
         const nextWeek = new Date(today);
         nextWeek.setDate(today.getDate() + 7);
         query = query
-          .gte("booking_date", today.toISOString().split("T")[0])
-          .lte("booking_date", nextWeek.toISOString().split("T")[0]);
+          .gte("booking_date", formatDateLocal(today))
+          .lte("booking_date", formatDateLocal(nextWeek));
         break;
-      case "upcoming":
-        query = query.gte("booking_date", today.toISOString().split("T")[0]);
+      }
+      case "upcoming": {
+        query = query.gte("booking_date", formatDateLocal(today));
         break;
-      case "past30":
+      }
+      case "past30": {
         const pastDate = new Date(today);
         pastDate.setDate(today.getDate() - 30);
         query = query
-          .gte("booking_date", pastDate.toISOString().split("T")[0])
-          .lte("booking_date", today.toISOString().split("T")[0]);
+          .gte("booking_date", formatDateLocal(pastDate))
+          .lte("booking_date", formatDateLocal(today));
         break;
-      case "recent":
+      }
+      case "recent": {
         const recentDate = new Date(today);
         recentDate.setDate(today.getDate() - 7);
         query = query
           .gte("created_at", recentDate.toISOString())
           .order("created_at", { ascending: false });
         break;
-      case "custom":
+      }
+      case "custom": {
         if (customDate) {
-          query = query
-            .gte("booking_date", customDate)
-            .lte("booking_date", customDate);
+          query = query.eq("booking_date", customDate);
         }
         break;
+      }
     }
 
     const { count } = await query.select("*", { count: "exact", head: true });
