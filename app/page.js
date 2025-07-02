@@ -73,13 +73,13 @@ export default function Home() {
       {/* Hero Section */}
       <section className="pt-24 pb-12 md:pt-32 md:pb-20 px-4 sm:px-6 overflow-hidden bg-gradient-to-b from-white to-blue-50">
         <div className="container mx-auto flex flex-col md:flex-row items-center gap-8 md:gap-12">
-          <motion.div 
+          <motion.div
             className="md:w-1/2 text-center md:text-left"
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <motion.span 
+            <motion.span
               className="inline-block bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm font-medium mb-3"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -88,7 +88,7 @@ export default function Home() {
               Modern Scheduling Solution
             </motion.span>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-              <motion.span 
+              <motion.span
                 className="block"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -96,7 +96,7 @@ export default function Home() {
               >
                 Effortless Booking,
               </motion.span>
-              <motion.span 
+              <motion.span
                 className="bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent block"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -105,7 +105,7 @@ export default function Home() {
                 More Time For You
               </motion.span>
             </h1>
-            <motion.p 
+            <motion.p
               className="text-lg md:text-xl text-gray-600 mb-8 max-w-lg mx-auto md:mx-0"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -113,14 +113,14 @@ export default function Home() {
             >
               Beautiful booking pages that match your brand. Clients book in seconds - no accounts needed.
             </motion.p>
-            <motion.div 
+            <motion.div
               className="flex flex-col sm:flex-row gap-4 mb-4 justify-center md:justify-start"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6 }}
             >
               <Link href="/dashboard/bookings" aria-label="Start free trial">
-                <Button 
+                <Button
                   className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 px-6 py-5 md:px-8 md:py-6 text-lg shadow-lg hover:shadow-blue-500/30 transition-all"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -130,7 +130,7 @@ export default function Home() {
               </Link>
               <DemoButton />
             </motion.div>
-            <motion.p 
+            <motion.p
               className="text-gray-500 font-medium"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -139,13 +139,13 @@ export default function Home() {
               Only $8.99 CAD/month after trial
             </motion.p>
           </motion.div>
-          <motion.div 
+          <motion.div
             className="md:w-1/2 mt-8 md:mt-0"
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <motion.div 
+            <motion.div
               className="relative aspect-video rounded-2xl overflow-hidden shadow-xl border-0"
               whileHover={{ scale: 1.02 }}
             >
@@ -158,7 +158,7 @@ export default function Home() {
       {/* Features Section */}
       <section id="features" className="py-16 md:py-24 bg-white">
         <div className="container mx-auto px-4 sm:px-6">
-          <motion.div 
+          <motion.div
             className="text-center max-w-3xl mx-auto mb-12 md:mb-16"
             initial="hidden"
             whileInView="visible"
@@ -175,27 +175,27 @@ export default function Home() {
               Schedulee.app gives you all the tools without the complexity
             </p>
           </motion.div>
-          
-          <motion.div 
+
+          <motion.div
             className="grid md:grid-cols-3 gap-6 md:gap-8"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={staggerContainer}
           >
-            <FeatureCard 
+            <FeatureCard
               title="Smart Availability"
               description="Set your working hours and time off. We handle the rest automatically."
               icon="calendar"
               color="text-blue-500"
             />
-            <FeatureCard 
+            <FeatureCard
               title="Brand Customization"
               description="Customize your booking page with your branding in minutes."
               icon="customization"
               color="text-purple-500"
             />
-            <FeatureCard 
+            <FeatureCard
               title="No Login Required"
               description="Clients book with just name and phone number - no accounts needed."
               icon="no-login"
@@ -208,7 +208,7 @@ export default function Home() {
       {/* How It Works */}
       <section id="how-it-works" className="py-16 md:py-24 bg-gradient-to-br from-blue-50 to-white">
         <div className="container mx-auto px-4 sm:px-6">
-          <motion.div 
+          <motion.div
             className="text-center max-w-3xl mx-auto mb-12 md:mb-16"
             initial="hidden"
             whileInView="visible"
@@ -225,9 +225,9 @@ export default function Home() {
               Get set up and start accepting bookings in minutes
             </p>
           </motion.div>
-          
+
           <div className="flex flex-col lg:flex-row gap-8 items-center">
-            <motion.div 
+            <motion.div
               className="lg:w-1/2"
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -238,8 +238,8 @@ export default function Home() {
                 <LottieAnimation animationName="setup-process" />
               </div>
             </motion.div>
-            
-            <motion.div 
+
+            <motion.div
               className="lg:w-1/2"
               initial={{ opacity: 0, x: 50 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -247,19 +247,19 @@ export default function Home() {
               transition={{ duration: 0.6 }}
             >
               <div className="space-y-6 md:space-y-8">
-                <StepItem 
+                <StepItem
                   step="1"
                   title="Customize Your Booking Page"
                   description="Match your brand colors and add your services in just a few clicks."
                   icon="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                 />
-                <StepItem 
+                <StepItem
                   step="2"
                   title="Set Your Availability"
                   description="Define your working hours and block off personal time as needed."
                   icon="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
-                <StepItem 
+                <StepItem
                   step="3"
                   title="Share Your Link"
                   description="Start accepting bookings immediately by sharing your unique page."
@@ -274,7 +274,7 @@ export default function Home() {
       {/* Testimonials Section */}
       <section id="testimonials" className="py-16 md:py-24 bg-gradient-to-br from-white to-gray-50">
         <div className="container mx-auto px-4 sm:px-6">
-          <motion.div 
+          <motion.div
             className="text-center max-w-3xl mx-auto mb-12 md:mb-16"
             initial="hidden"
             whileInView="visible"
@@ -299,7 +299,7 @@ export default function Home() {
       {/* Pricing Section */}
       <section className="py-16 md:py-24 bg-white">
         <div className="container mx-auto px-4 sm:px-6">
-          <motion.div 
+          <motion.div
             className="text-center max-w-3xl mx-auto mb-12 md:mb-16"
             initial="hidden"
             whileInView="visible"
@@ -316,8 +316,8 @@ export default function Home() {
               No hidden fees, no complicated tiers
             </p>
           </motion.div>
-          
-          <motion.div 
+
+          <motion.div
             className="max-w-md mx-auto bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg p-8 md:p-10 border border-gray-100"
             initial="hidden"
             whileInView="visible"
@@ -332,7 +332,7 @@ export default function Home() {
               </p>
               <p className="text-gray-600">Billed monthly. Cancel anytime.</p>
             </div>
-            
+
             <ul className="space-y-3 mb-8">
               {[
                 "Unlimited bookings",
@@ -350,7 +350,7 @@ export default function Home() {
                 </li>
               ))}
             </ul>
-            
+
             <div className="text-center">
               <Link href="/dashboard/bookings" aria-label="Start free trial">
                 <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 w-full py-6 text-lg shadow-lg hover:shadow-blue-500/30 transition-all">
