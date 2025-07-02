@@ -8,8 +8,8 @@ import {
   TestimonialCarousel,
   DemoVideo,
   LottieAnimation,
-  Placeholder // Add this import
-} from "@/components/interactive-elements"
+  Placeholder 
+} from "@/components/ui/interactive-elements"
 
 // Static data that doesn't require client-side rendering
 const DEFAULT_TESTIMONIALS = [
