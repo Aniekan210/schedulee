@@ -234,17 +234,17 @@ export function HowItWorksSection() {
 
   const steps = [
     {
-      icon: <CalendarDays className="h-full w-full text-indigo-600" />,
+      icon: <CalendarDays className="h-10 w-10 text-indigo-600" />,
       title: "Customize Your Booking Page",
       description: "Match your brand colors and add your services in just a few clicks."
     },
     {
-      icon: <Clock className="h-full w-full text-indigo-600" />,
+      icon: <Clock className="h-10 w-10 text-indigo-600" />,
       title: "Set Your Availability",
       description: "Define your working hours and block off personal time as needed."
     },
     {
-      icon: <Share2 className="h-full w-full text-indigo-600" />,
+      icon: <Share2 className="h-10 w-10 text-indigo-600" />,
       title: "Share Your Link",
       description: "Start accepting bookings immediately by sharing your unique page."
     }
