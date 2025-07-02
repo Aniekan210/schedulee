@@ -6,15 +6,15 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 
-// Dynamically import Lottie with error handling
-const Lottie = dynamic(() => import('react-lottie').then(mod => mod.default), {
-    ssr: false,
-    loading: () => <div className="w-full h-48 bg-gray-100 rounded-lg flex items-center justify-center">
-        <span className="text-gray-500">Loading animation...</span>
-    </div>
-})
+// Safe dynamic import for Lottie with error handling
+const Lottie = dynamic(
+    () => import('react-lottie')
+        .then(mod => mod.default)
+        .catch(() => null), // Return null if import fails
+    { ssr: false }
+)
 
-export default function ClientPage({ testimonials }) {
+export default function ClientPage({ testimonials = [] }) {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const [lastScrollY, setLastScrollY] = useState(0)
     const [navVisible, setNavVisible] = useState(true)
@@ -24,24 +24,26 @@ export default function ClientPage({ testimonials }) {
     const [currentIndex, setCurrentIndex] = useState(0)
     const videoRef = useRef(null)
 
-    // Animation options with error handling
+    // Safe animation options with error handling
     const getAnimationOptions = (animationName) => {
         try {
+            const animationData = require(`@/public/animations/${animationName}.json`)
             return {
                 loop: true,
                 autoplay: true,
-                animationData: require(`@/public/animations/${animationName}.json`),
+                animationData,
                 rendererSettings: {
                     preserveAspectRatio: 'xMidYMid slice'
                 }
             }
         } catch (e) {
-            console.error(`Failed to load animation: ${animationName}`, e)
+            console.error(`Animation not found: ${animationName}`)
             setAnimationError(true)
             return null
         }
     }
 
+    // Safe animation options - will be null if animations don't exist
     const calendarOptions = getAnimationOptions('calendar')
     const customizationOptions = getAnimationOptions('customization')
     const noLoginOptions = getAnimationOptions('no-login')
@@ -63,13 +65,13 @@ export default function ClientPage({ testimonials }) {
     }, [lastScrollY])
 
     const nextTestimonials = () => {
-        const newIndex = (currentIndex + 1) % (testimonials.length - 2)
+        const newIndex = (currentIndex + 1) % Math.max(1, (testimonials.length - 2))
         setCurrentIndex(newIndex)
         setCurrentTestimonials(testimonials.slice(newIndex, newIndex + 3))
     }
 
     const prevTestimonials = () => {
-        const newIndex = (currentIndex - 1 + (testimonials.length - 2)) % (testimonials.length - 2)
+        const newIndex = (currentIndex - 1 + Math.max(1, (testimonials.length - 2))) % Math.max(1, (testimonials.length - 2))
         setCurrentIndex(newIndex)
         setCurrentTestimonials(testimonials.slice(newIndex, newIndex + 3))
     }
@@ -97,6 +99,13 @@ export default function ClientPage({ testimonials }) {
         </Button>
     )
 
+    // Fallback component for missing animations
+    const AnimationFallback = ({ name }) => (
+        <div className="w-full h-48 bg-gray-100 rounded-lg flex items-center justify-center">
+            <span className="text-gray-500">{name} animation</span>
+        </div>
+    )
+
     return (
         <div className="min-h-screen bg-white">
             {/* Navigation */}
@@ -107,7 +116,8 @@ export default function ClientPage({ testimonials }) {
                             <Image
                                 src="/logo.avif"
                                 alt="schedulee.app Logo"
-                                fill
+                                width={40}
+                                height={40}
                                 className="object-contain"
                                 priority
                                 onError={() => console.error("Logo failed to load")}
@@ -213,9 +223,7 @@ export default function ClientPage({ testimonials }) {
                     <div className="md:w-1/2 mt-8 md:mt-0">
                         <div className="relative aspect-video rounded-2xl overflow-hidden shadow-xl border border-gray-200">
                             {videoError ? (
-                                <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                                    <span className="text-gray-500">Video failed to load</span>
-                                </div>
+                                <AnimationFallback name="Video" />
                             ) : (
                                 <video
                                     autoPlay
@@ -223,10 +231,9 @@ export default function ClientPage({ testimonials }) {
                                     muted
                                     playsInline
                                     className="w-full h-full object-cover"
-                                    poster="/images/booking-preview-poster.jpg"
                                     onError={() => setVideoError(true)}
                                 >
-                                    <source src="/videos/booking-preview.mp4" type="video/mp4" />
+                                    {/* No source provided intentionally */}
                                     Your browser does not support the video tag.
                                 </video>
                             )}
@@ -248,16 +255,13 @@ export default function ClientPage({ testimonials }) {
                         <Card className="hover:shadow-lg transition-shadow h-full">
                             <CardHeader>
                                 <div className="w-full h-48 mb-4">
-                                    {animationError || !calendarOptions ? (
-                                        <div className="w-full h-full bg-gray-100 rounded-lg flex items-center justify-center">
-                                            <span className="text-gray-500">Calendar animation</span>
-                                        </div>
+                                    {!Lottie || animationError || !calendarOptions ? (
+                                        <AnimationFallback name="Calendar" />
                                     ) : (
                                         <Lottie
                                             options={calendarOptions}
                                             height="100%"
                                             width="100%"
-                                            isStopped={animationError}
                                         />
                                     )}
                                 </div>
@@ -270,16 +274,13 @@ export default function ClientPage({ testimonials }) {
                         <Card className="hover:shadow-lg transition-shadow h-full">
                             <CardHeader>
                                 <div className="w-full h-48 mb-4">
-                                    {animationError || !customizationOptions ? (
-                                        <div className="w-full h-full bg-gray-100 rounded-lg flex items-center justify-center">
-                                            <span className="text-gray-500">Customization animation</span>
-                                        </div>
+                                    {!Lottie || animationError || !customizationOptions ? (
+                                        <AnimationFallback name="Customization" />
                                     ) : (
                                         <Lottie
                                             options={customizationOptions}
                                             height="100%"
                                             width="100%"
-                                            isStopped={animationError}
                                         />
                                     )}
                                 </div>
@@ -292,16 +293,13 @@ export default function ClientPage({ testimonials }) {
                         <Card className="hover:shadow-lg transition-shadow h-full">
                             <CardHeader>
                                 <div className="w-full h-48 mb-4">
-                                    {animationError || !noLoginOptions ? (
-                                        <div className="w-full h-full bg-gray-100 rounded-lg flex items-center justify-center">
-                                            <span className="text-gray-500">No-login animation</span>
-                                        </div>
+                                    {!Lottie || animationError || !noLoginOptions ? (
+                                        <AnimationFallback name="No-login" />
                                     ) : (
                                         <Lottie
                                             options={noLoginOptions}
                                             height="100%"
                                             width="100%"
-                                            isStopped={animationError}
                                         />
                                     )}
                                 </div>
@@ -327,16 +325,13 @@ export default function ClientPage({ testimonials }) {
                     <div className="flex flex-col lg:flex-row gap-8 items-center">
                         <div className="lg:w-1/2">
                             <div className="relative aspect-video rounded-xl overflow-hidden shadow-lg">
-                                {animationError || !setupOptions ? (
-                                    <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                                        <span className="text-gray-500">Setup animation</span>
-                                    </div>
+                                {!Lottie || animationError || !setupOptions ? (
+                                    <AnimationFallback name="Setup" />
                                 ) : (
                                     <Lottie
                                         options={setupOptions}
                                         height="100%"
                                         width="100%"
-                                        isStopped={animationError}
                                     />
                                 )}
                             </div>
@@ -393,18 +388,15 @@ export default function ClientPage({ testimonials }) {
                     </div>
                     <div className="relative aspect-video bg-gray-200 rounded-xl overflow-hidden shadow-xl max-w-4xl mx-auto">
                         {videoError ? (
-                            <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                                <span className="text-gray-500">Demo video failed to load</span>
-                            </div>
+                            <AnimationFallback name="Demo video" />
                         ) : (
                             <video
                                 ref={videoRef}
                                 className="w-full h-full object-cover"
-                                poster="/images/demo-poster.jpg"
                                 controls
                                 onError={() => setVideoError(true)}
                             >
-                                <source src="/videos/product-demo.mp4" type="video/mp4" />
+                                {/* No source provided intentionally */}
                                 Your browser does not support the video tag.
                             </video>
                         )}
@@ -423,49 +415,60 @@ export default function ClientPage({ testimonials }) {
                     </div>
 
                     <div className="relative">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {currentTestimonials.map((testimonial, index) => (
-                                <Card key={index} className="bg-white/10 border-white/20 backdrop-blur-sm hover:bg-white/15 transition-colors h-full">
-                                    <CardContent className="pt-6">
-                                        <div className="flex items-center mb-4">
-                                            {[...Array(testimonial.stars)].map((_, i) => (
-                                                <svg key={i} xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-300" viewBox="0 0 20 20" fill="currentColor">
-                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                                </svg>
-                                            ))}
-                                            {[...Array(5 - testimonial.stars)].map((_, i) => (
-                                                <svg key={i + testimonial.stars} xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-300" viewBox="0 0 20 20" fill="currentColor">
-                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                                </svg>
-                                            ))}
-                                        </div>
-                                        <p className="italic mb-4 text-lg">"{testimonial.quote}"</p>
-                                        <p className="font-semibold">{testimonial.author}</p>
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </div>
+                        {testimonials.length > 0 ? (
+                            <>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {currentTestimonials.map((testimonial, index) => (
+                                        <Card key={index} className="bg-white/10 border-white/20 backdrop-blur-sm hover:bg-white/15 transition-colors h-full">
+                                            <CardContent className="pt-6">
+                                                <div className="flex items-center mb-4">
+                                                    {[...Array(5)].map((_, i) => (
+                                                        <svg
+                                                            key={i}
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            className={`h-5 w-5 ${i < (testimonial?.stars || 0) ? 'text-yellow-300' : 'text-gray-300'}`}
+                                                            viewBox="0 0 20 20"
+                                                            fill="currentColor"
+                                                        >
+                                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                        </svg>
+                                                    ))}
+                                                </div>
+                                                <p className="italic mb-4 text-lg">"{testimonial?.quote || 'Great service!'}"</p>
+                                                <p className="font-semibold">{testimonial?.author || 'Happy Customer'}</p>
+                                            </CardContent>
+                                        </Card>
+                                    ))}
+                                </div>
 
-                        <div className="flex justify-center mt-8 gap-4">
-                            <button
-                                className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors"
-                                onClick={prevTestimonials}
-                                aria-label="Previous testimonial"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                                </svg>
-                            </button>
-                            <button
-                                className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors"
-                                onClick={nextTestimonials}
-                                aria-label="Next testimonial"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                </svg>
-                            </button>
-                        </div>
+                                {testimonials.length > 3 && (
+                                    <div className="flex justify-center mt-8 gap-4">
+                                        <button
+                                            className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors"
+                                            onClick={prevTestimonials}
+                                            aria-label="Previous testimonial"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                            </svg>
+                                        </button>
+                                        <button
+                                            className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors"
+                                            onClick={nextTestimonials}
+                                            aria-label="Next testimonial"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            <div className="text-center py-12">
+                                <p className="text-xl">No testimonials available yet</p>
+                            </div>
+                        )}
                     </div>
                 </div>
             </section>
@@ -501,7 +504,8 @@ export default function ClientPage({ testimonials }) {
                                     <Image
                                         src="/logo.avif"
                                         alt="Schedulee.app Logo"
-                                        fill
+                                        width={40}
+                                        height={40}
                                         className="object-contain"
                                         onError={() => console.error("Footer logo failed to load")}
                                     />
