@@ -232,7 +232,6 @@ export default function Home() {
                     width={40}
                     height={40}
                     className="object-contain"
-                    onError={() => console.error("Footer logo failed to load")}
                   />
                 </div>
                 <span className="text-xl font-bold">Schedulee.app</span>
