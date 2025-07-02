@@ -99,54 +99,41 @@ export default function Home() {
             </p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-8">
-            <Card className="border border-gray-100 hover:shadow-sm transition-all group">
-              <CardHeader className="items-center text-center">
-                <div className="w-full h-48 mb-6 flex items-center justify-center">
-                  <div className="p-4 bg-indigo-50 rounded-full group-hover:bg-indigo-100 transition-colors">
-                    <Calendar className="h-10 w-10 text-indigo-600" />
+          <div className="grid md:grid-cols-3 gap-5">
+            {[
+              {
+                icon: <Calendar className="h-7 w-7 text-indigo-600" />,
+                title: "Smart Availability",
+                desc: "Set your working hours and time off. We handle the rest automatically."
+              },
+              {
+                icon: <Palette className="h-7 w-7 text-indigo-600" />,
+                title: "Brand Customization",
+                desc: "Customize your booking page with your branding in minutes."
+              },
+              {
+                icon: <User className="h-7 w-7 text-indigo-600" />,
+                title: "No Login Required",
+                desc: "Clients book with just name and phone number - no accounts needed."
+              }
+            ].map((card, index) => (
+              <Card 
+                key={index}
+                className="border border-gray-100 hover:border-indigo-100 hover:shadow-xs transition-all group hover:-translate-y-0.5"
+              >
+                <CardHeader className="items-center text-center p-5">
+                  <div className="mb-3 p-3 bg-indigo-50 rounded-full group-hover:bg-indigo-100/80 transition-colors">
+                    {card.icon}
                   </div>
-                </div>
-                <CardTitle className="text-xl group-hover:text-indigo-600 transition-colors leading-[1.2] tracking-[-0.02em]">
-                  Smart Availability
-                </CardTitle>
-                <CardDescription className="group-hover:text-gray-700 transition-colors leading-[1.5]">
-                  Set your working hours and time off. We handle the rest automatically.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card className="border border-gray-100 hover:shadow-sm transition-all group">
-              <CardHeader className="items-center text-center">
-                <div className="w-full h-48 mb-6 flex items-center justify-center">
-                  <div className="p-4 bg-indigo-50 rounded-full group-hover:bg-indigo-100 transition-colors">
-                    <Palette className="h-10 w-10 text-indigo-600" />
-                  </div>
-                </div>
-                <CardTitle className="text-xl group-hover:text-indigo-600 transition-colors leading-[1.2] tracking-[-0.02em]">
-                  Brand Customization
-                </CardTitle>
-                <CardDescription className="group-hover:text-gray-700 transition-colors leading-[1.5]">
-                  Customize your booking page with your branding in minutes.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card className="border border-gray-100 hover:shadow-sm transition-all group">
-              <CardHeader className="items-center text-center">
-                <div className="w-full h-48 mb-6 flex items-center justify-center">
-                  <div className="p-4 bg-indigo-50 rounded-full group-hover:bg-indigo-100 transition-colors">
-                    <User className="h-10 w-10 text-indigo-600" />
-                  </div>
-                </div>
-                <CardTitle className="text-xl group-hover:text-indigo-600 transition-colors leading-[1.2] tracking-[-0.02em]">
-                  No Login Required
-                </CardTitle>
-                <CardDescription className="group-hover:text-gray-700 transition-colors leading-[1.5]">
-                  Clients book with just name and phone number - no accounts needed.
-                </CardDescription>
-              </CardHeader>
-            </Card>
+                  <CardTitle className="text-base font-medium group-hover:text-indigo-600 transition-colors">
+                    {card.title}
+                  </CardTitle>
+                  <CardDescription className="text-sm text-gray-600 group-hover:text-gray-700 mt-1 transition-colors">
+                    {card.description}
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            ))}
           </div>
         </div>
       </section>

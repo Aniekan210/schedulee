@@ -87,10 +87,10 @@ export function TestimonialCarousel({ testimonials = [] }) {
               {safeTestimonials.map((testimonial, index) => (
                 <div 
                   key={index} 
-                  className="w-full flex-shrink-0 px-4"
+                  className="w-full flex-shrink-0 px-4 max-w-xs md:max-w-sm mx-auto"
                   style={{ width: `${100 / safeTestimonials.length}%` }}
                 >
-                  <Card className="w-max-[400px] bg-white border border-gray-100 hover:border-indigo-100 transition-all h-full group hover:shadow-sm min-h-[280px] flex flex-col">
+                  <Card className="bg-white border border-gray-100 hover:border-indigo-100 transition-all h-full group hover:shadow-sm min-h-[280px] flex flex-col">
                     <CardContent className="p-6 flex flex-col flex-grow">
                       <div className="flex flex-col items-center text-center h-full">
                         <div className="relative w-20 h-20 rounded-full overflow-hidden mb-4 border-2 border-indigo-100">
@@ -119,6 +119,7 @@ export function TestimonialCarousel({ testimonials = [] }) {
                     </CardContent>
                   </Card>
                 </div>
+
               ))}
             </div>
 

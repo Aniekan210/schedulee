@@ -49,8 +49,6 @@ export default function BookingsOverviewPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(1);
 
-  const router = useRouter();
-
 
   const bookingLink = `https://schedulee.app/book/${user?.id}`;
 
@@ -76,6 +74,7 @@ export default function BookingsOverviewPage() {
     setIsLoading(true);
     if(!user)
     {
+      const router = useRouter();
       router.push("/login");
     }
 
