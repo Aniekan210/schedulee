@@ -1,7 +1,7 @@
 // components/ui/interactive-elements.jsx
 "use client"
 
-import { useRef, useEffect, useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import dynamic from 'next/dynamic'
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
@@ -20,7 +20,6 @@ const Lottie = dynamic(
   { ssr: false }
 )
 
-// Enhanced Placeholder component
 export function Placeholder({ name = "content", className = "", children }) {
   return (
     <motion.div 
@@ -155,7 +154,94 @@ export function MobileMenu({ testimonials = [] }) {
 
   return (
     <nav className={`fixed w-full bg-white shadow-sm z-50 transition-transform duration-300 ${navVisible ? 'translate-y-0' : '-translate-y-full'}`}>
-      {/* ... rest of MobileMenu component remains the same ... */}
+      <div className="container mx-auto px-4 sm:px-6 py-3 flex justify-between items-center">
+        <Link href="#" className="flex items-center" aria-label="schedulee.app Home">
+          <div className="relative w-10 h-10 mr-2">
+            {logoError ? (
+              <Placeholder name="Logo" className="w-10 h-10" />
+            ) : (
+              <Image
+                src="/logo.avif"
+                alt="schedulee.app Logo"
+                width={40}
+                height={40}
+                className="object-contain"
+                priority
+                onError={() => setLogoError(true)}
+              />
+            )}
+          </div>
+          <span className="text-xl font-bold text-gray-900">Schedulee.app</span>
+        </Link>
+
+        <div className="hidden md:flex items-center gap-6">
+          <Link href="#features" className="text-gray-600 hover:text-blue-500 transition-colors font-medium">
+            Features
+          </Link>
+          <Link href="#how-it-works" className="text-gray-600 hover:text-blue-500 transition-colors font-medium">
+            How It Works
+          </Link>
+          <Link href="#testimonials" className="text-gray-600 hover:text-blue-500 transition-colors font-medium">
+            Testimonials
+          </Link>
+          <Link href="/dashboard/bookings">
+            <Button className="bg-blue-500 hover:bg-blue-600 shadow-lg hover:shadow-blue-500/30 transition-all">
+              Get Started
+            </Button>
+          </Link>
+        </div>
+
+        <button
+          className="md:hidden text-gray-600 focus:outline-none"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          aria-label="Toggle menu"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {isMenuOpen ? (
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            ) : (
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            )}
+          </svg>
+        </button>
+      </div>
+
+      {isMenuOpen && (
+        <div className="md:hidden bg-white py-4 px-6 shadow-lg">
+          <div className="flex flex-col space-y-4">
+            <Link
+              href="#features"
+              className="text-gray-600 hover:text-blue-500 transition-colors font-medium py-2"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Features
+            </Link>
+            <Link
+              href="#how-it-works"
+              className="text-gray-600 hover:text-blue-500 transition-colors font-medium py-2"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              How It Works
+            </Link>
+            <Link
+              href="#testimonials"
+              className="text-gray-600 hover:text-blue-500 transition-colors font-medium py-2"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Testimonials
+            </Link>
+            <Link
+              href="/dashboard/bookings"
+              className="w-full"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <Button className="w-full bg-blue-500 hover:bg-blue-600">
+                Get Started
+              </Button>
+            </Link>
+          </div>
+        </div>
+      )}
     </nav>
   )
 }
@@ -216,7 +302,6 @@ export function TestimonialCarousel({ testimonials = [] }) {
                 }}
               >
                 <div className="bg-white rounded-2xl shadow-lg p-8 md:p-10 relative overflow-hidden">
-                  {/* Decorative elements */}
                   <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-blue-400"></div>
                   <div className="absolute bottom-0 right-0 text-gray-100 text-8xl font-serif z-0">”</div>
                   
@@ -410,6 +495,7 @@ export function StepItem({ step, title, description, icon }) {
     </motion.div>
   )
 }
+
 export function MainCTA({ className = "" }) {
   return (
     <motion.div 
@@ -448,7 +534,7 @@ export function SecondaryCTA({ className = "" }) {
         Still not convinced?
       </h3>
       <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-        Try our interactive demo with no commitment and see how Schedulee.app can transform your workflow.
+        Try watch our demo and see how Schedulee.app can transform your workflow.
       </p>
       <DemoButton />
     </motion.div>
