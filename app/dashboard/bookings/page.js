@@ -13,6 +13,7 @@ import {
   Filter, ChevronLeft, ChevronRight, Copy,
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/router"
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
@@ -48,6 +49,9 @@ export default function BookingsOverviewPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(1);
 
+  const router = useRouter();
+
+
   const bookingLink = `https://schedulee.app/book/${user?.id}`;
 
   useEffect(() => {
@@ -70,6 +74,11 @@ export default function BookingsOverviewPage() {
 
   const fetchBookings = async () => {
     setIsLoading(true);
+    if(!user)
+    {
+      router.push("/login");
+    }
+
     try {
       const params = new URLSearchParams({
         filter,
@@ -333,24 +342,26 @@ export default function BookingsOverviewPage() {
             </div>
           ) : (
             <>
-              <Table className="px-4">
+              <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Customer</TableHead>
-                    <TableHead>Contact</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Time</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="px-4">Customer</TableHead>
+                    <TableHead className="px-4">Contact</TableHead>
+                    <TableHead className="px-4">Date</TableHead>
+                    <TableHead className="px-4">Time</TableHead>
+                    <TableHead className="px-4 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {bookings.map((booking) => (
                     <TableRow key={booking.id}>
-                      <TableCell>{booking.name}</TableCell>
-                      <TableCell>{booking.phone_number}</TableCell>
-                      <TableCell>{format(new Date(booking.date), "MMM dd, yyyy")}</TableCell>
-                      <TableCell>{booking.time}</TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="px-4">{booking.name}</TableCell>
+                      <TableCell className="px-4">{booking.phone_number}</TableCell>
+                      <TableCell className="px-4">
+                        {format(new Date(booking.date), "MMM dd, yyyy")}
+                      </TableCell>
+                      <TableCell className="px-4">{booking.time}</TableCell>
+                      <TableCell className="px-4 text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="sm">
@@ -376,6 +387,7 @@ export default function BookingsOverviewPage() {
                   ))}
                 </TableBody>
               </Table>
+
 
               {/* Pagination */}
               {totalPages > 1 && (

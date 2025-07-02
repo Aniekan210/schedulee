@@ -11,6 +11,7 @@ export function AuthProvider({ children }) {
     user: null,
     hasPaid: false,
     daysLeft: 12,
+    isLoading: true,
   });
 
   useEffect(() => {

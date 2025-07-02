@@ -1,8 +1,17 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
-function formatDateLocal(date) {
-  return date.toLocaleDateString("en-CA"); // outputs YYYY-MM-DD in local time
+function getDateRangeForDay(date) {
+  const start = new Date(date);
+  start.setHours(0, 0, 0, 0); // start of day
+
+  const end = new Date(date);
+  end.setHours(23, 59, 59, 999); // end of day
+
+  return {
+    start: start.toISOString(),
+    end: end.toISOString(),
+  };
 }
 
 export async function GET(request) {
@@ -32,37 +41,43 @@ export async function GET(request) {
 
     switch (filter) {
       case "today": {
-        const todayStr = formatDateLocal(today);
-        query = query.eq("booking_date", todayStr);
+        const { start, end } = getDateRangeForDay(today);
+        query = query.gte("booking_date", start).lte("booking_date", end);
         break;
       }
+
       case "tomorrow": {
         const tomorrow = new Date(today);
-        tomorrow.setDate(today.getDate() + 1);
-        const tomorrowStr = formatDateLocal(tomorrow);
-        query = query.eq("booking_date", tomorrowStr);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const { start, end } = getDateRangeForDay(tomorrow);
+        query = query.gte("booking_date", start).lte("booking_date", end);
         break;
       }
+
       case "next7": {
         const nextWeek = new Date(today);
         nextWeek.setDate(today.getDate() + 7);
-        query = query
-          .gte("booking_date", formatDateLocal(today))
-          .lte("booking_date", formatDateLocal(nextWeek));
+        const { start: startToday } = getDateRangeForDay(today);
+        const { end: endNextWeek } = getDateRangeForDay(nextWeek);
+        query = query.gte("booking_date", startToday).lte("booking_date", endNextWeek);
         break;
       }
+
       case "upcoming": {
-        query = query.gte("booking_date", formatDateLocal(today));
+        const { start: startToday } = getDateRangeForDay(today);
+        query = query.gte("booking_date", startToday);
         break;
       }
+
       case "past30": {
         const pastDate = new Date(today);
         pastDate.setDate(today.getDate() - 30);
-        query = query
-          .gte("booking_date", formatDateLocal(pastDate))
-          .lte("booking_date", formatDateLocal(today));
+        const { start: startPast } = getDateRangeForDay(pastDate);
+        const { end: endToday } = getDateRangeForDay(today);
+        query = query.gte("booking_date", startPast).lte("booking_date", endToday);
         break;
       }
+
       case "recent": {
         const recentDate = new Date(today);
         recentDate.setDate(today.getDate() - 7);
@@ -71,9 +86,12 @@ export async function GET(request) {
           .order("created_at", { ascending: false });
         break;
       }
+
       case "custom": {
         if (customDate) {
-          query = query.eq("booking_date", customDate);
+          const date = new Date(customDate);
+          const { start, end } = getDateRangeForDay(date);
+          query = query.gte("booking_date", start).lte("booking_date", end);
         }
         break;
       }

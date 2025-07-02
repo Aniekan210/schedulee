@@ -16,32 +16,32 @@ const DEFAULT_TESTIMONIALS = [
   {
     quote: "schedulee.app has saved me hours each week. My clients love how easy it is to book, and I love having all my appointments in one place.",
     author: "Sarah K., Freelance Designer",
-    avatar: "https://randomuser.me/api/portraits/thumb/women/32.jpg"
+    avatar: "https://randomuser.me/api/portraits/women/32.jpg"
   },
   {
     quote: "The no-login feature is a game changer. My older clients were struggling with other systems, but now they book with just a phone call's worth of information.",
     author: "Michael T., Consultant",
-    avatar: "https://randomuser.me/api/portraits/thumb/men/45.jpg"
+    avatar: "https://randomuser.me/api/portraits/men/45.jpg"
   },
   {
     quote: "For $8.99/month, this is a no-brainer. I was paying triple for a more complex system I didn't need.",
     author: "Jessica L., Massage Therapist",
-    avatar: "https://randomuser.me/api/portraits/thumb/women/68.jpg"
+    avatar: "https://randomuser.me/api/portraits/women/68.jpg"
   },
   {
     quote: "Setup took 10 minutes and I was accepting bookings the same day. The trial convinced me to stay.",
     author: "David R., Tutor",
-    avatar: "https://randomuser.me/api/portraits/thumb/men/12.jpg"
+    avatar: "https://randomuser.me/api/portraits/men/12.jpg"
   },
   {
     quote: "My no-show rate dropped by 60% since using schedulee.app. The automated reminders are perfect.",
     author: "Emma S., Hair Stylist",
-    avatar: "https://randomuser.me/api/portraits/thumb/women/55.jpg"
+    avatar: "https://randomuser.me/api/portraits/women/55.jpg"
   },
   {
     quote: "Finally a booking system that doesn't overwhelm my clients with accounts and logins. Simple and effective.",
     author: "James P., Photographer",
-    avatar: "https://randomuser.me/api/portraits/thumb/men/23.jpg"
+    avatar: "https://randomuser.me/api/portraits/men/23.jpg"
   }
 ]
 
@@ -103,8 +103,8 @@ export default function Home() {
             <Card className="border border-gray-100 hover:shadow-sm transition-all group">
               <CardHeader className="items-center text-center">
                 <div className="w-full h-48 mb-6 flex items-center justify-center">
-                  <div className="p-6 bg-indigo-50 rounded-full group-hover:bg-indigo-100 transition-colors">
-                    <Calendar className="h-12 w-12 text-indigo-600" />
+                  <div className="p-4 bg-indigo-50 rounded-full group-hover:bg-indigo-100 transition-colors">
+                    <Calendar className="h-10 w-10 text-indigo-600" />
                   </div>
                 </div>
                 <CardTitle className="text-xl group-hover:text-indigo-600 transition-colors leading-[1.2] tracking-[-0.02em]">
@@ -115,12 +115,12 @@ export default function Home() {
                 </CardDescription>
               </CardHeader>
             </Card>
-            
+
             <Card className="border border-gray-100 hover:shadow-sm transition-all group">
               <CardHeader className="items-center text-center">
                 <div className="w-full h-48 mb-6 flex items-center justify-center">
-                  <div className="p-6 bg-indigo-50 rounded-full group-hover:bg-indigo-100 transition-colors">
-                    <Palette className="h-12 w-12 text-indigo-600" />
+                  <div className="p-4 bg-indigo-50 rounded-full group-hover:bg-indigo-100 transition-colors">
+                    <Palette className="h-10 w-10 text-indigo-600" />
                   </div>
                 </div>
                 <CardTitle className="text-xl group-hover:text-indigo-600 transition-colors leading-[1.2] tracking-[-0.02em]">
@@ -131,12 +131,12 @@ export default function Home() {
                 </CardDescription>
               </CardHeader>
             </Card>
-            
+
             <Card className="border border-gray-100 hover:shadow-sm transition-all group">
               <CardHeader className="items-center text-center">
                 <div className="w-full h-48 mb-6 flex items-center justify-center">
-                  <div className="p-6 bg-indigo-50 rounded-full group-hover:bg-indigo-100 transition-colors">
-                    <User className="h-12 w-12 text-indigo-600" />
+                  <div className="p-4 bg-indigo-50 rounded-full group-hover:bg-indigo-100 transition-colors">
+                    <User className="h-10 w-10 text-indigo-600" />
                   </div>
                 </div>
                 <CardTitle className="text-xl group-hover:text-indigo-600 transition-colors leading-[1.2] tracking-[-0.02em]">
@@ -148,7 +148,7 @@ export default function Home() {
               </CardHeader>
             </Card>
           </div>
-        </div>
+
       </section>
 
       <HowItWorksSection />
