@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import Image from "next/image"
-import { motion } from "motion/react"
+import { motion } from "@motionone/react"
 import {
   MobileMenu,
   TestimonialCarousel,

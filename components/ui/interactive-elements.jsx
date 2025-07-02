@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import Link from "next/link"
 import Image from "next/image"
-import { motion, AnimatePresence } from "motion/react"
+import { motion, AnimatePresence } from "@motionone/react"
 
 // Safe dynamic import for Lottie with robust error handling
 const Lottie = dynamic(
