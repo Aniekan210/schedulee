@@ -330,3 +330,11 @@ export function LottieAnimation({ animationName }) {
 
   return <Lottie options={options} height="100%" width="100%" />
 }
+
+export function Placeholder({ name = "content", className = "" }) {
+  return (
+    <div className={`bg-gray-100 rounded-lg flex items-center justify-center ${className}`}>
+      <span className="text-gray-500">{name} placeholder</span>
+    </div>
+  )
+}

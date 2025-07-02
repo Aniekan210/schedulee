@@ -1,9 +1,15 @@
 // app/page.js
 import { Button } from "@/components/ui/button"
-import { Link } from "next/link"
+import Link from "next/link" // Changed from named import
+import Image from "next/image"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
-import { MobileMenu, TestimonialCarousel, DemoVideo, LottieAnimation } from "@/components/ui/interactive-elements"
-
+import {
+  MobileMenu,
+  TestimonialCarousel,
+  DemoVideo,
+  LottieAnimation,
+  Placeholder // Add this import
+} from "@/components/interactive-elements"
 
 // Static data that doesn't require client-side rendering
 const DEFAULT_TESTIMONIALS = [
