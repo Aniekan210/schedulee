@@ -351,23 +351,23 @@ export default function BookingsOverviewPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="px-4">Customer</TableHead>
-                    <TableHead className="px-4">Contact</TableHead>
-                    <TableHead className="px-4">Date</TableHead>
-                    <TableHead className="px-4">Time</TableHead>
-                    <TableHead className="px-4 text-right">Actions</TableHead>
+                    <TableHead className="px-6">Customer</TableHead>
+                    <TableHead className="px-6">Contact</TableHead>
+                    <TableHead className="px-6">Date</TableHead>
+                    <TableHead className="px-6">Time</TableHead>
+                    <TableHead className="px-6 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {bookings.map((booking) => (
                     <TableRow key={booking.id}>
-                      <TableCell className="px-4">{booking.name}</TableCell>
-                      <TableCell className="px-4">{booking.phone_number}</TableCell>
-                      <TableCell className="px-4">
-                        {format(new Date(booking.date), "MMM dd, yyyy")}
+                      <TableCell className="px-6">{booking.name}</TableCell>
+                      <TableCell className="px-6">{booking.phone_number}</TableCell>
+                      <TableCell className="px-6">
+                        {format(new Date(`${booking.date}T00:00:00`), "MMM dd, yyyy")}
                       </TableCell>
-                      <TableCell className="px-4">{booking.time}</TableCell>
-                      <TableCell className="px-4 text-right">
+                      <TableCell className="px-6">{booking.time}</TableCell>
+                      <TableCell className="px-6 text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="sm">
