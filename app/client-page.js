@@ -8,10 +8,10 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 
 // Safe dynamic import for Lottie with error handling
 const Lottie = dynamic(
-    () => import('react-lottie')
-        .then(mod => mod.default)
-        .catch(() => null), // Return null if import fails
-    { ssr: false }
+  () => import('react-lottie')
+    .then(mod => mod.default)
+    .catch(() => null),
+  { ssr: false }
 )
 
 export default function ClientPage({ testimonials = [] }) {
@@ -20,9 +20,14 @@ export default function ClientPage({ testimonials = [] }) {
     const [navVisible, setNavVisible] = useState(true)
     const [animationError, setAnimationError] = useState(false)
     const [videoError, setVideoError] = useState(false)
-    const [currentTestimonials, setCurrentTestimonials] = useState(testimonials.slice(0, 3))
+    const [currentTestimonials, setCurrentTestimonials] = useState([])
     const [currentIndex, setCurrentIndex] = useState(0)
     const videoRef = useRef(null)
+
+    // Initialize testimonials
+    useEffect(() => {
+        setCurrentTestimonials(testimonials.slice(0, 3))
+    }, [testimonials])
 
     // Safe animation options with error handling
     const getAnimationOptions = (animationName) => {
@@ -43,7 +48,7 @@ export default function ClientPage({ testimonials = [] }) {
         }
     }
 
-    // Safe animation options - will be null if animations don't exist
+    // Memoize animation options to prevent re-renders
     const calendarOptions = getAnimationOptions('calendar')
     const customizationOptions = getAnimationOptions('customization')
     const noLoginOptions = getAnimationOptions('no-login')
@@ -52,15 +57,16 @@ export default function ClientPage({ testimonials = [] }) {
     // Handle scroll for navbar hide/show
     useEffect(() => {
         const handleScroll = () => {
-            if (window.scrollY > lastScrollY && window.scrollY > 100) {
+            const currentScrollY = window.scrollY
+            if (currentScrollY > lastScrollY && currentScrollY > 100) {
                 setNavVisible(false)
             } else {
                 setNavVisible(true)
             }
-            setLastScrollY(window.scrollY)
+            setLastScrollY(currentScrollY)
         }
 
-        window.addEventListener('scroll', handleScroll)
+        window.addEventListener('scroll', handleScroll, { passive: true })
         return () => window.removeEventListener('scroll', handleScroll)
     }, [lastScrollY])
 
