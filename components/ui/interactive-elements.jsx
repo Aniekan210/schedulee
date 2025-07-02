@@ -14,18 +14,27 @@ const Lottie = dynamic(
     .then(mod => mod.default)
     .catch(() => {
       console.error("Lottie animation library failed to load")
-      return () => <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-        <span className="text-gray-500">Animation player not available</span>
-      </div>
+      return () => null
     }),
   { ssr: false }
 )
 
-// Generic placeholder component - only one declaration
-export function Placeholder({ name = "content", className = "" }) {
+// Enhanced Placeholder component
+export function Placeholder({ name = "content", className = "", children }) {
   return (
-    <div className={`bg-gray-100 rounded-lg flex items-center justify-center ${className}`}>
-      <span className="text-gray-500">{name} placeholder</span>
+    <div className={`bg-gray-100 rounded-lg flex flex-col items-center justify-center p-4 ${className}`}>
+      <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        className="h-10 w-10 text-gray-400 mb-2" 
+        fill="none" 
+        viewBox="0 0 24 24" 
+        stroke="currentColor"
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      </svg>
+      <span className="text-gray-500 text-center">
+        {name || children || 'Placeholder content'}
+      </span>
     </div>
   )
 }
@@ -36,7 +45,6 @@ export function MobileMenu({ testimonials = [] }) {
   const [navVisible, setNavVisible] = useState(true)
   const [logoError, setLogoError] = useState(false)
 
-  // Handle scroll for navbar hide/show
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY
@@ -74,7 +82,6 @@ export function MobileMenu({ testimonials = [] }) {
           <span className="text-xl font-bold text-gray-900">Schedulee.app</span>
         </Link>
 
-        {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-6">
           <Link href="#features" className="text-gray-600 hover:text-blue-500 transition-colors font-medium">
             Features
@@ -92,7 +99,6 @@ export function MobileMenu({ testimonials = [] }) {
           </Link>
         </div>
 
-        {/* Mobile Menu Button */}
         <button
           className="md:hidden text-gray-600 focus:outline-none"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -108,7 +114,6 @@ export function MobileMenu({ testimonials = [] }) {
         </button>
       </div>
 
-      {/* Mobile Menu */}
       {isMenuOpen && (
         <div className="md:hidden bg-white py-4 px-6 shadow-lg">
           <div className="flex flex-col space-y-4">
@@ -152,24 +157,47 @@ export function MobileMenu({ testimonials = [] }) {
 export function TestimonialCarousel({ testimonials = [] }) {
   const [currentTestimonials, setCurrentTestimonials] = useState([])
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [loadingError, setLoadingError] = useState(false)
 
-  // Initialize with empty array if testimonials is undefined
-  const safeTestimonials = testimonials || []
-  
+  const safeTestimonials = Array.isArray(testimonials) ? testimonials : []
+
   useEffect(() => {
-    setCurrentTestimonials(safeTestimonials.slice(0, 3))
+    try {
+      setCurrentTestimonials(safeTestimonials.slice(0, 3))
+    } catch (e) {
+      console.error("Error loading testimonials:", e)
+      setLoadingError(true)
+    }
   }, [safeTestimonials])
 
   const nextTestimonials = () => {
-    const newIndex = (currentIndex + 1) % Math.max(1, (safeTestimonials.length - 2))
-    setCurrentIndex(newIndex)
-    setCurrentTestimonials(safeTestimonials.slice(newIndex, newIndex + 3))
+    try {
+      const newIndex = (currentIndex + 1) % Math.max(1, (safeTestimonials.length - 2))
+      setCurrentIndex(newIndex)
+      setCurrentTestimonials(safeTestimonials.slice(newIndex, newIndex + 3))
+    } catch (e) {
+      console.error("Error navigating testimonials:", e)
+      setLoadingError(true)
+    }
   }
 
   const prevTestimonials = () => {
-    const newIndex = (currentIndex - 1 + Math.max(1, (safeTestimonials.length - 2))) % Math.max(1, (safeTestimonials.length - 2))
-    setCurrentIndex(newIndex)
-    setCurrentTestimonials(safeTestimonials.slice(newIndex, newIndex + 3))
+    try {
+      const newIndex = (currentIndex - 1 + Math.max(1, (safeTestimonials.length - 2))) % Math.max(1, (safeTestimonials.length - 2))
+      setCurrentIndex(newIndex)
+      setCurrentTestimonials(safeTestimonials.slice(newIndex, newIndex + 3))
+    } catch (e) {
+      console.error("Error navigating testimonials:", e)
+      setLoadingError(true)
+    }
+  }
+
+  if (loadingError) {
+    return (
+      <Placeholder name="Testimonials" className="w-full h-64">
+        Failed to load testimonials
+      </Placeholder>
+    )
   }
 
   return (
@@ -252,83 +280,130 @@ export function TestimonialCarousel({ testimonials = [] }) {
   )
 }
 
-export function DemoVideo() {
+export function DemoVideo({ className = "" }) {
   const [videoError, setVideoError] = useState(false)
+  const [hasInteracted, setHasInteracted] = useState(false)
   const videoRef = useRef(null)
 
-  const handleDemoClick = () => {
-    const demoSection = document.getElementById('demo-video')
-    if (demoSection) {
-      demoSection.scrollIntoView({ behavior: 'smooth' })
-      const video = demoSection.querySelector('video')
-      if (video && !videoError) {
-        video.play().catch(e => {
-          console.error("Video play failed:", e)
-          setVideoError(true)
+  const handleVideoError = () => {
+    console.error("Video failed to load")
+    setVideoError(true)
+  }
+
+  const handleInteraction = () => {
+    setHasInteracted(true)
+    if (videoRef.current) {
+      videoRef.current.play().catch(e => {
+        console.error("Video play failed:", e)
+        setVideoError(true)
+      })
+    }
+  }
+
+  if (videoError) {
+    return (
+      <Placeholder 
+        name="Demo video" 
+        className={`aspect-video ${className}`}
+      >
+        Video unavailable
+      </Placeholder>
+    )
+  }
+
+  return (
+    <div 
+      className={`relative aspect-video bg-gray-200 rounded-xl overflow-hidden shadow-xl ${className}`}
+      onClick={handleInteraction}
+    >
+      <video
+        ref={videoRef}
+        className="w-full h-full object-cover"
+        controls={hasInteracted}
+        poster="/video-poster.jpg"
+        onError={handleVideoError}
+        playsInline
+        muted
+      >
+        <source src="/demo-video.mp4" type="video/mp4" />
+        <source src="/demo-video.webm" type="video/webm" />
+        Your browser does not support the video tag.
+      </video>
+      
+      {!hasInteracted && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/30 cursor-pointer">
+          <div className="bg-white/80 rounded-full p-4">
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              className="h-12 w-12 text-blue-600" 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export function LottieAnimation({ animationName, className = "" }) {
+  const [animationError, setAnimationError] = useState(false)
+  const [animationData, setAnimationData] = useState(null)
+
+  useEffect(() => {
+    try {
+      import(`@/public/animations/${animationName}.json`)
+        .then(data => setAnimationData(data.default))
+        .catch(() => {
+          console.error(`Animation "${animationName}" not found`)
+          setAnimationError(true)
         })
-      }
+    } catch (e) {
+      console.error(`Animation import error: ${e.message}`)
+      setAnimationError(true)
+    }
+  }, [animationName])
+
+  if (animationError || !animationData) {
+    return (
+      <Placeholder 
+        name={`Animation: ${animationName}`} 
+        className={`w-full h-48 ${className}`}
+      />
+    )
+  }
+
+  if (!Lottie) {
+    return (
+      <Placeholder 
+        name="Animation player loading..." 
+        className={`w-full h-48 ${className}`}
+      />
+    )
+  }
+
+  const options = {
+    loop: true,
+    autoplay: true,
+    animationData,
+    rendererSettings: {
+      preserveAspectRatio: 'xMidYMid slice'
     }
   }
 
   return (
-    <>
-      <Button
-        variant="outline"
-        className="px-6 py-5 md:px-8 md:py-6 text-lg border-2 hover:bg-gray-50"
-        onClick={handleDemoClick}
-        aria-label="Watch demo video"
-      >
-        Watch Demo
-      </Button>
-
-      <div id="demo-video" className="relative aspect-video bg-gray-200 rounded-xl overflow-hidden shadow-xl max-w-4xl mx-auto">
-        {videoError ? (
-          <Placeholder name="Demo video" className="w-full h-full" />
-        ) : (
-          <video
-            ref={videoRef}
-            className="w-full h-full object-cover"
-            controls
-            poster="/video-poster.jpg" // Add a fallback poster image
-            onError={() => setVideoError(true)}
-          >
-            <source src="/demo-video.mp4" type="video/mp4" />
-            <source src="/demo-video.webm" type="video/webm" />
-            <Placeholder name="Demo video" className="w-full h-full" />
-          </video>
-        )}
-      </div>
-    </>
+    <div className={`w-full h-full ${className}`}>
+      <Lottie 
+        options={options} 
+        height="100%" 
+        width="100%"
+        isStopped={false}
+        isPaused={false}
+      />
+    </div>
   )
-}
-
-export function LottieAnimation({ animationName }) {
-  const [animationError, setAnimationError] = useState(false)
-
-  const getAnimationOptions = () => {
-    try {
-      // Dynamic import for animation data with error handling
-      const animationData = require(`@/public/animations/${animationName}.json`)
-      return {
-        loop: true,
-        autoplay: true,
-        animationData,
-        rendererSettings: {
-          preserveAspectRatio: 'xMidYMid slice'
-        }
-      }
-    } catch (e) {
-      console.error(`Animation not found: ${animationName}`)
-      setAnimationError(true)
-      return null
-    }
-  }
-
-  const options = getAnimationOptions()
-
-  if (!Lottie || animationError || !options) {
-    return <Placeholder name={animationName} className="w-full h-48" />
-  }
-
-  return <Lottie options={options} height="100%" width="100%" />
 }
