@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import Link from "next/link"
 import Image from "next/image"
-import { CalendarDays, Clock, Share2, MessageSquare, Settings } from 'lucide-react'
+import { CalendarDays, Clock, Share2, MessageSquare, Settings, QuoteIcon  } from 'lucide-react'
 
 const Lottie = dynamic(
   () => import('react-lottie')
@@ -90,11 +90,11 @@ export function TestimonialCarousel({ testimonials = [] }) {
                   className="w-full flex-shrink-0 px-6 max-w-sm md:max-w-md mx-auto"
                   style={{ width: `${100 / safeTestimonials.length}%` }}
                 >
-                  <Card className="bg-white border border-gray-200 hover:border-indigo-300 transition-all shadow-sm hover:shadow-lg min-h-[320px] flex flex-col rounded-lg overflow-hidden">
+                  <Card className="bg-white border border-gray-200 hover:border-blue-500 transition-shadow shadow-sm hover:shadow-lg min-h-[320px] flex flex-col rounded-lg overflow-hidden">
                     <CardContent className="p-8 flex flex-col flex-grow">
                       <div className="flex flex-col items-center text-center h-full">
-                        {/* Bigger Avatar with subtle shadow */}
-                        <div className="relative w-24 h-24 rounded-full overflow-hidden mb-6 border-4 border-indigo-200 shadow-md">
+                        {/* Avatar with subtle shadow */}
+                        <div className="relative w-24 h-24 rounded-full overflow-hidden mb-6 shadow-sm">
                           <Image
                             src={testimonial.avatar}
                             alt={testimonial.author}
@@ -104,17 +104,18 @@ export function TestimonialCarousel({ testimonials = [] }) {
                           />
                         </div>
 
-                        {/* Quote box with background and padding */}
-                        <div className="flex-grow flex flex-col justify-center mb-6 px-4 py-3 bg-indigo-50 rounded-md shadow-inner">
-                          <p className="text-indigo-900 italic text-base md:text-lg leading-relaxed">
-                            “{testimonial.quote}”
+                        {/* Quote section with blue quote icon */}
+                        <div className="flex items-start gap-3 mb-6">
+                          <QuoteIcon className="w-6 h-6 text-blue-500 flex-shrink-0" />
+                          <p className="text-gray-700 italic text-base md:text-lg leading-relaxed">
+                            {testimonial.quote}
                           </p>
                         </div>
 
-                        {/* Author info with better spacing */}
+                        {/* Author info */}
                         <div>
-                          <p className="font-semibold text-indigo-700 text-lg">{testimonial.author}</p>
-                          <p className="text-sm text-indigo-400 uppercase tracking-wide mt-1">
+                          <p className="font-semibold text-blue-600">{testimonial.author}</p>
+                          <p className="text-sm text-blue-400 uppercase tracking-wide mt-1">
                             Verified User
                           </p>
                         </div>
@@ -122,6 +123,7 @@ export function TestimonialCarousel({ testimonials = [] }) {
                     </CardContent>
                   </Card>
                 </div>
+
 
 
               ))}
