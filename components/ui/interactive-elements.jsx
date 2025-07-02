@@ -381,3 +381,142 @@ export function LottieAnimation({ animationName, className = "", isActive = fals
     </div>
   )
 }
+
+export function MobileMenu() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [lastScrollY, setLastScrollY] = useState(0)
+  const [navVisible, setNavVisible] = useState(true)
+  const [logoError, setLogoError] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setNavVisible(false)
+      } else {
+        setNavVisible(true)
+      }
+      setLastScrollY(currentScrollY)
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [lastScrollY])
+
+  return (
+    <nav className={`fixed w-full bg-white/95 backdrop-blur-sm border-b border-gray-100 z-50 transition-all duration-300 ease-out ${navVisible ? 'translate-y-0' : '-translate-y-full'}`}>
+      <div className="container mx-auto px-4 sm:px-6 py-3 flex justify-between items-center">
+        <Link href="#" className="flex items-center group" aria-label="schedulee.app Home">
+          <div className="relative w-10 h-10 mr-3 transition-transform group-hover:scale-105">
+            {logoError ? (
+              <Placeholder name="Logo" className="w-10 h-10" />
+            ) : (
+              <Image
+                src="/logo.avif"
+                alt="schedulee.app Logo"
+                width={40}
+                height={40}
+                className="object-contain rounded-md"
+                priority
+                onError={() => setLogoError(true)}
+              />
+            )}
+          </div>
+          <span className="text-xl font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">Schedulee.app</span>
+        </Link>
+
+        <div className="hidden md:flex items-center gap-8">
+          <Link href="#features" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium flex items-center gap-1.5 group">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clipRule="evenodd" />
+            </svg>
+            Features
+          </Link>
+          <Link href="#how-it-works" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium flex items-center gap-1.5 group">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+            </svg>
+            How It Works
+          </Link>
+          <Link href="#testimonials" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium flex items-center gap-1.5 group">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9z" clipRule="evenodd" />
+            </svg>
+            Testimonials
+          </Link>
+          <Link href="/dashboard/bookings">
+            <Button className="bg-indigo-600 hover:bg-indigo-700 shadow-sm hover:shadow-indigo-400/20 transition-all group">
+              <span className="group-hover:scale-105 transition-transform">Get Started</span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="ml-1.5 h-4 w-4 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </Button>
+          </Link>
+        </div>
+
+        <button
+          className="md:hidden text-gray-600 focus:outline-none transition-transform hover:scale-110"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          aria-label="Toggle menu"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {isMenuOpen ? (
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            ) : (
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            )}
+          </svg>
+        </button>
+      </div>
+
+      {isMenuOpen && (
+        <div className="md:hidden bg-white/95 backdrop-blur-sm py-4 px-6 animate-in fade-in slide-in-from-top-4">
+          <div className="flex flex-col space-y-4">
+            <Link
+              href="#features"
+              className="text-gray-600 hover:text-indigo-600 transition-colors font-medium py-2 flex items-center gap-2"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clipRule="evenodd" />
+              </svg>
+              Features
+            </Link>
+            <Link
+              href="#how-it-works"
+              className="text-gray-600 hover:text-indigo-600 transition-colors font-medium py-2 flex items-center gap-2"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+              </svg>
+              How It Works
+            </Link>
+            <Link
+              href="#testimonials"
+              className="text-gray-600 hover:text-indigo-600 transition-colors font-medium py-2 flex items-center gap-2"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9z" clipRule="evenodd" />
+              </svg>
+              Testimonials
+            </Link>
+            <Link
+              href="/dashboard/bookings"
+              className="w-full mt-2"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <Button className="w-full bg-indigo-600 hover:bg-indigo-700 group">
+                <span className="group-hover:scale-105 transition-transform">Get Started</span>
+                <svg xmlns="http://www.w3.org/2000/svg" className="ml-1.5 h-4 w-4 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </Button>
+            </Link>
+          </div>
+        </div>
+      )}
+    </nav>
+  )
+}
