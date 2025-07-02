@@ -20,7 +20,7 @@ const Lottie = dynamic(
 
 export function Placeholder({ name = "content", className = "", children }) {
   return (
-    <div className={`bg-gray-100/50 rounded-lg flex flex-col items-center justify-center p-4 ${className}`}>
+    <div className={`bg-gray-100/20 rounded-lg flex flex-col items-center justify-center p-4 ${className}`}>
       <svg 
         xmlns="http://www.w3.org/2000/svg" 
         className="h-10 w-10 text-gray-400 mb-2" 
@@ -59,10 +59,10 @@ export function MobileMenu({ testimonials = [] }) {
   }, [lastScrollY])
 
   return (
-    <nav className={`fixed w-full bg-white/95 backdrop-blur-sm shadow-sm z-50 transition-all duration-300 ease-out ${navVisible ? 'translate-y-0' : '-translate-y-full'}`}>
+    <nav className={`fixed w-full bg-white/95 backdrop-blur-sm border-b border-gray-100 z-50 transition-all duration-300 ease-out ${navVisible ? 'translate-y-0' : '-translate-y-full'}`}>
       <div className="container mx-auto px-4 sm:px-6 py-3 flex justify-between items-center">
-        <Link href="#" className="flex items-center" aria-label="schedulee.app Home">
-          <div className="relative w-10 h-10 mr-2">
+        <Link href="#" className="flex items-center group" aria-label="schedulee.app Home">
+          <div className="relative w-10 h-10 mr-3 transition-transform group-hover:scale-105">
             {logoError ? (
               <Placeholder name="Logo" className="w-10 h-10" />
             ) : (
@@ -71,28 +71,40 @@ export function MobileMenu({ testimonials = [] }) {
                 alt="schedulee.app Logo"
                 width={40}
                 height={40}
-                className="object-contain"
+                className="object-contain rounded-md"
                 priority
                 onError={() => setLogoError(true)}
               />
             )}
           </div>
-          <span className="text-xl font-bold text-gray-900">Schedulee.app</span>
+          <span className="text-xl font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">Schedulee.app</span>
         </Link>
 
-        <div className="hidden md:flex items-center gap-6">
-          <Link href="#features" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">
+        <div className="hidden md:flex items-center gap-8">
+          <Link href="#features" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium flex items-center gap-1.5 group">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clipRule="evenodd" />
+            </svg>
             Features
           </Link>
-          <Link href="#how-it-works" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">
+          <Link href="#how-it-works" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium flex items-center gap-1.5 group">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+            </svg>
             How It Works
           </Link>
-          <Link href="#testimonials" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">
+          <Link href="#testimonials" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium flex items-center gap-1.5 group">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9z" clipRule="evenodd" />
+            </svg>
             Testimonials
           </Link>
           <Link href="/dashboard/bookings">
-            <Button className="bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 shadow-lg hover:shadow-indigo-500/30 transition-all">
-              Get Started
+            <Button className="bg-indigo-600 hover:bg-indigo-700 shadow-sm hover:shadow-indigo-400/20 transition-all group">
+              <span className="group-hover:scale-105 transition-transform">Get Started</span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="ml-1.5 h-4 w-4 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
             </Button>
           </Link>
         </div>
@@ -113,36 +125,48 @@ export function MobileMenu({ testimonials = [] }) {
       </div>
 
       {isMenuOpen && (
-        <div className="md:hidden bg-white/95 backdrop-blur-sm py-4 px-6 shadow-lg animate-in fade-in slide-in-from-top-4">
+        <div className="md:hidden bg-white/95 backdrop-blur-sm py-4 px-6 animate-in fade-in slide-in-from-top-4">
           <div className="flex flex-col space-y-4">
             <Link
               href="#features"
-              className="text-gray-600 hover:text-indigo-600 transition-colors font-medium py-2"
+              className="text-gray-600 hover:text-indigo-600 transition-colors font-medium py-2 flex items-center gap-2"
               onClick={() => setIsMenuOpen(false)}
             >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clipRule="evenodd" />
+              </svg>
               Features
             </Link>
             <Link
               href="#how-it-works"
-              className="text-gray-600 hover:text-indigo-600 transition-colors font-medium py-2"
+              className="text-gray-600 hover:text-indigo-600 transition-colors font-medium py-2 flex items-center gap-2"
               onClick={() => setIsMenuOpen(false)}
             >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+              </svg>
               How It Works
             </Link>
             <Link
               href="#testimonials"
-              className="text-gray-600 hover:text-indigo-600 transition-colors font-medium py-2"
+              className="text-gray-600 hover:text-indigo-600 transition-colors font-medium py-2 flex items-center gap-2"
               onClick={() => setIsMenuOpen(false)}
             >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9z" clipRule="evenodd" />
+              </svg>
               Testimonials
             </Link>
             <Link
               href="/dashboard/bookings"
-              className="w-full"
+              className="w-full mt-2"
               onClick={() => setIsMenuOpen(false)}
             >
-              <Button className="w-full bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600">
-                Get Started
+              <Button className="w-full bg-indigo-600 hover:bg-indigo-700 group">
+                <span className="group-hover:scale-105 transition-transform">Get Started</span>
+                <svg xmlns="http://www.w3.org/2000/svg" className="ml-1.5 h-4 w-4 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
               </Button>
             </Link>
           </div>
@@ -199,16 +223,16 @@ export function TestimonialCarousel({ testimonials = [] }) {
               {safeTestimonials.map((testimonial, index) => (
                 <div 
                   key={index} 
-                  className="w-full flex-shrink-0 px-4"
+                  className="w-full flex-shrink-0 px-2 sm:px-4"
                 >
-                  <Card className="bg-white border border-gray-200 hover:border-indigo-200 transition-all h-full">
+                  <Card className="bg-white border border-gray-100 hover:border-indigo-100 transition-all h-full group hover:shadow-sm">
                     <CardContent className="p-6">
                       <div className="flex items-center mb-4">
                         {[...Array(5)].map((_, i) => (
                           <svg
                             key={i}
                             xmlns="http://www.w3.org/2000/svg"
-                            className={`h-5 w-5 ${i < (testimonial?.stars || 0) ? 'text-amber-400' : 'text-gray-300'}`}
+                            className={`h-5 w-5 ${i < (testimonial?.stars || 0) ? 'text-amber-400 group-hover:text-amber-500' : 'text-gray-200 group-hover:text-gray-300'}`}
                             viewBox="0 0 20 20"
                             fill="currentColor"
                           >
@@ -216,14 +240,14 @@ export function TestimonialCarousel({ testimonials = [] }) {
                           </svg>
                         ))}
                       </div>
-                      <p className="text-gray-700 italic text-lg mb-6">"{testimonial?.quote || 'Great service!'}"</p>
+                      <p className="text-gray-700 italic text-lg mb-6 group-hover:text-gray-800 transition-colors">"{testimonial?.quote || 'Great service!'}"</p>
                       <div className="flex items-center">
-                        <div className="bg-indigo-100 rounded-full w-10 h-10 flex items-center justify-center text-indigo-600 font-bold mr-3">
+                        <div className="bg-indigo-100 rounded-full w-10 h-10 flex items-center justify-center text-indigo-600 font-bold mr-3 group-hover:bg-indigo-200 transition-colors">
                           {testimonial?.author?.charAt(0) || 'U'}
                         </div>
                         <div>
-                          <p className="font-semibold text-gray-900">{testimonial?.author || 'Happy Customer'}</p>
-                          <p className="text-sm text-gray-500">Verified User</p>
+                          <p className="font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">{testimonial?.author || 'Happy Customer'}</p>
+                          <p className="text-sm text-gray-500 group-hover:text-gray-600 transition-colors">Verified User</p>
                         </div>
                       </div>
                     </CardContent>
@@ -233,22 +257,32 @@ export function TestimonialCarousel({ testimonials = [] }) {
             </div>
 
             {safeTestimonials.length > 1 && (
-              <div className="flex justify-center mt-8 gap-4">
+              <div className="flex justify-center mt-8 gap-3">
                 <button
-                  className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all shadow-sm hover:shadow-md"
+                  className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all shadow-sm hover:shadow-md group"
                   onClick={prevTestimonial}
                   aria-label="Previous testimonial"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 md:h-6 md:w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-700 group-hover:text-indigo-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                   </svg>
                 </button>
+                <div className="flex items-center gap-1">
+                  {safeTestimonials.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setCurrentIndex(idx)}
+                      className={`w-2 h-2 rounded-full transition-all ${idx === currentIndex ? 'bg-indigo-600 w-3 h-3' : 'bg-gray-300'}`}
+                      aria-label={`Go to testimonial ${idx + 1}`}
+                    />
+                  ))}
+                </div>
                 <button
-                  className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all shadow-sm hover:shadow-md"
+                  className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all shadow-sm hover:shadow-md group"
                   onClick={nextTestimonial}
                   aria-label="Next testimonial"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 md:h-6 md:w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-700 group-hover:text-indigo-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </button>
@@ -258,14 +292,14 @@ export function TestimonialCarousel({ testimonials = [] }) {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[1, 2, 3].map((i) => (
-              <Card key={i} className="bg-white border border-gray-200 h-full">
+              <Card key={i} className="bg-white border border-gray-100 h-full group hover:shadow-sm">
                 <CardContent className="p-6">
                   <div className="flex items-center mb-4">
                     {[...Array(5)].map((_, i) => (
                       <svg
                         key={i}
                         xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 text-gray-300"
+                        className="h-5 w-5 text-gray-200 group-hover:text-gray-300"
                         viewBox="0 0 20 20"
                         fill="currentColor"
                       >
@@ -273,14 +307,14 @@ export function TestimonialCarousel({ testimonials = [] }) {
                       </svg>
                     ))}
                   </div>
-                  <p className="text-gray-700 italic text-lg mb-6">"This is a placeholder testimonial that would show real user feedback"</p>
+                  <p className="text-gray-700 italic text-lg mb-6 group-hover:text-gray-800 transition-colors">"This is a placeholder testimonial that would show real user feedback"</p>
                   <div className="flex items-center">
-                    <div className="bg-indigo-100 rounded-full w-10 h-10 flex items-center justify-center text-indigo-600 font-bold mr-3">
+                    <div className="bg-indigo-100 rounded-full w-10 h-10 flex items-center justify-center text-indigo-600 font-bold mr-3 group-hover:bg-indigo-200 transition-colors">
                       U
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900">Sample User</p>
-                      <p className="text-sm text-gray-500">Verified User</p>
+                      <p className="font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">Sample User</p>
+                      <p className="text-sm text-gray-500 group-hover:text-gray-600 transition-colors">Verified User</p>
                     </div>
                   </div>
                 </CardContent>
@@ -326,7 +360,7 @@ export function DemoVideo({ className = "" }) {
 
   return (
     <div 
-      className={`relative aspect-video bg-gray-200 rounded-xl overflow-hidden shadow-xl transition-all hover:shadow-2xl ${className}`}
+      className={`relative aspect-video bg-gray-100 rounded-xl overflow-hidden shadow-lg transition-all hover:shadow-xl ${className}`}
       onClick={handleInteraction}
     >
       <video
@@ -344,8 +378,8 @@ export function DemoVideo({ className = "" }) {
       </video>
       
       {!hasInteracted && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/20 cursor-pointer group">
-          <div className="bg-white rounded-full p-3 group-hover:scale-110 transition-transform">
+        <div className="absolute inset-0 flex items-center justify-center bg-black/10 cursor-pointer group">
+          <div className="bg-white/90 rounded-full p-3 group-hover:scale-110 transition-transform shadow-lg">
             <svg 
               xmlns="http://www.w3.org/2000/svg" 
               className="h-8 w-8 text-indigo-600" 

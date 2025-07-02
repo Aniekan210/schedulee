@@ -54,32 +54,35 @@ export default function Home() {
 
       {/* Hero Section */}
       <section className="pt-24 pb-12 md:pt-32 md:pb-20 px-4 sm:px-6">
-        <div className="container mx-auto flex flex-col md:flex-row items-center gap-12">
-          <div className="md:w-1/2 text-center md:text-left space-y-6">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
-              Effortless Scheduling <br />
-              <span className="bg-gradient-to-r from-indigo-600 to-indigo-500 bg-clip-text text-transparent">
-                with Schedulee.app
-              </span>
-            </h1>
-            <p className="text-lg md:text-xl text-gray-600 max-w-lg mx-auto md:mx-0">
-              Beautiful booking pages that match your brand. Clients book in seconds - no accounts needed.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 mb-4 justify-center md:justify-start">
-              <Link href="/dashboard/bookings" aria-label="Start free trial">
-                <Button className="bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 px-6 py-5 md:px-8 md:py-6 text-lg shadow-lg hover:shadow-indigo-500/30 transition-all">
-                  Start 14-Day Free Trial
-                </Button>
-              </Link>
-              <Button variant="outline" className="px-6 py-5 md:px-8 md:py-6 text-lg border-gray-300 hover:bg-gray-50">
-                Watch Demo
-              </Button>
+        <div className="container mx-auto max-w-6xl">
+          <div className="flex flex-col lg:flex-row items-center gap-12">
+            <div className="lg:w-1/2 text-center lg:text-left space-y-8">
+              <div>
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
+                  Effortless Scheduling <br />
+                  <span className="text-indigo-600">with Schedulee.app</span>
+                </h1>
+                <p className="text-lg md:text-xl text-gray-600 mt-6 max-w-lg mx-auto lg:mx-0">
+                  Beautiful booking pages that match your brand. Clients book in seconds - no accounts needed.
+                </p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                <Link href="/dashboard/bookings" aria-label="Start free trial">
+                  <Button className="bg-indigo-600 hover:bg-indigo-700 px-8 py-6 text-lg shadow-sm hover:shadow-md transition-all group">
+                    <span className="group-hover:scale-105 transition-transform">Start 14-Day Free Trial</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </Button>
+                </Link>
+              </div>
+
+              <p className="text-gray-500 font-medium">Only $8.99 CAD/month after trial</p>
             </div>
-            <p className="text-gray-500 font-medium">Only $8.99 CAD/month after trial</p>
-          </div>
-          <div className="md:w-1/2 mt-8 md:mt-0">
-            <div className="relative aspect-video rounded-2xl overflow-hidden shadow-xl border border-gray-200 hover:shadow-2xl transition-all">
-              <DemoVideo className="w-full h-full" />
+
+            <div className="lg:w-1/2 mt-8 lg:mt-0">
+              <DemoVideo className="w-full max-w-2xl mx-auto" />
             </div>
           </div>
         </div>
@@ -87,43 +90,46 @@ export default function Home() {
 
       {/* Features Section */}
       <section id="features" className="py-12 md:py-20 bg-gray-50">
-        <div className="container mx-auto px-4 sm:px-6">
-          <div className="text-center max-w-3xl mx-auto mb-12 md:mb-16">
+        <div className="container mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="text-center max-w-3xl mx-auto mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Everything You Need in One Place</h2>
             <p className="text-lg md:text-xl text-gray-600">
               Schedulee.app gives you all the tools without the complexity
             </p>
           </div>
+
           <div className="grid md:grid-cols-3 gap-8">
-            <Card className="hover:shadow-lg transition-all hover:-translate-y-1 h-full">
-              <CardHeader>
-                <div className="w-full h-48 mb-4">
+            <Card className="border border-gray-100 hover:shadow-sm transition-all group">
+              <CardHeader className="items-center text-center">
+                <div className="w-full h-48 mb-6">
                   <LottieAnimation animationName="calendar" />
                 </div>
-                <CardTitle className="text-xl">Smart Availability</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-xl group-hover:text-indigo-600 transition-colors">Smart Availability</CardTitle>
+                <CardDescription className="group-hover:text-gray-700 transition-colors">
                   Set your working hours and time off. We handle the rest automatically.
                 </CardDescription>
               </CardHeader>
             </Card>
-            <Card className="hover:shadow-lg transition-all hover:-translate-y-1 h-full">
-              <CardHeader>
-                <div className="w-full h-48 mb-4">
+
+            <Card className="border border-gray-100 hover:shadow-sm transition-all group">
+              <CardHeader className="items-center text-center">
+                <div className="w-full h-48 mb-6">
                   <LottieAnimation animationName="customization" />
                 </div>
-                <CardTitle className="text-xl">Brand Customization</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-xl group-hover:text-indigo-600 transition-colors">Brand Customization</CardTitle>
+                <CardDescription className="group-hover:text-gray-700 transition-colors">
                   Customize your booking page with your branding in minutes.
                 </CardDescription>
               </CardHeader>
             </Card>
-            <Card className="hover:shadow-lg transition-all hover:-translate-y-1 h-full">
-              <CardHeader>
-                <div className="w-full h-48 mb-4">
+
+            <Card className="border border-gray-100 hover:shadow-sm transition-all group">
+              <CardHeader className="items-center text-center">
+                <div className="w-full h-48 mb-6">
                   <LottieAnimation animationName="no-login" />
                 </div>
-                <CardTitle className="text-xl">No Login Required</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-xl group-hover:text-indigo-600 transition-colors">No Login Required</CardTitle>
+                <CardDescription className="group-hover:text-gray-700 transition-colors">
                   Clients book with just name and phone number - no accounts needed.
                 </CardDescription>
               </CardHeader>
@@ -134,54 +140,58 @@ export default function Home() {
 
       {/* How It Works */}
       <section id="how-it-works" className="py-12 md:py-20">
-        <div className="container mx-auto px-4 sm:px-6">
-          <div className="text-center max-w-3xl mx-auto mb-12 md:mb-16">
+        <div className="container mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="text-center max-w-3xl mx-auto mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">How Schedulee.app Works</h2>
             <p className="text-lg md:text-xl text-gray-600">
               Get set up and start accepting bookings in minutes
             </p>
           </div>
+
           <div className="flex flex-col lg:flex-row gap-12 items-center">
-            <div className="lg:w-1/2">
-              <div className="relative aspect-video rounded-xl overflow-hidden shadow-lg">
-                <LottieAnimation animationName="setup" />
-              </div>
-            </div>
-            <div className="lg:w-1/2">
+            <div className="lg:w-1/2 order-2 lg:order-1">
               <div className="space-y-8">
-                <div className="flex gap-6">
-                  <div className="bg-indigo-100 text-indigo-600 rounded-full w-10 h-10 flex items-center justify-center flex-shrink-0 text-lg font-bold">
+                <div className="flex gap-6 group">
+                  <div className="bg-indigo-100 text-indigo-600 rounded-full w-12 h-12 flex items-center justify-center flex-shrink-0 text-lg font-bold group-hover:bg-indigo-200 transition-colors">
                     1
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold mb-3">Customize Your Booking Page</h3>
-                    <p className="text-gray-600">
+                    <h3 className="text-xl font-semibold mb-3 group-hover:text-indigo-600 transition-colors">Customize Your Booking Page</h3>
+                    <p className="text-gray-600 group-hover:text-gray-700 transition-colors">
                       Match your brand colors and add your services in just a few clicks.
                     </p>
                   </div>
                 </div>
-                <div className="flex gap-6">
-                  <div className="bg-indigo-100 text-indigo-600 rounded-full w-10 h-10 flex items-center justify-center flex-shrink-0 text-lg font-bold">
+
+                <div className="flex gap-6 group">
+                  <div className="bg-indigo-100 text-indigo-600 rounded-full w-12 h-12 flex items-center justify-center flex-shrink-0 text-lg font-bold group-hover:bg-indigo-200 transition-colors">
                     2
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold mb-3">Set Your Availability</h3>
-                    <p className="text-gray-600">
+                    <h3 className="text-xl font-semibold mb-3 group-hover:text-indigo-600 transition-colors">Set Your Availability</h3>
+                    <p className="text-gray-600 group-hover:text-gray-700 transition-colors">
                       Define your working hours and block off personal time as needed.
                     </p>
                   </div>
                 </div>
-                <div className="flex gap-6">
-                  <div className="bg-indigo-100 text-indigo-600 rounded-full w-10 h-10 flex items-center justify-center flex-shrink-0 text-lg font-bold">
+
+                <div className="flex gap-6 group">
+                  <div className="bg-indigo-100 text-indigo-600 rounded-full w-12 h-12 flex items-center justify-center flex-shrink-0 text-lg font-bold group-hover:bg-indigo-200 transition-colors">
                     3
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold mb-3">Share Your Link</h3>
-                    <p className="text-gray-600">
+                    <h3 className="text-xl font-semibold mb-3 group-hover:text-indigo-600 transition-colors">Share Your Link</h3>
+                    <p className="text-gray-600 group-hover:text-gray-700 transition-colors">
                       Start accepting bookings immediately by sharing your unique page.
                     </p>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            <div className="lg:w-1/2 order-1 lg:order-2">
+              <div className="relative aspect-video rounded-xl overflow-hidden shadow-lg">
+                <LottieAnimation animationName="setup" />
               </div>
             </div>
           </div>
@@ -190,57 +200,61 @@ export default function Home() {
 
       {/* Testimonials */}
       <section id="testimonials" className="py-12 md:py-20 bg-indigo-50">
-        <div className="container mx-auto px-4 sm:px-6">
-          <div className="text-center max-w-3xl mx-auto mb-12">
+        <div className="container mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="text-center max-w-3xl mx-auto mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Trusted by Professionals Worldwide</h2>
             <p className="text-lg md:text-xl text-gray-600">
               Join thousands who have simplified their scheduling
             </p>
           </div>
 
-          <TestimonialCarousel testimonials={testimonials} />
+          <div className="max-w-4xl mx-auto">
+            <TestimonialCarousel testimonials={testimonials} />
+          </div>
         </div>
       </section>
 
       {/* CTA Section */}
       <section className="py-12 md:py-20 px-4 sm:px-6">
-        <div className="container mx-auto">
-          <div className="bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-2xl p-8 md:p-12 text-center text-white shadow-xl">
-            <h2 className="text-2xl md:text-3xl font-bold mb-6">Ready to Transform Your Scheduling?</h2>
-            <p className="text-lg md:text-xl mb-8 max-w-2xl mx-auto">
-              Join thousands of professionals who save hours every week with Schedulee.app
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Link href="/dashboard/bookings" aria-label="Start free trial">
-                <Button className="bg-white text-indigo-600 hover:bg-gray-100 px-6 py-5 md:px-8 md:py-6 text-lg shadow-lg hover:shadow-white/30 transition-all">
-                  Start 14-Day Free Trial
-                </Button>
-              </Link>
-              <Button variant="outline" className="px-6 py-5 md:px-8 md:py-6 text-lg border-white text-white hover:bg-white/10">
-                Watch Demo
-              </Button>
+        <div className="container mx-auto max-w-4xl">
+          <div className="bg-indigo-600 rounded-2xl p-8 md:p-12 text-center text-white shadow-xl">
+            <div className="max-w-2xl mx-auto">
+              <h2 className="text-2xl md:text-3xl font-bold mb-6">Ready to Transform Your Scheduling?</h2>
+              <p className="text-lg md:text-xl mb-8">
+                Join thousands of professionals who save hours every week with Schedulee.app
+              </p>
+              <div className="flex justify-center">
+                <Link href="/dashboard/bookings" aria-label="Start free trial">
+                  <Button className="bg-white text-indigo-600 hover:bg-gray-100 px-8 py-6 text-lg shadow-sm hover:shadow-md transition-all group">
+                    <span className="group-hover:scale-105 transition-transform">Start 14-Day Free Trial</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </Button>
+                </Link>
+              </div>
+              <p className="mt-4 text-indigo-100 text-sm md:text-base">Only $8.99 CAD/month after trial. Cancel anytime.</p>
             </div>
-            <p className="mt-4 text-indigo-100 text-sm md:text-base">Only $8.99 CAD/month after trial. Cancel anytime.</p>
           </div>
         </div>
       </section>
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-12">
-        <div className="container mx-auto px-4 sm:px-6">
+        <div className="container mx-auto max-w-6xl px-4 sm:px-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-8">
             <div className="flex flex-col items-center md:items-start">
-              <Link href="#" className="flex items-center mb-4" aria-label="Schedulee.app Home">
-                <div className="relative w-10 h-10 mr-2">
+              <Link href="#" className="flex items-center group mb-4" aria-label="Schedulee.app Home">
+                <div className="relative w-10 h-10 mr-3 transition-transform group-hover:scale-105">
                   <Image
                     src="/logo.avif"
                     alt="Schedulee.app Logo"
                     width={40}
                     height={40}
-                    className="object-contain"
+                    className="object-contain rounded-md"
                   />
                 </div>
-                <span className="text-xl font-bold">Schedulee.app</span>
+                <span className="text-xl font-bold group-hover:text-indigo-400 transition-colors">Schedulee.app</span>
               </Link>
               <p className="text-gray-400 text-center md:text-left">
                 The simplest way to manage appointments.
@@ -248,14 +262,24 @@ export default function Home() {
             </div>
 
             <div className="flex flex-col items-center md:items-end gap-4">
-              <div className="flex gap-4 md:gap-6 flex-wrap justify-center">
-                <Link href="#" className="text-gray-400 hover:text-white transition-colors text-sm md:text-base">
+              <div className="flex gap-6 flex-wrap justify-center">
+                <Link href="#" className="text-gray-400 hover:text-white transition-colors flex items-center gap-1.5 group">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9z" clipRule="evenodd" />
+                  </svg>
                   Terms
                 </Link>
-                <Link href="#" className="text-gray-400 hover:text-white transition-colors text-sm md:text-base">
+                <Link href="#" className="text-gray-400 hover:text-white transition-colors flex items-center gap-1.5 group">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                  </svg>
                   Privacy
                 </Link>
-                <a href="mailto:support@schedulee.app" className="text-gray-400 hover:text-white transition-colors text-sm md:text-base">
+                <a href="mailto:support@schedulee.app" className="text-gray-400 hover:text-white transition-colors flex items-center gap-1.5 group">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                  </svg>
                   Support
                 </a>
               </div>
