@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import Link from "next/link"
 import Image from "next/image"
-import { CalendarDays, Clock, Share2 } from 'lucide-react'
+import { CalendarDays, Clock, Share2, MessageSquare, Settings } from 'lucide-react'
 
 const Lottie = dynamic(
   () => import('react-lottie')
@@ -85,9 +85,9 @@ export function TestimonialCarousel({ testimonials = [] }) {
               {safeTestimonials.map((testimonial, index) => (
                 <div 
                   key={index} 
-                  className="w-full flex-shrink-0 px-4"
+                  className="w-full flex-shrink-0 px-4" // Keep some side padding
                 >
-                  <Card className="bg-white border border-gray-100 hover:border-indigo-100 transition-all h-full group hover:shadow-sm min-h-[300px] flex flex-col">
+                  <Card className="bg-white border border-gray-100 hover:border-indigo-100 transition-all h-full group hover:shadow-sm min-h-[280px] flex flex-col max-w-md mx-auto"> {/* Added max-w-md and mx-auto */}
                     <CardContent className="p-6 flex flex-col flex-grow">
                       <div className="flex flex-col items-center text-center h-full">
                         <div className="relative w-20 h-20 rounded-full overflow-hidden mb-4 border-2 border-indigo-100">
@@ -100,7 +100,7 @@ export function TestimonialCarousel({ testimonials = [] }) {
                           />
                         </div>
                         <div className="flex-grow flex flex-col justify-center">
-                          <p className="text-gray-700 italic text-lg mb-6 group-hover:text-gray-800 transition-colors line-clamp-4">
+                          <p className="text-gray-700 italic text-lg mb-6 group-hover:text-gray-800 transition-colors">
                             "{testimonial.quote}"
                           </p>
                         </div>
@@ -120,13 +120,13 @@ export function TestimonialCarousel({ testimonials = [] }) {
             </div>
 
             {safeTestimonials.length > 1 && (
-              <div className="flex justify-center mt-8 gap-3">
+              <div className="flex justify-center mt-6 gap-3">
                 <button
-                  className="w-12 h-12 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all shadow-sm hover:shadow-md group"
+                  className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all shadow-sm hover:shadow-md group"
                   onClick={prevTestimonial}
                   aria-label="Previous testimonial"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-700 group-hover:text-indigo-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-700 group-hover:text-indigo-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                   </svg>
                 </button>
@@ -135,17 +135,17 @@ export function TestimonialCarousel({ testimonials = [] }) {
                     <button
                       key={idx}
                       onClick={() => setCurrentIndex(idx)}
-                      className={`w-3 h-3 rounded-full transition-all ${idx === currentIndex ? 'bg-indigo-600' : 'bg-gray-300'}`}
+                      className={`w-2.5 h-2.5 rounded-full transition-all ${idx === currentIndex ? 'bg-indigo-600' : 'bg-gray-300'}`}
                       aria-label={`Go to testimonial ${idx + 1}`}
                     />
                   ))}
                 </div>
                 <button
-                  className="w-12 h-12 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all shadow-sm hover:shadow-md group"
+                  className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all shadow-sm hover:shadow-md group"
                   onClick={nextTestimonial}
                   aria-label="Next testimonial"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-700 group-hover:text-indigo-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-700 group-hover:text-indigo-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </button>
@@ -155,28 +155,28 @@ export function TestimonialCarousel({ testimonials = [] }) {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[1, 2, 3].map((i) => (
-              <Card key={i} className="bg-white border border-gray-100 h-full group hover:shadow-sm min-h-[300px] flex flex-col">
-                <CardContent className="p-6 flex flex-col flex-grow">
+              <Card key={i} className="bg-white border border-gray-100 h-full group hover:shadow-sm min-h-[250px] flex flex-col">
+                <CardContent className="p-4 flex flex-col flex-grow">
                   <div className="flex flex-col items-center text-center h-full">
-                    <div className="relative w-20 h-20 rounded-full overflow-hidden mb-4 border-2 border-indigo-100">
+                    <div className="relative w-16 h-16 rounded-full overflow-hidden mb-3 border-2 border-indigo-100">
                       <Image
                         src={`https://randomuser.me/api/portraits/thumb/${i % 2 === 0 ? 'women' : 'men'}/${i * 10}.jpg`}
                         alt="User"
-                        width={80}
-                        height={80}
+                        width={64}
+                        height={64}
                         className="object-cover w-full h-full"
                       />
                     </div>
                     <div className="flex-grow flex flex-col justify-center">
-                      <p className="text-gray-700 italic text-lg mb-6 group-hover:text-gray-800 transition-colors line-clamp-4">
+                      <p className="text-gray-700 italic text-base mb-4 group-hover:text-gray-800 transition-colors line-clamp-4">
                         "This is a placeholder testimonial that would show real user feedback"
                       </p>
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">
+                      <p className="font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors text-sm">
                         Sample User
                       </p>
-                      <p className="text-sm text-gray-500 group-hover:text-gray-600 transition-colors">
+                      <p className="text-xs text-gray-500 group-hover:text-gray-600 transition-colors">
                         Verified User
                       </p>
                     </div>
@@ -427,21 +427,15 @@ export function MobileMenu() {
 
         <div className="hidden md:flex items-center gap-8">
           <Link href="#features" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium flex items-center gap-1.5 group">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clipRule="evenodd" />
-            </svg>
+            <Settings className="h-5 w-5 text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity" />
             Features
           </Link>
           <Link href="#how-it-works" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium flex items-center gap-1.5 group">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
-            </svg>
+            <CalendarDays className="h-5 w-5 text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity" />
             How It Works
           </Link>
           <Link href="#testimonials" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium flex items-center gap-1.5 group">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9z" clipRule="evenodd" />
-            </svg>
+            <MessageSquare className="h-5 w-5 text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity" />
             Testimonials
           </Link>
           <Link href="/dashboard/bookings">
@@ -477,9 +471,7 @@ export function MobileMenu() {
               className="text-gray-600 hover:text-indigo-600 transition-colors font-medium py-2 flex items-center gap-2"
               onClick={() => setIsMenuOpen(false)}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clipRule="evenodd" />
-              </svg>
+              <Settings className="h-5 w-5 text-indigo-400" />
               Features
             </Link>
             <Link
@@ -487,9 +479,7 @@ export function MobileMenu() {
               className="text-gray-600 hover:text-indigo-600 transition-colors font-medium py-2 flex items-center gap-2"
               onClick={() => setIsMenuOpen(false)}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
-              </svg>
+              <CalendarDays className="h-5 w-5 text-indigo-400" />
               How It Works
             </Link>
             <Link
@@ -497,9 +487,7 @@ export function MobileMenu() {
               className="text-gray-600 hover:text-indigo-600 transition-colors font-medium py-2 flex items-center gap-2"
               onClick={() => setIsMenuOpen(false)}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9z" clipRule="evenodd" />
-              </svg>
+              <MessageSquare className="h-5 w-5 text-indigo-400" />
               Testimonials
             </Link>
             <Link

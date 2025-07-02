@@ -68,14 +68,14 @@ export default function Home() {
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <Link href="/dashboard/bookings" aria-label="Start free trial">
-                  <Button className="bg-indigo-600 hover:bg-indigo-700 px-8 py-6 text-lg shadow-sm hover:shadow-md transition-all group">
+                  <Button className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-4 text-base sm:text-lg shadow-sm hover:shadow-md transition-all group w-full sm:w-auto">
                     <span className="group-hover:scale-105 transition-transform">Start 14-Day Free Trial</span>
                     <svg xmlns="http://www.w3.org/2000/svg" className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
                     </svg>
                   </Button>
                 </Link>
-                <Button variant="outline" className="px-8 py-6 text-lg border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all">
+                <Button variant="outline" className="px-6 py-4 text-base sm:text-lg border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all w-full sm:w-auto">
                   Learn More
                 </Button>
               </div>
@@ -179,14 +179,14 @@ export default function Home() {
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-4">
                 <Link href="/dashboard/bookings" aria-label="Start free trial">
-                  <Button className="bg-indigo-600 hover:bg-indigo-700 px-8 py-6 text-lg shadow-sm hover:shadow-md transition-all group">
+                  <Button className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-4 text-base sm:text-lg shadow-sm hover:shadow-md transition-all group w-full sm:w-auto">
                     <span className="group-hover:scale-105 transition-transform">Start 14-Day Free Trial</span>
                     <svg xmlns="http://www.w3.org/2000/svg" className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
                     </svg>
                   </Button>
                 </Link>
-                <Button variant="outline" className="px-8 py-6 text-lg border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all">
+                <Button variant="outline" className="px-6 py-4 text-base sm:text-lg border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all w-full sm:w-auto">
                   Learn More
                 </Button>
               </div>

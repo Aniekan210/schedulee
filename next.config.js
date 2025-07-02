@@ -4,10 +4,10 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "drive.google.com",
+        hostname: "randomuser.me",
         // Optionally, you can add these:
         // port: '',
-        // pathname: '/**',
+         pathname: '/api/portraits/thumb/**',
       },
     ],
   },
