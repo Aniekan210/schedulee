@@ -85,7 +85,9 @@ export function TestimonialCarousel({ testimonials = [] }) {
               style={{ width: `${safeTestimonials.length * 100}%` }}
             >
               {safeTestimonials.map((testimonial, index) => (
-                <div key={index} className="flex">
+                <div key={index} className="w-full flex-shrink-0 px-4"
+                  style={{ width: ${100 / safeTestimonials.length}%}}
+                >
                   <Card className="bg-white border border-gray-200 hover:border-blue-500 transition-shadow shadow-sm hover:shadow-lg min-h-[320px] flex flex-col rounded-lg overflow-hidden w-full">
                     <CardContent className="p-8 flex flex-col flex-grow">
                       <div className="flex flex-col items-center text-center h-full">
