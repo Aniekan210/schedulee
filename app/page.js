@@ -52,17 +52,22 @@ export default function Home() {
       <MobileMenu />
 
       {/* Hero Section */}
-      <section className="pt-24 pb-12 md:pt-32 md:pb-20 px-4 sm:px-6">
-        <div className="container mx-auto max-w-6xl">
+      <section className="pt-24 pb-12 md:pt-32 md:pb-20 px-4 sm:px-6 relative overflow-hidden">
+        <div className="absolute inset-0 -z-10">
+          <DemoVideo className="w-full h-full" />
+          <div className="absolute inset-0 bg-black/10"></div>
+        </div>
+        
+        <div className="container mx-auto max-w-6xl relative z-10">
           <div className="flex flex-col lg:flex-row items-center gap-12">
-            <div className="lg:w-1/2 text-center lg:text-left space-y-8">
+            <div className="lg:w-1/2 text-center lg:text-left space-y-8 bg-white/90 backdrop-blur-sm p-8 rounded-xl shadow-lg">
               <div>
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-[1.2] tracking-[-0.02em]">
-                  Effortless Scheduling <br />
-                  <span className="text-gray-900">with Schedulee.app</span>
+                  Booking Made Beautiful <br />
+                  <span className="text-indigo-600">Without the Hassle</span>
                 </h1>
                 <p className="text-lg md:text-xl text-gray-600 mt-6 max-w-lg mx-auto lg:mx-0 leading-[1.5]">
-                  Beautiful booking pages that match your brand. Clients book in seconds - no accounts needed.
+                  Professional scheduling that works for you and your clients. No accounts, no complexity.
                 </p>
               </div>
               
@@ -81,10 +86,6 @@ export default function Home() {
               </div>
               
               <p className="text-gray-500 font-medium">Only $8.99 CAD/month after trial</p>
-            </div>
-            
-            <div className="lg:w-1/2 mt-8 lg:mt-0">
-              <DemoVideo className="hidden md:block w-full max-w-2xl mx-auto" />
             </div>
           </div>
         </div>

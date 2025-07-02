@@ -36,7 +36,6 @@ export function Placeholder({ name = "content", className = "", children }) {
     </div>
   )
 }
-
 export function MobileMenu() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [lastScrollY, setLastScrollY] = useState(0)
@@ -225,10 +224,10 @@ export function TestimonialCarousel({ testimonials = [] }) {
                   key={index} 
                   className="w-full flex-shrink-0 px-4"
                 >
-                  <Card className="bg-white border border-gray-100 hover:border-indigo-100 transition-all h-full group hover:shadow-sm">
-                    <CardContent className="p-8">
-                      <div className="flex flex-col items-center text-center">
-                        <div className="relative w-16 h-16 rounded-full overflow-hidden mb-6 border-2 border-indigo-100">
+                  <Card className="bg-white border border-gray-100 hover:border-indigo-100 transition-all h-full group hover:shadow-sm max-h-[400px]">
+                    <CardContent className="p-6">
+                      <div className="flex flex-col items-center text-center h-full">
+                        <div className="relative w-16 h-16 rounded-full overflow-hidden mb-4 border-2 border-indigo-100">
                           <Image
                             src={testimonial.avatar}
                             alt={testimonial.author}
@@ -237,7 +236,7 @@ export function TestimonialCarousel({ testimonials = [] }) {
                             className="object-cover"
                           />
                         </div>
-                        <p className="text-gray-700 italic text-lg mb-6 group-hover:text-gray-800 transition-colors">
+                        <p className="text-gray-700 italic mb-4 group-hover:text-gray-800 transition-colors flex-grow">
                           "{testimonial.quote}"
                         </p>
                         <div>
@@ -256,7 +255,7 @@ export function TestimonialCarousel({ testimonials = [] }) {
             </div>
 
             {safeTestimonials.length > 1 && (
-              <div className="flex justify-center mt-8 gap-3">
+              <div className="flex justify-center mt-6 gap-3">
                 <button
                   className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all shadow-sm hover:shadow-md group"
                   onClick={prevTestimonial}
@@ -291,10 +290,10 @@ export function TestimonialCarousel({ testimonials = [] }) {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[1, 2, 3].map((i) => (
-              <Card key={i} className="bg-white border border-gray-100 h-full group hover:shadow-sm">
-                <CardContent className="p-8">
-                  <div className="flex flex-col items-center text-center">
-                    <div className="relative w-16 h-16 rounded-full overflow-hidden mb-6 border-2 border-indigo-100">
+              <Card key={i} className="bg-white border border-gray-100 h-full group hover:shadow-sm max-h-[400px]">
+                <CardContent className="p-6">
+                  <div className="flex flex-col items-center text-center h-full">
+                    <div className="relative w-16 h-16 rounded-full overflow-hidden mb-4 border-2 border-indigo-100">
                       <Image
                         src={`https://randomuser.me/api/portraits/thumb/${i % 2 === 0 ? 'women' : 'men'}/${i * 10}.jpg`}
                         alt="User"
@@ -303,7 +302,7 @@ export function TestimonialCarousel({ testimonials = [] }) {
                         className="object-cover"
                       />
                     </div>
-                    <p className="text-gray-700 italic text-lg mb-6 group-hover:text-gray-800 transition-colors">
+                    <p className="text-gray-700 italic mb-4 group-hover:text-gray-800 transition-colors flex-grow">
                       "This is a placeholder testimonial that would show real user feedback"
                     </p>
                     <div>
@@ -327,22 +326,24 @@ export function TestimonialCarousel({ testimonials = [] }) {
 
 export function DemoVideo({ className = "" }) {
   const [videoError, setVideoError] = useState(false)
-  const [hasInteracted, setHasInteracted] = useState(false)
   const videoRef = useRef(null)
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.play().catch(e => {
+        console.error("Autoplay failed, trying muted:", e)
+        videoRef.current.muted = true
+        videoRef.current.play().catch(e => {
+          console.error("Muted autoplay failed:", e)
+          setVideoError(true)
+        })
+      })
+    }
+  }, [])
 
   const handleVideoError = () => {
     console.error("Video failed to load")
     setVideoError(true)
-  }
-
-  const handleInteraction = () => {
-    setHasInteracted(true)
-    if (videoRef.current) {
-      videoRef.current.play().catch(e => {
-        console.error("Video play failed:", e)
-        setVideoError(true)
-      })
-    }
   }
 
   if (videoError) {
@@ -357,40 +358,20 @@ export function DemoVideo({ className = "" }) {
   }
 
   return (
-    <div 
-      className={`relative aspect-video bg-gray-100 rounded-xl overflow-hidden shadow-lg transition-all hover:shadow-xl ${className}`}
-      onClick={handleInteraction}
-    >
+    <div className={`relative w-full h-full ${className}`}>
       <video
         ref={videoRef}
-        className="w-full h-full object-cover"
-        controls={hasInteracted}
-        poster="/video-poster.jpg"
-        onError={handleVideoError}
+        className="w-full h-full object-cover rounded-none"
         playsInline
+        loop
         muted
+        autoPlay
+        onError={handleVideoError}
       >
         <source src="/demo-video.mp4" type="video/mp4" />
         <source src="/demo-video.webm" type="video/webm" />
         Your browser does not support the video tag.
       </video>
-      
-      {!hasInteracted && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/10 cursor-pointer group">
-          <div className="bg-white/90 rounded-full p-3 group-hover:scale-110 transition-transform shadow-lg">
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              className="h-8 w-8 text-indigo-600" 
-              fill="none" 
-              viewBox="0 0 24 24" 
-              stroke="currentColor"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
@@ -456,6 +437,13 @@ export function LottieAnimation({ animationName, className = "", isActive = fals
 export function HowItWorksSection() {
   const [activeStep, setActiveStep] = useState(0)
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveStep(prev => (prev + 1) % 3)
+    }, 5000)
+    return () => clearInterval(interval)
+  }, [])
+
   return (
     <section id="how-it-works" className="py-12 md:py-20">
       <div className="container mx-auto max-w-6xl px-4 sm:px-6">
@@ -472,54 +460,54 @@ export function HowItWorksSection() {
           <div className="lg:w-1/2 order-2 lg:order-1">
             <div className="space-y-8">
               <div 
-                className="flex gap-6 group cursor-pointer"
+                className={`flex gap-6 group cursor-pointer p-4 rounded-xl transition-all ${activeStep === 0 ? 'bg-indigo-50 border border-indigo-100' : 'hover:bg-gray-50'}`}
                 onMouseEnter={() => setActiveStep(0)}
                 onClick={() => setActiveStep(0)}
               >
-                <div className="bg-indigo-100 text-indigo-600 rounded-full w-12 h-12 flex items-center justify-center flex-shrink-0 text-lg font-bold group-hover:bg-indigo-200 transition-colors">
+                <div className={`rounded-full w-12 h-12 flex items-center justify-center flex-shrink-0 text-lg font-bold transition-colors ${activeStep === 0 ? 'bg-indigo-600 text-white' : 'bg-indigo-100 text-indigo-600 group-hover:bg-indigo-200'}`}>
                   1
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold mb-2 group-hover:text-indigo-600 transition-colors leading-[1.2] tracking-[-0.02em]">
+                  <h3 className={`text-xl font-semibold mb-2 transition-colors leading-[1.2] tracking-[-0.02em] ${activeStep === 0 ? 'text-indigo-600' : 'text-gray-900 group-hover:text-indigo-600'}`}>
                     Customize Your Booking Page
                   </h3>
-                  <p className="text-gray-600 group-hover:text-gray-700 transition-colors leading-[1.5]">
+                  <p className={`transition-colors leading-[1.5] ${activeStep === 0 ? 'text-gray-700' : 'text-gray-600 group-hover:text-gray-700'}`}>
                     Match your brand colors and add your services in just a few clicks.
                   </p>
                 </div>
               </div>
               
               <div 
-                className="flex gap-6 group cursor-pointer"
+                className={`flex gap-6 group cursor-pointer p-4 rounded-xl transition-all ${activeStep === 1 ? 'bg-indigo-50 border border-indigo-100' : 'hover:bg-gray-50'}`}
                 onMouseEnter={() => setActiveStep(1)}
                 onClick={() => setActiveStep(1)}
               >
-                <div className="bg-indigo-100 text-indigo-600 rounded-full w-12 h-12 flex items-center justify-center flex-shrink-0 text-lg font-bold group-hover:bg-indigo-200 transition-colors">
+                <div className={`rounded-full w-12 h-12 flex items-center justify-center flex-shrink-0 text-lg font-bold transition-colors ${activeStep === 1 ? 'bg-indigo-600 text-white' : 'bg-indigo-100 text-indigo-600 group-hover:bg-indigo-200'}`}>
                   2
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold mb-2 group-hover:text-indigo-600 transition-colors leading-[1.2] tracking-[-0.02em]">
+                  <h3 className={`text-xl font-semibold mb-2 transition-colors leading-[1.2] tracking-[-0.02em] ${activeStep === 1 ? 'text-indigo-600' : 'text-gray-900 group-hover:text-indigo-600'}`}>
                     Set Your Availability
                   </h3>
-                  <p className="text-gray-600 group-hover:text-gray-700 transition-colors leading-[1.5]">
+                  <p className={`transition-colors leading-[1.5] ${activeStep === 1 ? 'text-gray-700' : 'text-gray-600 group-hover:text-gray-700'}`}>
                     Define your working hours and block off personal time as needed.
                   </p>
                 </div>
               </div>
               
               <div 
-                className="flex gap-6 group cursor-pointer"
+                className={`flex gap-6 group cursor-pointer p-4 rounded-xl transition-all ${activeStep === 2 ? 'bg-indigo-50 border border-indigo-100' : 'hover:bg-gray-50'}`}
                 onMouseEnter={() => setActiveStep(2)}
                 onClick={() => setActiveStep(2)}
               >
-                <div className="bg-indigo-100 text-indigo-600 rounded-full w-12 h-12 flex items-center justify-center flex-shrink-0 text-lg font-bold group-hover:bg-indigo-200 transition-colors">
+                <div className={`rounded-full w-12 h-12 flex items-center justify-center flex-shrink-0 text-lg font-bold transition-colors ${activeStep === 2 ? 'bg-indigo-600 text-white' : 'bg-indigo-100 text-indigo-600 group-hover:bg-indigo-200'}`}>
                   3
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold mb-2 group-hover:text-indigo-600 transition-colors leading-[1.2] tracking-[-0.02em]">
+                  <h3 className={`text-xl font-semibold mb-2 transition-colors leading-[1.2] tracking-[-0.02em] ${activeStep === 2 ? 'text-indigo-600' : 'text-gray-900 group-hover:text-indigo-600'}`}>
                     Share Your Link
                   </h3>
-                  <p className="text-gray-600 group-hover:text-gray-700 transition-colors leading-[1.5]">
+                  <p className={`transition-colors leading-[1.5] ${activeStep === 2 ? 'text-gray-700' : 'text-gray-600 group-hover:text-gray-700'}`}>
                     Start accepting bookings immediately by sharing your unique page.
                   </p>
                 </div>
@@ -528,7 +516,7 @@ export function HowItWorksSection() {
           </div>
           
           <div className="lg:w-1/2 order-1 lg:order-2">
-            <div className="relative aspect-video rounded-xl overflow-hidden shadow-lg">
+            <div className="relative aspect-video w-full h-full rounded-xl overflow-hidden">
               {activeStep === 0 && <LottieAnimation animationName="setup-step1" isActive />}
               {activeStep === 1 && <LottieAnimation animationName="setup-step2" isActive />}
               {activeStep === 2 && <LottieAnimation animationName="setup-step3" isActive />}
