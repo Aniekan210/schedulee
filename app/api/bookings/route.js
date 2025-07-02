@@ -1,17 +1,8 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
-function getDateRangeForDay(date) {
-  const start = new Date(date);
-  start.setHours(0, 0, 0, 0); // start of day
-
-  const end = new Date(date);
-  end.setHours(23, 59, 59, 999); // end of day
-
-  return {
-    start: start.toISOString(),
-    end: end.toISOString(),
-  };
+function formatDateAsISODate(date) {
+  return date.toISOString().slice(0, 10); // YYYY-MM-DD only, perfect for `date` type filtering
 }
 
 export async function GET(request) {
@@ -32,6 +23,7 @@ export async function GET(request) {
     }
 
     const today = new Date();
+
     let query = supabase
       .from("bookings")
       .select("*")
@@ -41,44 +33,40 @@ export async function GET(request) {
 
     switch (filter) {
       case "today": {
-        const { start, end } = getDateRangeForDay(today);
-        query = query.gte("booking_date", start).lte("booking_date", end);
+        const dateStr = formatDateAsISODate(today);
+        query = query.eq("booking_date", dateStr);
         break;
       }
-
       case "tomorrow": {
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
-        const { start, end } = getDateRangeForDay(tomorrow);
-        query = query.gte("booking_date", start).lte("booking_date", end);
+        const dateStr = formatDateAsISODate(tomorrow);
+        query = query.eq("booking_date", dateStr);
         break;
       }
-
       case "next7": {
+        const startDateStr = formatDateAsISODate(today);
         const nextWeek = new Date(today);
         nextWeek.setDate(today.getDate() + 7);
-        const { start: startToday } = getDateRangeForDay(today);
-        const { end: endNextWeek } = getDateRangeForDay(nextWeek);
-        query = query.gte("booking_date", startToday).lte("booking_date", endNextWeek);
+        const endDateStr = formatDateAsISODate(nextWeek);
+        query = query.gte("booking_date", startDateStr).lte("booking_date", endDateStr);
         break;
       }
-
       case "upcoming": {
-        const { start: startToday } = getDateRangeForDay(today);
-        query = query.gte("booking_date", startToday);
+        const startDateStr = formatDateAsISODate(today);
+        query = query.gte("booking_date", startDateStr);
         break;
       }
-
       case "past30": {
         const pastDate = new Date(today);
         pastDate.setDate(today.getDate() - 30);
-        const { start: startPast } = getDateRangeForDay(pastDate);
-        const { end: endToday } = getDateRangeForDay(today);
-        query = query.gte("booking_date", startPast).lte("booking_date", endToday);
+        const pastDateStr = formatDateAsISODate(pastDate);
+        const todayStr = formatDateAsISODate(today);
+        query = query.gte("booking_date", pastDateStr).lte("booking_date", todayStr);
         break;
       }
-
       case "recent": {
+        // Assuming `created_at` is timestamp - keep as is
         const recentDate = new Date(today);
         recentDate.setDate(today.getDate() - 7);
         query = query
@@ -86,12 +74,9 @@ export async function GET(request) {
           .order("created_at", { ascending: false });
         break;
       }
-
       case "custom": {
         if (customDate) {
-          const date = new Date(customDate);
-          const { start, end } = getDateRangeForDay(date);
-          query = query.gte("booking_date", start).lte("booking_date", end);
+          query = query.eq("booking_date", customDate);
         }
         break;
       }

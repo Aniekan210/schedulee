@@ -85,33 +85,36 @@ export function TestimonialCarousel({ testimonials = [] }) {
               style={{ width: `${safeTestimonials.length * 100}%` }}
             >
               {safeTestimonials.map((testimonial, index) => (
-                <div 
-                  key={index} 
-                  className="w-full flex-shrink-0 px-4 max-w-xs md:max-w-sm mx-auto"
+                <div
+                  key={index}
+                  className="w-full flex-shrink-0 px-6 max-w-sm md:max-w-md mx-auto"
                   style={{ width: `${100 / safeTestimonials.length}%` }}
                 >
-                  <Card className="bg-white border border-gray-100 hover:border-indigo-100 transition-all h-full group hover:shadow-sm min-h-[280px] flex flex-col">
-                    <CardContent className="p-6 flex flex-col flex-grow">
+                  <Card className="bg-white border border-gray-200 hover:border-indigo-300 transition-all shadow-sm hover:shadow-lg min-h-[320px] flex flex-col rounded-lg overflow-hidden">
+                    <CardContent className="p-8 flex flex-col flex-grow">
                       <div className="flex flex-col items-center text-center h-full">
-                        <div className="relative w-20 h-20 rounded-full overflow-hidden mb-4 border-2 border-indigo-100">
+                        {/* Bigger Avatar with subtle shadow */}
+                        <div className="relative w-24 h-24 rounded-full overflow-hidden mb-6 border-4 border-indigo-200 shadow-md">
                           <Image
                             src={testimonial.avatar}
                             alt={testimonial.author}
-                            width={110}
-                            height={110}
+                            width={96}
+                            height={96}
                             className="object-cover w-full h-full"
                           />
                         </div>
-                        <div className="flex-grow flex flex-col justify-center">
-                          <p className="text-gray-700 italic text-lg mb-6 group-hover:text-gray-800 transition-colors">
-                            "{testimonial.quote}"
+
+                        {/* Quote box with background and padding */}
+                        <div className="flex-grow flex flex-col justify-center mb-6 px-4 py-3 bg-indigo-50 rounded-md shadow-inner">
+                          <p className="text-indigo-900 italic text-base md:text-lg leading-relaxed">
+                            “{testimonial.quote}”
                           </p>
                         </div>
+
+                        {/* Author info with better spacing */}
                         <div>
-                          <p className="font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">
-                            {testimonial.author}
-                          </p>
-                          <p className="text-sm text-gray-500 group-hover:text-gray-600 transition-colors">
+                          <p className="font-semibold text-indigo-700 text-lg">{testimonial.author}</p>
+                          <p className="text-sm text-indigo-400 uppercase tracking-wide mt-1">
                             Verified User
                           </p>
                         </div>
@@ -119,6 +122,7 @@ export function TestimonialCarousel({ testimonials = [] }) {
                     </CardContent>
                   </Card>
                 </div>
+
 
               ))}
             </div>

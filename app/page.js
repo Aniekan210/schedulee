@@ -99,36 +99,38 @@ export default function Home() {
             </p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-5">
+          <div className="grid md:grid-cols-3 gap-6">
             {[
               {
-                icon: <Calendar className="h-7 w-7 text-indigo-600" />,
+                icon: <Calendar className="h-6 w-6 text-indigo-600" />,
                 title: "Smart Availability",
-                desc: "Set your working hours and time off. We handle the rest automatically."
+                description: "Set your working hours and time off. We handle the rest automatically."
               },
               {
-                icon: <Palette className="h-7 w-7 text-indigo-600" />,
+                icon: <Palette className="h-6 w-6 text-indigo-600" />,
                 title: "Brand Customization",
-                desc: "Customize your booking page with your branding in minutes."
+                description: "Customize your booking page with your branding in minutes."
               },
               {
-                icon: <User className="h-7 w-7 text-indigo-600" />,
+                icon: <User className="h-6 w-6 text-indigo-600" />,
                 title: "No Login Required",
-                desc: "Clients book with just name and phone number - no accounts needed."
+                description: "Clients book with just name and phone number - no accounts needed."
               }
             ].map((card, index) => (
               <Card 
                 key={index}
-                className="border border-gray-100 hover:border-indigo-100 hover:shadow-xs transition-all group hover:-translate-y-0.5"
+                className="border border-gray-200 rounded-lg hover:shadow-sm transition-all hover:border-indigo-100"
               >
-                <CardHeader className="items-center text-center p-5">
-                  <div className="mb-3 p-3 bg-indigo-50 rounded-full group-hover:bg-indigo-100/80 transition-colors">
-                    {card.icon}
+                <CardHeader className="text-center p-6">
+                  <div className="flex justify-center mb-5">
+                    <div className="inline-flex p-3 bg-indigo-50 rounded-full hover:bg-indigo-100 transition-colors">
+                      {card.icon}
+                    </div>
                   </div>
-                  <CardTitle className="text-base font-medium group-hover:text-indigo-600 transition-colors">
+                  <CardTitle className="text-lg font-medium mb-2">
                     {card.title}
                   </CardTitle>
-                  <CardDescription className="text-sm text-gray-600 group-hover:text-gray-700 mt-1 transition-colors">
+                  <CardDescription className="text-gray-600 text-sm">
                     {card.description}
                   </CardDescription>
                 </CardHeader>
