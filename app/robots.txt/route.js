@@ -1,3 +1,4 @@
+// robots.txt
 export function GET() {
     return new Response(
         `# Allow all crawlers for public pages
@@ -7,6 +8,8 @@ Allow: /signup
 Allow: /login
 Allow: /upgrade
 Allow: /success
+Allow: /terms
+Allow: /privacy
 
 # Disallow private/dashboard pages
 Disallow: /dashboard/*
