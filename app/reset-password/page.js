@@ -1,13 +1,12 @@
 // app/reset-password/page.jsx
 'use client'
 import { useState, useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import ForgotPasswordForm from '@/components/ui/forgotPasswordForm'
 
 export default function ResetPassword() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
@@ -16,14 +15,18 @@ export default function ResetPassword() {
 
   // Check for token in URL on mount
   useEffect(() => {
-    const access_token = searchParams.get('access_token')
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash.substring(1);
+      const params = new URLSearchParams(hash);
+      const access_token = params.get('access_code');
+    }
     if (!access_token) {
       setError('Invalid password reset link')
       setTokenValid(false)
     } else {
       setTokenValid(true)
     }
-  }, [searchParams])
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault()
