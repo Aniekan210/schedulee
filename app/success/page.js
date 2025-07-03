@@ -5,6 +5,7 @@ import { CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
+import { Suspense } from 'react';
 
 function SuccessContent() {
   const searchParams = useSearchParams();
