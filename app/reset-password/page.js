@@ -15,10 +15,12 @@ export default function ResetPassword() {
 
   // Check for token in URL on mount
   useEffect(() => {
+    let access_token;
+    
     if (typeof window !== 'undefined') {
       const hash = window.location.hash.substring(1);
       const params = new URLSearchParams(hash);
-      const access_token = params.get('access_code');
+      access_token = params.get('access_code');
     }
     if (!access_token) {
       setError('Invalid password reset link')

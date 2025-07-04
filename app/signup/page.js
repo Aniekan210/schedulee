@@ -169,6 +169,26 @@ export default function SignUpPage() {
                 />
               </div>
 
+              <div className="flex items-start gap-2">
+                <input
+                  type="checkbox"
+                  id="acceptedTerms"
+                  name="acceptedTerms"
+                  className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 shrink-0"
+                  required
+                />
+                <Label htmlFor="acceptedTerms" className="text-gray-700 text-sm leading-snug">
+                  I agree to the{" "}
+                  <Link href="/terms" className="text-blue-600 hover:underline">
+                    Terms of Service
+                  </Link>{" "}
+                  and{" "}
+                  <Link href="/privacy" className="text-blue-600 hover:underline">
+                    Privacy Policy
+                  </Link>
+                </Label>
+              </div>
+
               <Button
                 type="submit"
                 className="w-full h-11 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-medium"

@@ -16,70 +16,62 @@ import Image from "next/image";
 import Link from "next/link";
 
 export default function SignUpPage() {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
-  const [emailSent, setEmailSent] = useState("");
-  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-    setSuccess(false);
 
     const formData = new FormData(e.target);
     const email = formData.get("email");
     const password = formData.get("password");
-    const businessName = formData.get("businessName");
-    const acceptedTerms = formData.get("acceptedTerms") === "on";
 
-    if (!acceptedTerms) {
-      setError("You must accept the terms and privacy policy");
-      setLoading(false);
-      return;
-    }
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_API_KEY
+    );
 
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-
-      const response = await fetch("/api/signup", {
+      const response = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, business_name: businessName }),
-        signal: controller.signal,
+        body: JSON.stringify({ email, password }),
       });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || "Registration failed");
-      }
 
       const data = await response.json();
 
-      if (data.success) {
-        setEmailSent(email);
-        setSuccess(true);
+      if (!response.ok) throw new Error(data.error || "Login failed");
+
+      // Initialize the session on the client side if session data exists
+      if (data.session) {
+        const { error } = await supabase.auth.setSession({
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token,
+        });
+
+        if (error) throw error;
+
+        // Check if session is properly set
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        if (!session) throw new Error("Session initialization failed");
+
+        window.location.href = "/dashboard/bookings";
       } else {
-        throw new Error(data.error || "Registration failed");
+        throw new Error("Login successful but no session found");
       }
     } catch (err) {
-      setError(
-        err.name === "AbortError"
-          ? "Request timed out. Please try again."
-          : err.message || "Registration failed. Please try again."
-      );
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGoogleSignup = async () => {
+  const handleGoogleLogin = async () => {
     if (typeof window !== "undefined") {
       localStorage.removeItem("sb-code-verifier");
     }
@@ -107,149 +99,97 @@ export default function SignUpPage() {
                   />
                 </div>
                 <CardTitle className="text-2xl font-bold text-gray-900">
-                  {success ? "Check your email" : "Create your account"}
+                  Welcome back
                 </CardTitle>
                 <CardDescription className="text-gray-500 mt-2">
-                  {success
-                    ? `We've sent a confirmation link to ${emailSent}. Please check your inbox to verify your email.`
-                    : "Start managing your bookings in minutes"}
+                  Sign in to manage your bookings
                 </CardDescription>
               </CardHeader>
 
-              {!success ? (
-                <CardContent className="px-8 pb-6">
-                  <Button
-                    onClick={handleGoogleSignup}
-                    variant="outline"
-                    className="w-full flex items-center justify-center gap-3 mb-6 h-11 rounded-lg border-gray-300 hover:bg-gray-50"
-                    disabled={loading}
-                  >
-                    <GoogleIcon />
-                    Continue with Google
-                  </Button>
+              <CardContent className="px-8 pb-6">
+                <Button
+                  onClick={handleGoogleLogin}
+                  variant="outline"
+                  className="w-full flex items-center justify-center gap-3 mb-6 h-11 rounded-lg border-gray-300 hover:bg-gray-50"
+                  disabled={loading}
+                >
+                  <GoogleIcon />
+                  Continue with Google
+                </Button>
 
-                  <div className="flex items-center my-6">
-                    <div className="flex-1 h-px bg-gray-200"></div>
-                    <span className="mx-4 text-sm text-gray-400">or</span>
-                    <div className="flex-1 h-px bg-gray-200"></div>
+                <div className="flex items-center my-6">
+                  <div className="flex-1 h-px bg-gray-200"></div>
+                  <span className="mx-4 text-sm text-gray-400">or</span>
+                  <div className="flex-1 h-px bg-gray-200"></div>
+                </div>
+
+                {error && (
+                  <div className="mb-4 p-3 text-sm text-red-600 bg-red-50 rounded-md border border-red-100">
+                    {error}
+                  </div>
+                )}
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-gray-700">
+                      Email
+                    </Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      placeholder="you@example.com"
+                      className="h-11 rounded-lg focus:ring-blue-500 border-gray-300"
+                      required
+                    />
                   </div>
 
-                  {error && (
-                    <div className="mb-4 p-3 text-sm text-red-600 bg-red-50 rounded-md border border-red-100">
-                      {error}
-                    </div>
-                  )}
-
-                  <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="businessName" className="text-gray-700">
-                        Business Name
-                      </Label>
-                      <Input
-                        id="businessName"
-                        name="businessName"
-                        type="text"
-                        placeholder="Your Business Name"
-                        className="h-11 rounded-lg focus:ring-blue-500 border-gray-300"
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="email" className="text-gray-700">
-                        Email
-                      </Label>
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        placeholder="you@example.com"
-                        className="h-11 rounded-lg focus:ring-blue-500 border-gray-300"
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
                       <Label htmlFor="password" className="text-gray-700">
                         Password
                       </Label>
-                      <Input
-                        id="password"
-                        name="password"
-                        type="password"
-                        placeholder="••••••••"
-                        className="h-11 rounded-lg focus:ring-blue-500 border-gray-300"
-                        required
-                        minLength={6}
-                      />
-                    </div>
-
-                    <div className="flex items-start space-x-2">
-                      <input
-                        type="checkbox"
-                        id="acceptedTerms"
-                        name="acceptedTerms"
-                        className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        required
-                      />
-                      <Label htmlFor="acceptedTerms" className="text-gray-700 text-sm">
-                        I agree to the{" "}
-                        <Link href="/terms" className="text-blue-600 hover:underline">
-                          Terms of Service
-                        </Link>{" "}
-                        and{" "}
-                        <Link href="/policy" className="text-blue-600 hover:underline">
-                          Privacy Policy
-                        </Link>
-                      </Label>
-                    </div>
-
-                    <Button
-                      type="submit"
-                      className="w-full h-11 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-medium"
-                      disabled={loading}
-                    >
-                      {loading ? <Spinner /> : "Create Account"}
-                    </Button>
-                  </form>
-                </CardContent>
-              ) : (
-                <CardContent className="px-8 pb-6 text-center">
-                  <div className="my-6 p-4 bg-blue-50 text-blue-700 rounded-lg">
-                    <p className="font-medium">
-                      Didn't receive the email? Check your spam folder or{" "}
-                      <button
-                        onClick={() => setSuccess(false)}
-                        className="text-blue-600 hover:underline"
+                      <Link
+                        href="/forgot-password"
+                        className="text-sm text-blue-600 hover:text-blue-700 hover:underline"
                       >
-                        try again
-                      </button>
-                    </p>
+                        Forgot password?
+                      </Link>
+                    </div>
+                    <Input
+                      id="password"
+                      name="password"
+                      type="password"
+                      placeholder="••••••••"
+                      className="h-11 rounded-lg focus:ring-blue-500 border-gray-300"
+                      required
+                    />
                   </div>
-                  <Link
-                    href="/login"
-                    className="mt-4 inline-block text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline"
-                  >
-                    Go to login page
-                  </Link>
-                </CardContent>
-              )}
 
-              {!success && (
-                <div className="px-8 py-6 border-t border-gray-100 bg-gray-50">
-                  <p className="text-sm text-center text-gray-600">
-                    Already have an account?{" "}
-                    <Link
-                      href="/login"
-                      className="font-medium text-blue-600 hover:text-blue-700 hover:underline"
-                    >
-                      Log in
-                    </Link>
-                  </p>
-                </div>
-              )}
+                  <Button
+                    type="submit"
+                    className="w-full h-11 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-medium"
+                    disabled={loading}
+                  >
+                    {loading ? <Spinner /> : "Sign In"}
+                  </Button>
+                </form>
+              </CardContent>
+
+              <CardFooter className="px-8 py-6 border-t border-gray-100 bg-gray-50">
+                <p className="text-sm text-center text-gray-600">
+                  Don't have an account?{" "}
+                  <Link
+                    href="/signup"
+                    className="font-medium text-blue-600 hover:text-blue-700 hover:underline"
+                  >
+                    Sign up
+                  </Link>
+                </p>
+              </CardFooter>
             </Card>
           </div>
+
         )
       }
     </>
