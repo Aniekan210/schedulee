@@ -86,7 +86,11 @@ export default function SignUpPage() {
     <>
       {
         showForgotPassword ? (
-          <ForgotPasswordForm onBack={() => setShowForgotPassword(false)} />
+          <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+            <div className="w-full max-w-md">
+              <ForgotPasswordForm onBack={() => setShowForgotPassword(false)} />
+            </div>
+          </div>
         ) : (
           <div className="min-h-screen bg-white flex items-center justify-center p-4">
             <Card className="w-full max-w-md shadow-lg rounded-xl border border-gray-100">
