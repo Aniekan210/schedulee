@@ -151,12 +151,12 @@ export default function SignUpPage() {
                       <Label htmlFor="password" className="text-gray-700">
                         Password
                       </Label>
-                      <Link
-                        href="/forgot-password"
+                      <span
+                        onClick={() => { setShowForgotPassword(true); }}
                         className="text-sm text-blue-600 hover:text-blue-700 hover:underline"
                       >
                         Forgot password?
-                      </Link>
+                      </span>
                     </div>
                     <Input
                       id="password"
