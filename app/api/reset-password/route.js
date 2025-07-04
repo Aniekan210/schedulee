@@ -4,8 +4,10 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function POST(request) {
 
-  const supabase = createSupabaseServerClient();
+
   try {
+    const supabase = createSupabaseServerClient();
+
     const { email } = await request.json();
 
     if (!email) {
