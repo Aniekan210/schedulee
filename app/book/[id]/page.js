@@ -10,6 +10,7 @@ import {
   CheckCircle,
   XCircle,
   Loader2,
+  ChevronDown,
 } from "lucide-react";
 import { format } from "date-fns";
 import { debounce } from "lodash";
@@ -22,10 +23,25 @@ import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+// List of common timezones
+const TIMEZONES = [
+  { value: "America/New_York", label: "Eastern Time (ET)" },
+  { value: "America/Chicago", label: "Central Time (CT)" },
+  { value: "America/Denver", label: "Mountain Time (MT)" },
+  { value: "America/Los_Angeles", label: "Pacific Time (PT)" },
+  { value: "America/Halifax", label: "Atlantic Time (AT)" },
+  { value: "America/St_Johns", label: "Newfoundland Time (NT)" },
+  { value: "Europe/London", label: "London (GMT/BST)" },
+  { value: "Europe/Paris", label: "Paris (CET/CEST)" },
+  { value: "Asia/Tokyo", label: "Tokyo (JST)" },
+  { value: "Australia/Sydney", label: "Sydney (AEST/AEDT)" },
+];
+
 export default function BookingPage() {
-  const { id } = useParams();
+  const { id: business_id } = useParams();
   const [isLoadingSettings, setIsLoadingSettings] = useState(true);
   const [settings, setSettings] = useState(null);
+  const [timezone, setTimezone] = useState("America/Halifax"); // Default timezone
 
   const [date, setDate] = useState();
   const [selectedTime, setSelectedTime] = useState("");
@@ -45,15 +61,20 @@ export default function BookingPage() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [icsUrl, setIcsUrl] = useState(null);
 
+  // Fetch business settings
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const response = await fetch(`/api/getBookSettings?id=${id}`);
+        const response = await fetch(`/api/form-settings?id=${business_id}`);
         if (!response.ok) throw new Error("Failed to fetch settings");
         const data = await response.json();
 
-        if (!data || !data.businessName) throw new Error("Invalid booking ID");
+        if (!data || !data.businessName) throw new Error("Invalid business ID");
         setSettings(data);
+        // Set timezone from settings if available
+        if (data.timezone) {
+          setTimezone(data.timezone);
+        }
       } catch (err) {
         console.error("Error fetching settings:", err);
         setSettings(null);
@@ -63,35 +84,50 @@ export default function BookingPage() {
     };
 
     fetchSettings();
-  }, [id]);
+  }, [business_id]);
 
-  // Memoize the debounced function with useCallback
+  // Fetch available times when date or timezone changes
   const fetchAvailableTimes = useCallback(
     debounce(async (selectedDate) => {
       if (!selectedDate) return;
 
       setIsLoadingTimes(true);
       setSelectedTime("");
-      setAvailableTimes([]);
       try {
+        const dateStr = format(selectedDate, "yyyy-MM-dd");
         const response = await fetch(
-          `/api/getAvailableTimes?date=${format(selectedDate, 'yyyy-MM-dd')}`
+          `/api/availability/client?business_id=${business_id}&date=${dateStr}&timezone=${timezone}`
         );
-        if (!response.ok) throw new Error("Failed to fetch times");
+
+        if (!response.ok) throw new Error("Failed to fetch available times");
+
         const data = await response.json();
+
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
         setAvailableTimes(
-          data.availableTimes.length
+          data.availableTimes && data.availableTimes.length
             ? data.availableTimes
             : ["No available times"]
         );
-      } catch {
+      } catch (error) {
+        console.error("Error fetching available times:", error);
         setAvailableTimes(["Error loading times"]);
       } finally {
         setIsLoadingTimes(false);
       }
-    }, 500),
-    []
+    }, 300),
+    [business_id, timezone]
   );
+
+  // Reload times when timezone changes
+  useEffect(() => {
+    if (date) {
+      fetchAvailableTimes(date);
+    }
+  }, [timezone, date, fetchAvailableTimes]);
 
   const handleDateSelect = (newDate) => {
     setDate(newDate);
@@ -106,6 +142,7 @@ export default function BookingPage() {
     e.preventDefault();
     setIsSubmitting(true);
 
+    // Validate form
     let formIsValid = true;
     const newErrors = { name: "", phoneNumber: "", date: "", time: "" };
 
@@ -136,24 +173,28 @@ export default function BookingPage() {
     }
 
     try {
+      // Prepare booking data
       const bookingData = {
-        business_id: id,
+        business_id,
         name: formData.name,
         phone_number: formData.phoneNumber,
-        booking_date: format(date, 'yyyy-MM-dd'),
-        booking_time: selectedTime
+        booking_date: format(date, "yyyy-MM-dd"),
+        booking_time: selectedTime,
+        timezone,
       };
 
-      const response = await fetch('/api/bookings', {
-        method: 'POST',
+      // Submit booking
+      const response = await fetch("/api/bookings", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(bookingData)
+        body: JSON.stringify(bookingData),
       });
 
       if (!response.ok) {
-        throw new Error('Booking failed');
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Booking failed");
       }
 
       // Create calendar event
@@ -165,9 +206,9 @@ export default function BookingPage() {
       const eventEnd = new Date(eventStart.getTime() + 30 * 60 * 1000);
       const pad = (n) => String(n).padStart(2, "0");
       const formatICSDate = (d) =>
-        `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}T${pad(
-          d.getUTCHours()
-        )}${pad(d.getUTCMinutes())}00Z`;
+        `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(
+          d.getUTCDate()
+        )}T${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}00Z`;
 
       const icsContent = `BEGIN:VCALENDAR
 VERSION:2.0
@@ -183,12 +224,17 @@ LOCATION:Online or In-Person
 END:VEVENT
 END:VCALENDAR`;
 
-      const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });
+      const blob = new Blob([icsContent], {
+        type: "text/calendar;charset=utf-8",
+      });
       setIcsUrl(URL.createObjectURL(blob));
       setIsSuccess(true);
     } catch (error) {
       console.error("Booking error:", error);
-      // Consider adding user feedback here
+      setErrors((prev) => ({
+        ...prev,
+        form: error.message || "Failed to book appointment",
+      }));
     } finally {
       setIsSubmitting(false);
     }
@@ -224,10 +270,14 @@ END:VCALENDAR`;
           <XCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
           <h2 className="text-xl font-bold mb-2">Invalid Booking Link</h2>
           <p className="text-sm text-gray-600">
-            This booking page ID is invalid or no longer active. Please check the link and try again.
+            This booking page is not available. Please check the link and try
+            again.
           </p>
           <div className="mt-6">
-            <a href="/" className="text-blue-600 hover:underline text-sm font-medium">
+            <a
+              href="/"
+              className="text-blue-600 hover:underline text-sm font-medium"
+            >
               Go back to homepage
             </a>
           </div>
@@ -238,14 +288,19 @@ END:VCALENDAR`;
 
   const { businessName, bgColor, logoUrl } = settings;
 
-  // Color calculations (unchanged from original)
+  // Color calculations
   const hexColor = bgColor.replace("#", "");
   const r = parseInt(hexColor.substring(0, 2), 16);
   const g = parseInt(hexColor.substring(2, 4), 16);
   const b = parseInt(hexColor.substring(4, 6), 16);
-  const r1 = r / 255, g1 = g / 255, b1 = b / 255;
-  const max = Math.max(r1, g1, b1), min = Math.min(r1, g1, b1);
-  let h, s, l = (max + min) / 2;
+  const r1 = r / 255,
+    g1 = g / 255,
+    b1 = b / 255;
+  const max = Math.max(r1, g1, b1),
+    min = Math.min(r1, g1, b1);
+  let h,
+    s,
+    l = (max + min) / 2;
 
   if (max !== min) {
     const d = max - min;
@@ -262,7 +317,13 @@ END:VCALENDAR`;
   const hue2rgb = (p, q, t) => {
     if (t < 0) t += 1;
     if (t > 1) t -= 1;
-    return t < 1 / 6 ? p + (q - p) * 6 * t : t < 0.5 ? q : t < 2 / 3 ? p + (q - p) * (2 / 3 - t) * 6 : p;
+    return t < 1 / 6
+      ? p + (q - p) * 6 * t
+      : t < 0.5
+      ? q
+      : t < 2 / 3
+      ? p + (q - p) * (2 / 3 - t) * 6
+      : p;
   };
   const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
   const p = 2 * l - q;
@@ -276,24 +337,46 @@ END:VCALENDAR`;
   const buttonVariant = shouldDarken ? "secondary" : "default";
   const activeBgColor = shouldDarken ? "bg-white/20" : "bg-black/10";
   const activeTextColor = shouldDarken ? "text-white" : "text-black";
+  const hoverBgColor = shouldDarken ? "hover:bg-white/10" : "hover:bg-black/5";
+  const focusRingColor = shouldDarken
+    ? "focus:ring-white/50"
+    : "focus:ring-black/50";
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen w-full flex items-center justify-center p-4" style={{ backgroundColor: newColor }}>
-        <div className={`w-full max-w-md rounded-2xl shadow-xl p-8 ${textColor}`} style={{ backgroundColor: bgColor }}>
+      <div
+        className="min-h-screen w-full flex items-center justify-center p-4"
+        style={{ backgroundColor: newColor }}
+      >
+        <div
+          className={`w-full max-w-md rounded-2xl shadow-xl p-8 ${textColor}`}
+          style={{ backgroundColor: bgColor }}
+        >
           <div className="flex justify-center mb-6">
             <CheckCircle className="h-16 w-16 text-green-500" />
           </div>
-          <h2 className="text-2xl font-bold mb-4 text-center">Booking Confirmed!</h2>
-          <p className="mb-4 text-center">Your appointment with {businessName} is booked for:</p>
+          <h2 className="text-2xl font-bold mb-4 text-center">
+            Booking Confirmed!
+          </h2>
+          <p className="mb-4 text-center">
+            Your appointment with {businessName} is booked for:
+          </p>
           <div className="bg-opacity-20 rounded-lg p-4 mb-6 text-center">
             <p className="font-medium">{format(date, "PPP")}</p>
             <p className="text-xl font-bold">{selectedTime}</p>
+            <p className="text-sm opacity-70 mt-1">
+              (
+              {TIMEZONES.find((tz) => tz.value === timezone)?.label || timezone}
+              )
+            </p>
           </div>
           {icsUrl && (
             <a
               href={icsUrl}
-              download={`booking-${businessName}-${format(date, "yyyyMMdd")}.ics`}
+              download={`booking-${businessName}-${format(
+                date,
+                "yyyyMMdd"
+              )}.ics`}
               className="block mb-4"
             >
               <Button variant="outline" className="w-full py-3 font-semibold">
@@ -302,7 +385,10 @@ END:VCALENDAR`;
             </a>
           )}
           <div className="text-center text-xs opacity-70">
-            Powered by <a href="/" className="font-medium hover:underline">schedulee.app</a>
+            Powered by{" "}
+            <a href="/" className="font-medium hover:underline">
+              schedulee.app
+            </a>
           </div>
         </div>
       </div>
@@ -333,18 +419,49 @@ END:VCALENDAR`;
           )}
 
           <h1 className="text-2xl sm:text-3xl font-bold text-center mb-6">
-            You're booking with{" "}
-            <span className="whitespace-nowrap">{businessName}</span>
+            Book with {businessName}
           </h1>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-4">
+              {/* Improved Timezone Selector */}
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Timezone
+                </label>
+                <div className="relative">
+                  <select
+                    value={timezone}
+                    onChange={(e) => setTimezone(e.target.value)}
+                    className={cn(
+                      "w-full p-2.5 rounded-md border bg-transparent appearance-none pr-8",
+                      "focus:outline-none focus:ring-2 focus:ring-opacity-50",
+                      borderColor,
+                      hoverBgColor,
+                      focusRingColor,
+                      "transition-colors duration-200"
+                    )}
+                  >
+                    {TIMEZONES.map((tz) => (
+                      <option
+                        key={tz.value}
+                        value={tz.value}
+                        className={shouldDarken ? "bg-gray-800" : "bg-white"}
+                      >
+                        {tz.label}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-3 h-4 w-4 opacity-70 pointer-events-none" />
+                </div>
+              </div>
+
               <div>
                 <label
                   htmlFor="name"
                   className="block text-sm font-medium mb-1"
                 >
-                  Name
+                  Your Name
                 </label>
                 <Input
                   id="name"
@@ -352,15 +469,17 @@ END:VCALENDAR`;
                   type="text"
                   value={formData.name}
                   onChange={handleInputChange}
-                  className={`w-full ${borderColor} bg-transparent focus-visible:ring-2 focus-visible:ring-opacity-50 ${errors.name ? "border-red-500" : ""
-                    }`}
+                  className={`w-full ${borderColor} bg-transparent focus-visible:ring-2 focus-visible:ring-opacity-50 ${
+                    errors.name ? "border-red-500" : ""
+                  }`}
                   style={{
                     borderColor: errors.name
                       ? "#ef4444"
                       : shouldDarken
-                        ? "rgba(255, 255, 255, 0.7)"
-                        : "rgba(0, 0, 0, 0.7)",
+                      ? "rgba(255, 255, 255, 0.7)"
+                      : "rgba(0, 0, 0, 0.7)",
                   }}
+                  placeholder="John Doe"
                 />
                 {errors.name && (
                   <p className="mt-1 text-sm text-red-500 flex items-center">
@@ -382,15 +501,17 @@ END:VCALENDAR`;
                   type="tel"
                   value={formData.phoneNumber}
                   onChange={handleInputChange}
-                  className={`w-full ${borderColor} bg-transparent focus-visible:ring-2 focus-visible:ring-opacity-50 ${errors.phoneNumber ? "border-red-500" : ""
-                    }`}
+                  className={`w-full ${borderColor} bg-transparent focus-visible:ring-2 focus-visible:ring-opacity-50 ${
+                    errors.phoneNumber ? "border-red-500" : ""
+                  }`}
                   style={{
                     borderColor: errors.phoneNumber
                       ? "#ef4444"
                       : shouldDarken
-                        ? "rgba(255, 255, 255, 0.7)"
-                        : "rgba(0, 0, 0, 0.7)",
+                      ? "rgba(255, 255, 255, 0.7)"
+                      : "rgba(0, 0, 0, 0.7)",
                   }}
+                  placeholder="(123) 456-7890"
                 />
                 {errors.phoneNumber && (
                   <p className="mt-1 text-sm text-red-500 flex items-center">
@@ -407,15 +528,16 @@ END:VCALENDAR`;
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
-                      className={`w-full justify-start text-left font-normal ${borderColor} bg-transparent hover:border-2 ${errors.date ? "border-red-500" : ""
-                        }`}
+                      className={`w-full justify-start text-left font-normal ${borderColor} bg-transparent hover:border-2 ${
+                        errors.date ? "border-red-500" : ""
+                      }`}
                       style={{
                         borderWidth: "2px",
                         borderColor: errors.date
                           ? "#ef4444"
                           : shouldDarken
-                            ? "rgba(255, 255, 255, 0.7)"
-                            : "rgba(0, 0, 0, 0.7)",
+                          ? "rgba(255, 255, 255, 0.7)"
+                          : "rgba(0, 0, 0, 0.7)",
                       }}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
@@ -454,8 +576,8 @@ END:VCALENDAR`;
                   ) : (
                     <>
                       {availableTimes.length === 1 &&
-                        (availableTimes[0] === "No available times" ||
-                          availableTimes[0] === "Error loading times") ? (
+                      (availableTimes[0] === "No available times" ||
+                        availableTimes[0] === "Error loading times") ? (
                         <div className="flex justify-center py-4 text-sm font-medium opacity-70">
                           {availableTimes[0]}
                         </div>
@@ -500,6 +622,13 @@ END:VCALENDAR`;
                 </div>
               )}
             </div>
+
+            {errors.form && (
+              <div className="text-red-500 text-sm text-center">
+                <XCircle className="w-4 h-4 inline mr-1" />
+                {errors.form}
+              </div>
+            )}
 
             <Button
               type="submit"

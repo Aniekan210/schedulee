@@ -2,32 +2,55 @@
 
 import { useAuth } from "@/context/auth-context";
 import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  MoreVertical, Edit, Trash2, Plus, Calendar as CalendarIcon,
-  Filter, ChevronLeft, ChevronRight, Copy,
+  MoreVertical,
+  Edit,
+  Trash2,
+  Plus,
+  Calendar as CalendarIcon,
+  Filter,
+  ChevronLeft,
+  ChevronRight,
+  Copy,
 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/router"
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import {
-  Popover, PopoverContent, PopoverTrigger,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -35,13 +58,53 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const ITEMS_PER_PAGE = 5;
 
+const FILTER_OPTIONS = {
+  today: "Today",
+  tomorrow: "Tomorrow",
+  next7: "Next 7 Days",
+  upcoming: "All Upcoming",
+  past30: "Past 30 Days",
+  recent: "Recently Booked",
+  all: "All Bookings",
+  custom: "Custom Date",
+};
+
+const TableSkeleton = () => (
+  <div className="space-y-4 p-6">
+    {[...Array(5)].map((_, i) => (
+      <Skeleton key={i} className="h-12 w-full rounded-lg" />
+    ))}
+  </div>
+);
+
+const formatDisplayDate = (dateString) => {
+  try {
+    // Create date in local timezone
+    const date = new Date(dateString + "T00:00:00");
+    return format(date, "MMM do, yyyy");
+  } catch {
+    return dateString;
+  }
+};
+
+const formatDisplayTime = (timeString) => {
+  try {
+    // Ensure time is in HH:MM format
+    const [hours, minutes] = timeString.split(":");
+    return `${hours.padStart(2, "0")}:${(minutes || "00").padStart(2, "0")}`;
+  } catch {
+    return timeString;
+  }
+};
+
 export default function BookingsOverviewPage() {
   const { user } = useAuth();
   const [businessName, setBusinessName] = useState("Your Business");
+  const [timezone, setTimezone] = useState("America/Halifax");
   const [bookings, setBookings] = useState([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [currentBooking, setCurrentBooking] = useState(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [currentBooking, setCurrentBooking] = useState(null);
   const [bookingToDelete, setBookingToDelete] = useState(null);
   const [filter, setFilter] = useState("today");
   const [currentPage, setCurrentPage] = useState(1);
@@ -49,87 +112,83 @@ export default function BookingsOverviewPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(1);
 
+  const bookingLink = `${process.env.NEXT_PUBLIC_SITE_URL}/book/${user?.id}`;
 
-  const bookingLink = `https://schedulee.app/book/${user?.id}`;
-
+  // Fetch business settings
   useEffect(() => {
     const getSettings = async () => {
       try {
-        const response = await fetch(`/api/getBookSettings?id=${user?.id}`);
+        const response = await fetch(`/api/form-settings?id=${user?.id}`);
         const data = await response.json();
         setBusinessName(data.businessName);
+        setTimezone(data.timezone || "America/Halifax");
       } catch (err) {
         console.error("Error fetching settings:", err);
       }
     };
-    getSettings();
+    if (user) {
+      getSettings();
+    } else {
+      window.location.href = "/login";
+    }
   }, [user]);
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(bookingLink);
-    toast.success("Booking link copied to clipboard!");
-  };
-
-  function formatDateToLocalYYYYMMDD(date) {
-    const yyyy = date.getFullYear();
-    const mm = String(date.getMonth() + 1).padStart(2, "0");
-    const dd = String(date.getDate()).padStart(2, "0");
-    return `${yyyy}-${mm}-${dd}`;
-  }
-
+  // Fetch bookings function
   const fetchBookings = async () => {
     setIsLoading(true);
-    if(!user)
-    {
-      const router = useRouter();
-      router.push("/login");
-    }
+    if (!user) return;
 
     try {
       const params = new URLSearchParams({
         filter,
         page: currentPage,
         itemsPerPage: ITEMS_PER_PAGE,
+        timezone,
         ...(filter === "custom" && {
-          customDate: formatDateToLocalYYYYMMDD(customDate),
+          customDate: customDate.toISOString().split("T")[0],
         }),
       });
 
       const response = await fetch(`/api/bookings?${params.toString()}`);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
 
-      if (response.ok) {
-        const formattedBookings = data.bookings.map((booking) => ({
-          ...booking,
-          date: booking.booking_date,
-          time: booking.booking_time.slice(0, 5),
-        }));
-
-        setBookings(formattedBookings);
-        setTotalPages(data.totalPages);
+      if (data.bookings) {
+        setBookings(data.bookings);
+        setTotalPages(data.totalPages || 1);
       } else {
-        throw new Error(data.error || "Failed to fetch bookings");
+        throw new Error("Invalid response format");
       }
     } catch (error) {
-      toast.error(error.message);
+      console.error("Fetch bookings error:", error);
+      toast.error("Failed to load bookings");
+      setBookings([]);
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Fetch bookings on dependencies change
   useEffect(() => {
-    if (user) {
-      fetchBookings();
-    }
-  }, [user, filter, currentPage, customDate]);
+    fetchBookings();
+  }, [user, filter, currentPage, customDate, timezone]);
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(bookingLink);
+    toast.success("Booking link copied to clipboard!");
+  };
 
   const handleEdit = (booking) => {
     setCurrentBooking({
       id: booking.id,
       name: booking.name,
       phone_number: booking.phone_number,
-      date: booking.date,
-      time: booking.time,
+      booking_date: booking.booking_date,
+      booking_time: booking.booking_time,
     });
     setIsDialogOpen(true);
   };
@@ -147,14 +206,20 @@ export default function BookingsOverviewPage() {
         body: JSON.stringify({ id: bookingToDelete }),
       });
 
-      if (response.ok) {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
         toast.success("Booking deleted successfully");
-        fetchBookings();
+        setBookings(bookings.filter((b) => b.id !== bookingToDelete));
       } else {
-        const data = await response.json();
         throw new Error(data.error || "Failed to delete booking");
       }
     } catch (error) {
+      console.error("Delete booking error:", error);
       toast.error(error.message);
     } finally {
       setIsDeleteDialogOpen(false);
@@ -167,44 +232,45 @@ export default function BookingsOverviewPage() {
       const method = currentBooking.id ? "PUT" : "POST";
       const url = "/api/bookings";
 
-      const requestBody = currentBooking.id
-        ? currentBooking
-        : {
-          business_id: user?.id,
-          name: currentBooking.name,
-          phone_number: currentBooking.phone_number,
-          booking_date: currentBooking.date,
-          booking_time: currentBooking.time,
-        };
-
       const response = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify({
+          ...currentBooking,
+          timezone,
+          business_id: user?.id,
+        }),
       });
 
-      if (response.ok) {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.id) {
         toast.success(
           `Booking ${currentBooking.id ? "updated" : "created"} successfully`
         );
-        fetchBookings();
         setIsDialogOpen(false);
+        fetchBookings();
       } else {
-        const data = await response.json();
         throw new Error(data.error || "Failed to save booking");
       }
     } catch (error) {
+      console.error("Save booking error:", error);
       toast.error(error.message);
     }
   };
 
   const handleAddNew = () => {
+    const now = new Date();
     setCurrentBooking({
       id: "",
       name: "",
       phone_number: "",
-      date: format(new Date(), "yyyy-MM-dd"),
-      time: "09:00",
+      booking_date: now.toISOString().split("T")[0],
+      booking_time: now.getHours().toString().padStart(2, "0") + ":00",
     });
     setIsDialogOpen(true);
   };
@@ -222,28 +288,9 @@ export default function BookingsOverviewPage() {
     if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
   };
 
-  const filterLabels = {
-    today: "Today",
-    tomorrow: "Tomorrow",
-    next7: "Next 7 Days",
-    upcoming: "All Upcoming",
-    past30: "Past 30 Days",
-    recent: "Recently Booked",
-    all: "All Bookings",
-    custom: "Custom Date",
-  };
-
-  const TableSkeleton = () => (
-    <div className="space-y-4 p-6">
-      {[...Array(5)].map((_, i) => (
-        <Skeleton key={i} className="h-12 w-full rounded-lg" />
-      ))}
-    </div>
-  );
-
   return (
     <div className="container mx-auto px-4 py-6 space-y-6">
-      {/* Header */}
+      {/* Header and Booking Link Card */}
       <div className="grid gap-6">
         <div className="flex flex-col space-y-1">
           <h1 className="text-3xl font-bold">Welcome, {businessName}</h1>
@@ -252,7 +299,6 @@ export default function BookingsOverviewPage() {
           </p>
         </div>
 
-        {/* Booking Link Card */}
         <Card className="overflow-hidden">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm text-muted-foreground uppercase">
@@ -273,7 +319,7 @@ export default function BookingsOverviewPage() {
         </Card>
       </div>
 
-      {/* Filters */}
+      {/* Filters and Table */}
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row justify-between gap-4 items-start sm:items-center">
           <div className="flex flex-wrap gap-3 items-center">
@@ -284,7 +330,7 @@ export default function BookingsOverviewPage() {
                 <SelectValue placeholder="Select filter" />
               </SelectTrigger>
               <SelectContent>
-                {Object.entries(filterLabels).map(([key, label]) => (
+                {Object.entries(FILTER_OPTIONS).map(([key, label]) => (
                   <SelectItem key={key} value={key}>
                     {label}
                   </SelectItem>
@@ -311,18 +357,29 @@ export default function BookingsOverviewPage() {
               </Popover>
             )}
 
-            {/* Refresh Button */}
             <Button onClick={fetchBookings} variant="outline">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none"
-                viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                  d="M4 4v6h6M20 20v-6h-6M4 10a9 9 0 0115.9-3.36M20 14a9 9 0 01-15.9 3.36" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4 mr-2"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                />
               </svg>
               Refresh
             </Button>
           </div>
 
-          <Button onClick={handleAddNew} className="bg-blue-500 hover:bg-blue-600">
+          <Button
+            onClick={handleAddNew}
+            className="bg-blue-500 hover:bg-blue-600"
+          >
             <Plus className="h-4 w-4 mr-2" />
             Add Booking
           </Button>
@@ -330,7 +387,7 @@ export default function BookingsOverviewPage() {
 
         {/* Active Filter Badge */}
         <div className="flex items-center gap-2">
-          <Badge variant="outline">{filterLabels[filter]}</Badge>
+          <Badge variant="outline">{FILTER_OPTIONS[filter]}</Badge>
           {!isLoading && bookings.length > 0 && (
             <span className="text-sm text-muted-foreground">
               {bookings.length} {bookings.length === 1 ? "booking" : "bookings"}
@@ -362,11 +419,15 @@ export default function BookingsOverviewPage() {
                   {bookings.map((booking) => (
                     <TableRow key={booking.id}>
                       <TableCell className="px-6">{booking.name}</TableCell>
-                      <TableCell className="px-6">{booking.phone_number}</TableCell>
                       <TableCell className="px-6">
-                        {format(new Date(`${booking.date}T00:00:00`), "MMM dd, yyyy")}
+                        {booking.phone_number}
                       </TableCell>
-                      <TableCell className="px-6">{booking.time}</TableCell>
+                      <TableCell className="px-6">
+                        {formatDisplayDate(booking.booking_date)}
+                      </TableCell>
+                      <TableCell className="px-6">
+                        {formatDisplayTime(booking.booking_time)}
+                      </TableCell>
                       <TableCell className="px-6 text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -375,7 +436,9 @@ export default function BookingsOverviewPage() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleEdit(booking)}>
+                            <DropdownMenuItem
+                              onClick={() => handleEdit(booking)}
+                            >
                               <Edit className="h-4 w-4 mr-2" />
                               Edit
                             </DropdownMenuItem>
@@ -393,7 +456,6 @@ export default function BookingsOverviewPage() {
                   ))}
                 </TableBody>
               </Table>
-
 
               {/* Pagination */}
               {totalPages > 1 && (
@@ -469,11 +531,11 @@ export default function BookingsOverviewPage() {
                 <Input
                   type="date"
                   id="date"
-                  value={currentBooking?.date || ""}
+                  value={currentBooking?.booking_date || ""}
                   onChange={(e) =>
                     setCurrentBooking((prev) => ({
                       ...prev,
-                      date: e.target.value,
+                      booking_date: e.target.value,
                     }))
                   }
                   required
@@ -484,11 +546,11 @@ export default function BookingsOverviewPage() {
                 <Input
                   type="time"
                   id="time"
-                  value={currentBooking?.time || ""}
+                  value={currentBooking?.booking_time || ""}
                   onChange={(e) =>
                     setCurrentBooking((prev) => ({
                       ...prev,
-                      time: e.target.value,
+                      booking_time: e.target.value,
                     }))
                   }
                   required

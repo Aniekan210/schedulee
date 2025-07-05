@@ -40,6 +40,7 @@ export async function GET(request) {
       bgColor: data.bg_color,
       logoUrl: data.logo_url || "",
       businessName: data.business_name || "",
+      businessTimezone: data.timezone || "America/Halifax",
     };
 
     return new Response(JSON.stringify(settings), {

@@ -1,11 +1,29 @@
+import { DateTime } from "luxon";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
-function formatDateAsUTC(date) {
-  // Forces the date to UTC midnight to avoid timezone shifts
-  const utcDate = new Date(date);
-  utcDate.setUTCHours(0, 0, 0, 0);
-  return utcDate.toISOString().split('T')[0];
+function convertToUTC(dateStr, timeStr, timezone) {
+  // Create a Luxon DateTime in the specified timezone
+  const localDateTime = DateTime.fromISO(`${dateStr}T${timeStr}`, {
+    zone: timezone,
+  });
+
+  // Convert to UTC and return as ISO string
+  return localDateTime.toUTC().toISO();
+}
+
+function convertFromUTC(timestampUtc, timezone) {
+  // Create a Luxon DateTime from UTC timestamp
+  const utcDateTime = DateTime.fromISO(timestampUtc, { zone: "utc" });
+
+  // Convert to the specified timezone
+  const localDateTime = utcDateTime.setZone(timezone);
+
+  // Format as date and time strings
+  const dateStr = localDateTime.toISODate();
+  const timeStr = localDateTime.toFormat("HH:mm");
+
+  return { booking_date: dateStr, booking_time: timeStr };
 }
 
 export async function GET(request) {
@@ -14,6 +32,7 @@ export async function GET(request) {
   const page = parseInt(searchParams.get("page") || "1");
   const itemsPerPage = parseInt(searchParams.get("itemsPerPage") || "5");
   const customDate = searchParams.get("customDate");
+  const timezone = searchParams.get("timezone") || "UTC";
 
   try {
     const supabase = await createSupabaseServerClient();
@@ -25,62 +44,75 @@ export async function GET(request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const today = new Date();
+    const today = DateTime.now().setZone(timezone).startOf("day");
 
     let query = supabase
       .from("bookings")
       .select("*")
       .eq("business_id", user.id)
-      .order("booking_date", { ascending: true })
-      .order("booking_time", { ascending: true });
+      .order("timestamp_utc", { ascending: true });
 
     switch (filter) {
       case "today": {
-        const dateStr = formatDateAsUTC(today);
-        query = query.eq("booking_date", dateStr);
+        const startUtc = today.toUTC().toISO();
+        const endUtc = today.plus({ days: 1 }).toUTC().toISO();
+        query = query
+          .gte("timestamp_utc", startUtc)
+          .lt("timestamp_utc", endUtc);
         break;
       }
       case "tomorrow": {
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        const dateStr = formatDateAsUTC(tomorrow);
-        query = query.eq("booking_date", dateStr);
+        const tomorrow = today.plus({ days: 1 });
+        const startUtc = tomorrow.toUTC().toISO();
+        const endUtc = tomorrow.plus({ days: 1 }).toUTC().toISO();
+        query = query
+          .gte("timestamp_utc", startUtc)
+          .lt("timestamp_utc", endUtc);
         break;
       }
       case "next7": {
-        const startDateStr = formatDateAsUTC(today);
-        const nextWeek = new Date(today);
-        nextWeek.setDate(today.getDate() + 7);
-        const endDateStr = formatDateAsUTC(nextWeek);
-        query = query.gte("booking_date", startDateStr).lte("booking_date", endDateStr);
+        const startUtc = today.toUTC().toISO();
+        const nextWeek = today.plus({ days: 7 }).endOf("day");
+        query = query
+          .gte("timestamp_utc", startUtc)
+          .lte("timestamp_utc", nextWeek.toUTC().toISO());
         break;
       }
       case "upcoming": {
-        const startDateStr = formatDateAsUTC(today);
-        query = query.gte("booking_date", startDateStr);
+        const startUtc = today.toUTC().toISO();
+        query = query.gte("timestamp_utc", startUtc);
         break;
       }
       case "past30": {
-        const pastDate = new Date(today);
-        pastDate.setDate(today.getDate() - 30);
-        const pastDateStr = formatDateAsUTC(pastDate);
-        const todayStr = formatDateAsUTC(today);
-        query = query.gte("booking_date", pastDateStr).lte("booking_date", todayStr);
+        const pastDate = today.minus({ days: 30 });
+        const todayEnd = today.endOf("day");
+        query = query
+          .gte("timestamp_utc", pastDate.toUTC().toISO())
+          .lte("timestamp_utc", todayEnd.toUTC().toISO());
         break;
       }
       case "recent": {
-        const recentDate = new Date(today);
-        recentDate.setDate(today.getDate() - 7);
+        const recentDate = DateTime.now().minus({ days: 7 });
         query = query
-          .gte("created_at", recentDate.toISOString())
+          .gte("created_at", recentDate.toUTC().toISO())
           .order("created_at", { ascending: false });
         break;
       }
       case "custom": {
         if (customDate) {
-          // Ensure customDate is treated as UTC (assuming input is YYYY-MM-DD)
-          const utcDate = new Date(`${customDate}T00:00:00Z`);
-          query = query.eq("booking_date", utcDate.toISOString().split('T')[0]);
+          const startUtc = DateTime.fromISO(`${customDate}T00:00:00`, {
+            zone: timezone,
+          })
+            .toUTC()
+            .toISO();
+          const endUtc = DateTime.fromISO(`${customDate}T23:59:59.999`, {
+            zone: timezone,
+          })
+            .toUTC()
+            .toISO();
+          query = query
+            .gte("timestamp_utc", startUtc)
+            .lte("timestamp_utc", endUtc);
         }
         break;
       }
@@ -95,8 +127,14 @@ export async function GET(request) {
 
     if (error) throw error;
 
+    // Convert UTC timestamps back to local date and time
+    const bookingsWithLocalTime = data.map((booking) => ({
+      ...booking,
+      ...convertFromUTC(booking.timestamp_utc, timezone),
+    }));
+
     return NextResponse.json({
-      bookings: data,
+      bookings: bookingsWithLocalTime,
       total: count,
       page,
       totalPages: Math.ceil(count / itemsPerPage),
@@ -109,47 +147,53 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const supabase = await createSupabaseServerClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
 
-    if (!user)
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    const bookingData = await request.json();
+    const { timezone, ...bookingData } = await request.json();
 
     // Validate required fields
-    if (!bookingData.name || !bookingData.phone_number || !bookingData.booking_date || !bookingData.booking_time) {
+    if (
+      !bookingData.name ||
+      !bookingData.phone_number ||
+      !bookingData.booking_date ||
+      !bookingData.booking_time
+    ) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
       );
     }
 
-    // Ensure business_id matches the authenticated user
-    if (bookingData.business_id && bookingData.business_id !== user.id) {
-      return NextResponse.json(
-        { error: "Invalid business_id" },
-        { status: 403 }
-      );
-    }
+    // Convert local date/time to UTC timestamp
+    const timestamp_utc = convertToUTC(
+      bookingData.booking_date,
+      bookingData.booking_time.includes(":")
+        ? bookingData.booking_time
+        : `${bookingData.booking_time}:00`,
+      timezone || "UTC"
+    );
+
+    // Create a new object without booking_date and booking_time
+    const { booking_date, booking_time, ...cleanBookingData } = bookingData;
 
     const { data, error } = await supabase
       .from("bookings")
       .insert([
         {
-          ...bookingData,
-          business_id: user.id, // Override with authenticated user's ID
-          booking_time: bookingData.booking_time.includes(':')
-            ? bookingData.booking_time
-            : `${bookingData.booking_time}:00`, // Ensure time format
-        }
+          ...cleanBookingData,
+          timestamp_utc,
+        },
       ])
       .select();
 
     if (error) throw error;
 
-    return NextResponse.json(data[0], { status: 201 });
+    // Return the booking with local date/time
+    const responseData = {
+      ...data[0],
+      ...convertFromUTC(data[0].timestamp_utc, timezone || "UTC"),
+    };
+
+    return NextResponse.json(responseData, { status: 201 });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -165,7 +209,8 @@ export async function PUT(request) {
     if (!user)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const { id, date, time, phone, ...rest } = await request.json();
+    const { id, timezone, booking_date, booking_time, phone, ...rest } =
+      await request.json();
 
     const { data: existingBooking } = await supabase
       .from("bookings")
@@ -177,20 +222,38 @@ export async function PUT(request) {
     if (!existingBooking)
       return NextResponse.json({ error: "Booking not found" }, { status: 404 });
 
+    // Convert local date/time to UTC timestamp if date/time are being updated
+    let timestamp_utc = existingBooking.timestamp_utc;
+    if (booking_date && booking_time) {
+      timestamp_utc = convertToUTC(
+        booking_date,
+        booking_time.includes(":") ? booking_time : `${booking_time}:00`,
+        timezone || "UTC"
+      );
+    }
+
+    // Remove any deprecated fields that might be in the rest object
+    const { booking_date: _, booking_time: __, ...cleanRest } = rest;
+
     const { data, error } = await supabase
       .from("bookings")
       .update({
-        ...rest,
+        ...cleanRest,
         phone_number: phone,
-        booking_date: date,
-        booking_time: `${time}:00`,
+        timestamp_utc,
       })
       .eq("id", id)
       .select();
 
     if (error) throw error;
 
-    return NextResponse.json(data[0]);
+    // Return the booking with local date/time
+    const responseData = {
+      ...data[0],
+      ...convertFromUTC(data[0].timestamp_utc, timezone || "UTC"),
+    };
+
+    return NextResponse.json(responseData);
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

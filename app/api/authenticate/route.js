@@ -9,7 +9,7 @@ export async function GET() {
     const {
       data: { user },
       error,
-    } = await supabase.auth.getUser(); // ✅ secure
+    } = await supabase.auth.getUser();
 
     if (error || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -20,10 +20,10 @@ export async function GET() {
     const now = new Date();
     const daysElapsed = Math.floor((now - createdAt) / 86400000);
     const daysLeft = Math.max(0, trialDays - daysElapsed);
-
+    
     return NextResponse.json({
       user,
-      hasPaid: user.user_metadata?.has_paid || false,
+      hasPaid: user.user_metadata?.is_paid || false,
       daysLeft,
     });
   } catch (error) {
