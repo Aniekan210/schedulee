@@ -1,14 +1,14 @@
-// app/api/availability/client/route.js
 import { supabase } from "@/lib/supabase/client";
 import { DateTime } from "luxon";
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const business_id = searchParams.get("business_id");
-  const dateParam = searchParams.get("date");
-  const timezone = searchParams.get("timezone") || "UTC";
+  const rawDate = searchParams.get("date");
+  const userTimezone = searchParams.get("timezone") || "UTC";
+  const businessTimezone = searchParams.get("business_timezone") || "UTC";
 
-  if (!business_id || !dateParam) {
+  if (!business_id || !rawDate) {
     return new Response(
       JSON.stringify({
         error: "Missing required parameters: business_id or date",
@@ -17,46 +17,52 @@ export async function GET(request) {
     );
   }
 
+  const userDate = DateTime.fromISO(rawDate, { zone: userTimezone });
+  if (!userDate.isValid) {
+    return new Response(
+      JSON.stringify({ error: "Invalid date format (expected YYYY-MM-DD)" }),
+      { status: 400, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
+  // Get UTC range for the user's full local day
+  const utcStart = userDate.startOf("day").toUTC();
+  const utcEnd = userDate.endOf("day").toUTC();
+
+  // Use business timezone version of UTC start to query the override
+  const businessLocalDate = utcStart.setZone(businessTimezone).toISODate();
+
+  const weekday = userDate.toFormat("cccc").toLowerCase();
+  const dateOnly = userDate.toISODate();
+
   try {
-    const date = DateTime.fromISO(dateParam, { zone: timezone });
-    if (!date.isValid) {
-      return new Response(JSON.stringify({ error: "Invalid date format" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-
-    const weekday = date.toFormat("cccc").toLowerCase(); // e.g. "monday"
-    const dateOnly = date.toISODate(); // "YYYY-MM-DD"
-
-    // 1. Check for override
     const { data: override, error: overrideError } = await supabase
       .from("overrides")
       .select("*")
       .eq("business_id", business_id)
-      .eq("date", dateOnly)
+      .eq("date", businessLocalDate)
       .maybeSingle();
 
     if (overrideError) throw overrideError;
 
-    if (override && !override.is_available) {
+    if (override && override.is_available === false) {
       return new Response(
         JSON.stringify({
           availableTimes: [],
           reason: "business_closed",
-          message: "Business is closed on this date",
+          message: "Business is closed on this date via override.",
         }),
         { headers: { "Content-Type": "application/json" } }
       );
     }
 
-    // 2. Get existing bookings
+    // Get existing bookings in UTC
     const { data: existingBookings = [], error: bookingsError } = await supabase
       .from("bookings")
       .select("timestamp_utc")
       .eq("business_id", business_id)
-      .gte("timestamp_utc", `${dateOnly}T00:00:00Z`)
-      .lt("timestamp_utc", `${dateOnly}T23:59:59Z`);
+      .gte("timestamp_utc", utcStart.toISO())
+      .lt("timestamp_utc", utcEnd.toISO());
 
     if (bookingsError) throw bookingsError;
 
@@ -67,7 +73,6 @@ export async function GET(request) {
       })
     );
 
-    // 3. Get availability config
     let availabilityConfig = null;
     let breaks = [];
 
@@ -93,7 +98,7 @@ export async function GET(request) {
           JSON.stringify({
             availableTimes: [],
             reason: "no_regular_hours",
-            message: "No regular business hours for this weekday",
+            message: "No recurring business hours for this weekday.",
           }),
           { headers: { "Content-Type": "application/json" } }
         );
@@ -115,6 +120,7 @@ export async function GET(request) {
       breaks = availabilityBreaks;
     }
 
+    // Generate all potential UTC slots
     const slots = generateTimeSlots(
       availabilityConfig.start_time,
       availabilityConfig.end_time,
@@ -122,29 +128,32 @@ export async function GET(request) {
       breaks
     );
 
+    // Filter out booked ones
     const availableSlots = slots.filter((slot) => {
-      const [hours, minutes] = slot.split(":").map(Number);
-      const slotMinutes = hours * 60 + minutes;
+      const [hour, minute] = slot.split(":").map(Number);
+      const slotMinutes = hour * 60 + minute;
       return !bookedMinutes.has(slotMinutes);
     });
 
-    const timezoneSlots = convertSlotsToTimezone(
+    // Convert each available time to the user's local timezone
+    const convertedSlots = convertSlotsToUserTimezone(
       availableSlots,
-      dateOnly,
-      timezone
+      userDate,
+      userTimezone
     );
 
     return new Response(
       JSON.stringify({
-        availableTimes: timezoneSlots,
+        availableTimes: convertedSlots,
         meta: {
           date: dateOnly,
-          timezone,
+          timezone: userTimezone,
+          businessTimezone,
           weekday,
           business_id,
           totalSlots: slots.length,
           bookedSlots: existingBookings.length,
-          availableSlots: timezoneSlots.length,
+          availableSlots: convertedSlots.length,
           usingOverride: !!override?.is_available,
           intervalMinutes: availabilityConfig.interval_minutes,
         },
@@ -152,7 +161,7 @@ export async function GET(request) {
       { headers: { "Content-Type": "application/json" } }
     );
   } catch (error) {
-    console.error("Error fetching availability:", error);
+    console.error("💥 Error fetching availability:", error);
     return new Response(
       JSON.stringify({
         error: "Failed to fetch availability",
@@ -179,8 +188,11 @@ function generateTimeSlots(startTime, endTime, intervalMinutes, breaks = []) {
       currentMin
     ).padStart(2, "0")}`;
 
+    // Exclude time if it's inside a break
     const isDuringBreak = breaks.some((b) => {
-      return timeStr >= b.start_time && timeStr < b.end_time;
+      const breakStart = b.start_time;
+      const breakEnd = b.end_time;
+      return timeStr >= breakStart && timeStr < breakEnd;
     });
 
     if (!isDuringBreak) {
@@ -197,18 +209,21 @@ function generateTimeSlots(startTime, endTime, intervalMinutes, breaks = []) {
   return slots;
 }
 
-function convertSlotsToTimezone(slots, dateStr, timezone) {
-  return slots.map((slot) => {
-    const [hour, minute] = slot.split(":").map(Number);
-    const utcTime = DateTime.fromObject(
+function convertSlotsToUserTimezone(slots, userDate, userTimezone) {
+  const converted = slots.map((timeStr) => {
+    const [hour, minute] = timeStr.split(":").map(Number);
+    const utcSlot = DateTime.fromObject(
       {
-        ...DateTime.fromISO(dateStr).toObject(),
+        year: userDate.year,
+        month: userDate.month,
+        day: userDate.day,
         hour,
         minute,
       },
       { zone: "utc" }
-    ).setZone(timezone);
-
-    return utcTime.toFormat("HH:mm");
+    );
+    return utcSlot.setZone(userTimezone).toFormat("HH:mm");
   });
+
+  return converted;
 }

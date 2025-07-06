@@ -42,7 +42,6 @@ export default function BookingPage() {
   const [isLoadingSettings, setIsLoadingSettings] = useState(true);
   const [settings, setSettings] = useState(null);
   const [timezone, setTimezone] = useState("America/Halifax"); // Default timezone
-
   const [date, setDate] = useState();
   const [selectedTime, setSelectedTime] = useState("");
   const [availableTimes, setAvailableTimes] = useState([]);
@@ -72,8 +71,8 @@ export default function BookingPage() {
         if (!data || !data.businessName) throw new Error("Invalid business ID");
         setSettings(data);
         // Set timezone from settings if available
-        if (data.timezone) {
-          setTimezone(data.timezone);
+        if (data.businessTimezone) {
+          setTimezone(data.businessTimezone);
         }
       } catch (err) {
         console.error("Error fetching settings:", err);
@@ -94,9 +93,10 @@ export default function BookingPage() {
       setIsLoadingTimes(true);
       setSelectedTime("");
       try {
+        const { businessTimezone } = settings;
         const dateStr = format(selectedDate, "yyyy-MM-dd");
         const response = await fetch(
-          `/api/availability/client?business_id=${business_id}&date=${dateStr}&timezone=${timezone}`
+          `/api/availability/client?business_id=${business_id}&date=${dateStr}&timezone=${timezone}&business_timezone=${businessTimezone}`
         );
 
         if (!response.ok) throw new Error("Failed to fetch available times");

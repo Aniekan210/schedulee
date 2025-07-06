@@ -1,6 +1,37 @@
 "use client";
 
 import { useAuth } from "@/context/auth-context";
+import { Button } from "@/components/ui/button";
+import {
+  Plus,
+  Save,
+  Clock,
+  X,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Edit,
+  Trash2,
+  MoreVertical,
+} from "lucide-react";
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
+import { DateTime } from "luxon";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -9,7 +40,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,42 +47,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  MoreVertical,
-  Edit,
-  Trash2,
-  Plus,
-  Calendar as CalendarIcon,
-  ChevronLeft,
-  ChevronRight,
-  Save,
-  Clock,
-  X,
-  Check,
-} from "lucide-react";
-import { useState, useEffect } from "react";
-import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
-import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Switch } from "@/components/ui/switch";
-import { TimePicker } from "@/components/ui/time-picker";
 
 const WEEKDAYS = [
   "monday",
@@ -65,6 +65,16 @@ const WEEKDAYS = [
 ];
 
 const WEEKDAY_LABELS = {
+  monday: "Monday",
+  tuesday: "Tuesday",
+  wednesday: "Wednesday",
+  thursday: "Thursday",
+  friday: "Friday",
+  saturday: "Saturday",
+  sunday: "Sunday",
+};
+
+const WEEKDAY_SHORT_LABELS = {
   monday: "Mon",
   tuesday: "Tue",
   wednesday: "Wed",
@@ -74,25 +84,355 @@ const WEEKDAY_LABELS = {
   sunday: "Sun",
 };
 
-const generateTimeSlots = () => {
-  const slots = [];
-  for (let hour = 0; hour < 24; hour++) {
-    slots.push(`${hour.toString().padStart(2, "0")}:00`);
-    slots.push(`${hour.toString().padStart(2, "0")}:30`);
-  }
-  return slots;
+const TIME_OPTIONS = Array.from({ length: 24 * 2 }, (_, i) => {
+  const hour = Math.floor(i / 2);
+  const minute = (i % 2) * 30;
+  return `${hour.toString().padStart(2, "0")}:${minute
+    .toString()
+    .padStart(2, "0")}`;
+});
+
+const INTERVAL_OPTIONS = [
+  { value: 15, label: "15 minutes" },
+  { value: 30, label: "30 minutes" },
+  { value: 45, label: "45 minutes" },
+  { value: 60, label: "1 hour" },
+  { value: 90, label: "1.5 hours" },
+  { value: 120, label: "2 hours" },
+];
+
+const TimePicker = ({ value, onChange, placeholder = "Select time" }) => {
+  return (
+    <Select value={value} onValueChange={onChange}>
+      <SelectTrigger className="w-[120px]">
+        <SelectValue placeholder={placeholder} />
+      </SelectTrigger>
+      <SelectContent className="max-h-[300px] overflow-y-auto">
+        {TIME_OPTIONS.map((time) => (
+          <SelectItem key={time} value={time}>
+            {DateTime.fromFormat(time, "HH:mm").toLocaleString(
+              DateTime.TIME_SIMPLE
+            )}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+};
+
+const DaySchedule = ({ day, availability, onChange }) => {
+  const [isExpanded, setIsExpanded] = useState(availability.is_available);
+
+  const handleToggleAvailable = (checked) => {
+    onChange(day, "is_available", checked);
+    setIsExpanded(checked);
+  };
+
+  return (
+    <div className="w-full max-w-md mx-auto border rounded-2xl overflow-hidden bg-white dark:bg-gray-900 shadow-sm">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800">
+        <div className="flex items-center gap-3">
+          <Switch
+            checked={availability.is_available}
+            onCheckedChange={handleToggleAvailable}
+            className="data-[state=checked]:bg-blue-500"
+          />
+          <Label className="text-sm font-medium">{WEEKDAY_LABELS[day]}</Label>
+        </div>
+
+        <Badge
+          variant="outline"
+          className={
+            availability.is_available
+              ? "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-400"
+              : "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-400"
+          }
+        >
+          {availability.is_available ? "Available" : "Unavailable"}
+        </Badge>
+      </div>
+
+      {/* Body */}
+      {availability.is_available && (
+        <div className="p-4 space-y-6 border-t">
+          {/* Time Settings */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-4">
+            <div className="space-y-1.5">
+              <Label className="text-sm">Start Time</Label>
+              <TimePicker
+                value={availability.start_time}
+                onChange={(value) => onChange(day, "start_time", value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-sm">End Time</Label>
+              <TimePicker
+                value={availability.end_time}
+                onChange={(value) => onChange(day, "end_time", value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-sm">Interval</Label>
+              <Select
+                value={availability.interval_minutes.toString()}
+                onValueChange={(value) =>
+                  onChange(day, "interval_minutes", parseInt(value))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select interval" />
+                </SelectTrigger>
+                <SelectContent>
+                  {INTERVAL_OPTIONS.map((option) => (
+                    <SelectItem
+                      key={option.value}
+                      value={option.value.toString()}
+                    >
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Breaks */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <Label className="text-sm">Breaks</Label>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  onChange(day, "breaks", [
+                    ...availability.breaks,
+                    {
+                      id: `temp-${Date.now()}`,
+                      start_time: "12:00",
+                      end_time: "13:00",
+                    },
+                  ]);
+                }}
+                className="text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30"
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Add Break
+              </Button>
+            </div>
+
+            {availability.breaks.length === 0 ? (
+              <div className="text-center py-2 text-sm text-muted-foreground">
+                No breaks scheduled
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {availability.breaks.map((br) => (
+                  <div
+                    key={br.id}
+                    className="flex items-center gap-4 flex-wrap"
+                  >
+                    <TimePicker
+                      value={br.start_time}
+                      onChange={(value) => {
+                        const updatedBreaks = availability.breaks.map((b) =>
+                          b.id === br.id ? { ...b, start_time: value } : b
+                        );
+                        onChange(day, "breaks", updatedBreaks);
+                      }}
+                      placeholder="Start"
+                    />
+                    <span className="text-muted-foreground text-sm">to</span>
+                    <TimePicker
+                      value={br.end_time}
+                      onChange={(value) => {
+                        const updatedBreaks = availability.breaks.map((b) =>
+                          b.id === br.id ? { ...b, end_time: value } : b
+                        );
+                        onChange(day, "breaks", updatedBreaks);
+                      }}
+                      placeholder="End"
+                    />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        const updatedBreaks = availability.breaks.filter(
+                          (b) => b.id !== br.id
+                        );
+                        onChange(day, "breaks", updatedBreaks);
+                      }}
+                      className="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 px-2"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const WeekView = ({ availabilities, onChange }) => {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3 gap-6">
+      {WEEKDAYS.map((day) => {
+        const dayAvailability = availabilities.find(
+          (a) => a.weekday === day
+        ) || {
+          weekday: day,
+          is_available: false,
+          start_time: "09:00",
+          end_time: "17:00",
+          interval_minutes: 60,
+          breaks: [],
+        };
+
+        return (
+          <DaySchedule
+            key={day}
+            day={day}
+            availability={dayAvailability}
+            onChange={onChange}
+          />
+        );
+      })}
+    </div>
+  );
+};
+
+const VisualSchedule = ({ availabilities }) => {
+  const timeSlots = Array.from({ length: 24 * 2 }, (_, i) => {
+    const hour = Math.floor(i / 2);
+    const minute = (i % 2) * 30;
+    return `${hour.toString().padStart(2, "0")}:${minute
+      .toString()
+      .padStart(2, "0")}`;
+  });
+
+  return (
+    <div className="h-[calc(100vh-320px)] overflow-hidden border rounded-lg">
+      <div className="h-full overflow-auto">
+        <div className="min-w-[700px]">
+          {/* Header row - sticky top */}
+          <div className="grid grid-cols-8 border-b bg-white dark:bg-gray-900 z-10 sticky top-0">
+            <div className="p-2 font-medium border-r text-sm sticky left-0 bg-white dark:bg-gray-900 z-9">
+              Time
+            </div>
+            {WEEKDAYS.map((day) => (
+              <div
+                key={day}
+                className="p-2 font-medium text-center border-r text-sm last:border-r-0"
+              >
+                {WEEKDAY_SHORT_LABELS[day]}
+              </div>
+            ))}
+          </div>
+
+          {/* Time slots */}
+          {timeSlots.map((time) => {
+            const [hour, minute] = time.split(":").map(Number);
+            const isHalfHour = minute === 30;
+            const displayTime = `${hour.toString().padStart(2, "0")}:${minute
+              .toString()
+              .padStart(2, "0")}`;
+
+            return (
+              <div
+                key={time}
+                className={`grid grid-cols-8 border-b ${
+                  isHalfHour ? "bg-gray-50 dark:bg-gray-800" : ""
+                }`}
+              >
+                {/* Time column - sticky left */}
+                <div className="p-2 border-r text-xs text-muted-foreground sticky left-0 bg-white dark:bg-gray-800 z-9">
+                  {displayTime}
+                </div>
+                {WEEKDAYS.map((day) => {
+                  const dayAvailability = availabilities.find(
+                    (a) => a.weekday === day
+                  );
+                  if (!dayAvailability) return null;
+
+                  const isAvailable = dayAvailability.is_available;
+                  const isWorkingHour =
+                    isAvailable &&
+                    time >= dayAvailability.start_time &&
+                    time < dayAvailability.end_time;
+
+                  const isBreakTime = isWorkingHour
+                    ? dayAvailability.breaks.some(
+                        (br) => time >= br.start_time && time < br.end_time
+                      )
+                    : false;
+
+                  return (
+                    <div
+                      key={`${day}-${time}`}
+                      className={`p-1 border-r text-center ${
+                        isWorkingHour
+                          ? isBreakTime
+                            ? "bg-red-100 dark:bg-red-900/30"
+                            : "bg-green-100 dark:bg-green-900/30"
+                          : "bg-gray-100 dark:bg-gray-800"
+                      }`}
+                      title={
+                        isWorkingHour
+                          ? isBreakTime
+                            ? `Break: ${dayAvailability.breaks
+                                .filter(
+                                  (br) =>
+                                    time >= br.start_time && time < br.end_time
+                                )
+                                .map((br) => `${br.start_time}-${br.end_time}`)
+                                .join(", ")}`
+                            : `Available (${dayAvailability.start_time}-${dayAvailability.end_time})`
+                          : "Unavailable"
+                      }
+                    >
+                      {isWorkingHour ? (
+                        isBreakTime ? (
+                          <Clock className="h-3 w-3 mx-auto text-red-500 dark:text-red-400" />
+                        ) : (
+                          <Check className="h-3 w-3 mx-auto text-green-500 dark:text-green-400" />
+                        )
+                      ) : (
+                        <X className="h-3 w-3 mx-auto text-gray-500 dark:text-gray-400" />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
 };
 
 const formatTimeDisplay = (time) => {
   if (!time) return "";
-  return new Date(`1970-01-01T${time}`).toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,
-  });
+  return DateTime.fromFormat(time, "HH:mm").toLocaleString(
+    DateTime.TIME_SIMPLE
+  );
 };
 
-export default function AvailabilityPage() {
+const TableSkeleton = () => {
+  return (
+    <div className="space-y-4">
+      {[...Array(5)].map((_, i) => (
+        <Skeleton key={i} className="h-12 w-full rounded-lg" />
+      ))}
+    </div>
+  );
+};
+
+const AvailabilityPage = () => {
   const { user } = useAuth();
   const [timezone, setTimezone] = useState("America/Halifax");
   const [availabilities, setAvailabilities] = useState([]);
@@ -180,59 +520,8 @@ export default function AvailabilityPage() {
     setHasChanges(true);
   };
 
-  const handleAddBreak = (weekday) => {
-    setAvailabilities((prev) =>
-      prev.map((avail) =>
-        avail.weekday === weekday
-          ? {
-              ...avail,
-              breaks: [
-                ...avail.breaks,
-                {
-                  id: `temp-${Date.now()}`,
-                  availability_id: avail.id,
-                  start_time: "12:00",
-                  end_time: "13:00",
-                },
-              ],
-            }
-          : avail
-      )
-    );
-    setHasChanges(true);
-  };
-
-  const handleBreakChange = (weekday, breakId, field, value) => {
-    setAvailabilities((prev) =>
-      prev.map((avail) =>
-        avail.weekday === weekday
-          ? {
-              ...avail,
-              breaks: avail.breaks.map((br) =>
-                br.id === breakId ? { ...br, [field]: value } : br
-              ),
-            }
-          : avail
-      )
-    );
-    setHasChanges(true);
-  };
-
-  const handleRemoveBreak = (weekday, breakId) => {
-    setAvailabilities((prev) =>
-      prev.map((avail) =>
-        avail.weekday === weekday
-          ? {
-              ...avail,
-              breaks: avail.breaks.filter((br) => br.id !== breakId),
-            }
-          : avail
-      )
-    );
-    setHasChanges(true);
-  };
-
-  const handleSaveChanges = async () => {
+  const handleSaveChanges = async (e) => {
+    e.preventDefault();
     setIsSaving(true);
     try {
       const response = await fetch("/api/availability", {
@@ -259,10 +548,11 @@ export default function AvailabilityPage() {
     }
   };
 
-  const handleAddOverride = () => {
+  const handleAddOverride = (e) => {
+    e.preventDefault();
     setCurrentOverride({
       business_id: user?.id,
-      date: new Date().toISOString().split("T")[0],
+      date: DateTime.now().setZone(timezone).toISODate(),
       is_available: true,
       start_time: "09:00",
       end_time: "17:00",
@@ -271,24 +561,28 @@ export default function AvailabilityPage() {
     setIsOverrideDialogOpen(true);
   };
 
-  const handleEditOverride = (override) => {
+  const handleEditOverride = (override, e) => {
+    e.preventDefault();
     setCurrentOverride({
       ...override,
-      // Ensure we're working with the UTC times in the dialog
       start_time: override.start_time || "09:00",
       end_time: override.end_time || "17:00",
     });
     setIsOverrideDialogOpen(true);
   };
 
-  const handleDeleteOverride = (id) => {
+  const handleDeleteOverride = (id, e) => {
+    e.preventDefault();
     setOverrideToDelete(id);
     setIsDeleteOverrideDialogOpen(true);
   };
 
-  const handleSaveOverride = async () => {
+  const handleSaveOverride = async (e) => {
+    e.preventDefault();
     try {
+      setIsSaving(true);
       const method = currentOverride?.id ? "PUT" : "POST";
+
       const response = await fetch("/api/overrides", {
         method,
         headers: { "Content-Type": "application/json" },
@@ -312,10 +606,13 @@ export default function AvailabilityPage() {
     } catch (error) {
       console.error("Save override error:", error);
       toast.error("Failed to save override");
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const handleDeleteOverrideConfirm = async () => {
+  const handleDeleteOverrideConfirm = async (e) => {
+    e.preventDefault();
     try {
       const response = await fetch("/api/overrides", {
         method: "DELETE",
@@ -338,303 +635,9 @@ export default function AvailabilityPage() {
     }
   };
 
-  const VisualSchedule = () => {
-    const timeSlots = generateTimeSlots();
-
-    return (
-      <div className="overflow-x-auto pb-4">
-        <div className="min-w-[700px]">
-          <div className="grid grid-cols-8 border-b sticky top-0 bg-white dark:bg-gray-900 z-10">
-            <div className="p-2 font-medium border-r text-sm">Time</div>
-            {WEEKDAYS.map((day) => (
-              <div
-                key={day}
-                className="p-2 font-medium text-center border-r text-sm last:border-r-0"
-              >
-                {WEEKDAY_LABELS[day]}
-              </div>
-            ))}
-          </div>
-          {timeSlots.map((time) => {
-            const [hour, minute] = time.split(":").map(Number);
-            const isHalfHour = minute === 30;
-            const displayTime = `${hour.toString().padStart(2, "0")}:${minute
-              .toString()
-              .padStart(2, "0")}`;
-
-            return (
-              <div
-                key={time}
-                className={`grid grid-cols-8 border-b ${
-                  isHalfHour ? "bg-gray-50 dark:bg-gray-800" : ""
-                }`}
-              >
-                <div className="p-2 border-r text-xs text-muted-foreground">
-                  {displayTime}
-                </div>
-                {WEEKDAYS.map((day) => {
-                  const dayAvailability = availabilities.find(
-                    (a) => a.weekday === day
-                  );
-                  if (!dayAvailability) return null;
-
-                  const isAvailable = dayAvailability.is_available;
-                  const isWorkingHour =
-                    isAvailable &&
-                    time >= dayAvailability.start_time &&
-                    time < dayAvailability.end_time;
-
-                  const isBreakTime = isWorkingHour
-                    ? dayAvailability.breaks.some(
-                        (br) => time >= br.start_time && time < br.end_time
-                      )
-                    : false;
-
-                  return (
-                    <div
-                      key={`${day}-${time}`}
-                      className={`p-1 border-r text-center ${
-                        isWorkingHour
-                          ? isBreakTime
-                            ? "bg-red-100 dark:bg-red-900/30"
-                            : "bg-green-100 dark:bg-green-900/30"
-                          : "bg-gray-100 dark:bg-gray-800"
-                      }`}
-                      title={
-                        isWorkingHour
-                          ? isBreakTime
-                            ? `Break: ${dayAvailability.breaks
-                                .filter(
-                                  (br) =>
-                                    time >= br.start_time && time < br.end_time
-                                )
-                                .map((br) => `${br.start_time}-${br.end_time}`)
-                                .join(", ")}`
-                            : `Available (${dayAvailability.start_time}-${dayAvailability.end_time})`
-                          : "Unavailable"
-                      }
-                    >
-                      {isWorkingHour ? (
-                        isBreakTime ? (
-                          <Clock className="h-3 w-3 mx-auto text-red-500 dark:text-red-400" />
-                        ) : (
-                          <Check className="h-3 w-3 mx-auto text-green-500 dark:text-green-400" />
-                        )
-                      ) : (
-                        <X className="h-3 w-3 mx-auto text-gray-500 dark:text-gray-400" />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
-
-  const RecurringAvailabilityCard = () => (
-    <Card>
-      <CardHeader>
-        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-          <CardTitle className="text-lg md:text-xl">Weekly Schedule</CardTitle>
-          <div className="flex flex-col sm:flex-row gap-2">
-            {hasChanges && (
-              <Badge
-                variant="outline"
-                className="bg-blue-50 text-blue-600 border-blue-200 self-start"
-              >
-                Unsaved Changes
-              </Badge>
-            )}
-            <Button
-              onClick={handleSaveChanges}
-              disabled={!hasChanges || isSaving}
-              className="bg-blue-500 hover:bg-blue-600 w-full sm:w-auto"
-            >
-              {isSaving ? (
-                "Saving..."
-              ) : (
-                <>
-                  <Save className="h-4 w-4 mr-2" />
-                  Save Changes
-                </>
-              )}
-            </Button>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        {isLoading ? (
-          <div className="space-y-4">
-            {[...Array(7)].map((_, i) => (
-              <Skeleton key={i} className="h-16 w-full rounded-lg" />
-            ))}
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {availabilities.map((availability) => (
-              <div
-                key={availability.weekday}
-                className="p-3 md:p-4 border rounded-lg"
-              >
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
-                  <div className="flex items-center space-x-3">
-                    <Switch
-                      checked={availability.is_available}
-                      onCheckedChange={(checked) =>
-                        handleAvailabilityChange(
-                          availability.weekday,
-                          "is_available",
-                          checked
-                        )
-                      }
-                      className="data-[state=checked]:bg-blue-500"
-                    />
-                    <Label className="text-sm sm:text-base">
-                      {WEEKDAY_LABELS[availability.weekday]}
-                    </Label>
-                  </div>
-                  {!availability.is_available && (
-                    <Badge
-                      variant="outline"
-                      className="self-start sm:self-auto"
-                    >
-                      Unavailable
-                    </Badge>
-                  )}
-                </div>
-
-                {availability.is_available && (
-                  <div className="space-y-4 ml-0 sm:ml-12">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      <div>
-                        <Label className="mb-1 block text-sm">Start Time</Label>
-                        <TimePicker
-                          value={availability.start_time}
-                          onChange={(value) =>
-                            handleAvailabilityChange(
-                              availability.weekday,
-                              "start_time",
-                              value
-                            )
-                          }
-                        />
-                      </div>
-                      <div>
-                        <Label className="mb-1 block text-sm">End Time</Label>
-                        <TimePicker
-                          value={availability.end_time}
-                          onChange={(value) =>
-                            handleAvailabilityChange(
-                              availability.weekday,
-                              "end_time",
-                              value
-                            )
-                          }
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-sm">Interval (minutes)</Label>
-                        <Input
-                          type="number"
-                          min="1"
-                          value={availability.interval_minutes}
-                          onChange={(e) =>
-                            handleAvailabilityChange(
-                              availability.weekday,
-                              "interval_minutes",
-                              parseInt(e.target.value)
-                            )
-                          }
-                          className="mt-1"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-                        <Label className="text-sm">Breaks</Label>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleAddBreak(availability.weekday)}
-                          className="text-blue-500 border-blue-200 hover:bg-blue-50 w-full sm:w-auto"
-                        >
-                          <Plus className="h-3 w-3 mr-1 sm:mr-2" />
-                          Add Break
-                        </Button>
-                      </div>
-
-                      {availability.breaks.length === 0 ? (
-                        <p className="text-xs sm:text-sm text-muted-foreground">
-                          No breaks scheduled
-                        </p>
-                      ) : (
-                        // In the RecurringAvailabilityCard component, update the breaks section:
-                        <div className="space-y-2">
-                          {availability.breaks.map((br) => (
-                            <div
-                              key={br.id}
-                              className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full"
-                            >
-                              <div className="flex-1 grid grid-cols-2 gap-2 w-full">
-                                <div className="w-full">
-                                  <TimePicker
-                                    value={br.start_time}
-                                    onChange={(value) =>
-                                      handleBreakChange(
-                                        availability.weekday,
-                                        br.id,
-                                        "start_time",
-                                        value
-                                      )
-                                    }
-                                  />
-                                </div>
-                                <div className="w-full">
-                                  <TimePicker
-                                    value={br.end_time}
-                                    onChange={(value) =>
-                                      handleBreakChange(
-                                        availability.weekday,
-                                        br.id,
-                                        "end_time",
-                                        value
-                                      )
-                                    }
-                                  />
-                                </div>
-                              </div>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() =>
-                                  handleRemoveBreak(availability.weekday, br.id)
-                                }
-                                className="px-2 sm:px-3"
-                              >
-                                <X className="h-3 w-3 sm:h-4 sm:w-4 text-red-500" />
-                              </Button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-
   return (
-    <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
-      <div className="flex flex-col space-y-1">
+    <div className="container mx-auto px-4 py-6">
+      <div className="flex flex-col space-y-1 mb-6">
         <h1 className="text-2xl sm:text-3xl font-bold">
           Availability Settings
         </h1>
@@ -643,19 +646,67 @@ export default function AvailabilityPage() {
         </p>
       </div>
 
-      <Tabs
-        value={activeTab}
-        onValueChange={setActiveTab}
-        className="space-y-4 sm:space-y-6"
-      >
-        <TabsList className="grid grid-cols-3 w-full md:w-auto">
-          <TabsTrigger value="recurring">Recurring</TabsTrigger>
-          <TabsTrigger value="overrides">Special Dates</TabsTrigger>
-          <TabsTrigger value="visual">Schedule</TabsTrigger>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+        <TabsList className="grid grid-cols-3 w-full gap-1">
+          <TabsTrigger value="recurring" className="text-xs sm:text-sm">
+            Recurring Times
+          </TabsTrigger>
+          <TabsTrigger value="overrides" className="text-xs sm:text-sm">
+            Special Dates
+          </TabsTrigger>
+          <TabsTrigger value="visual" className="text-xs sm:text-sm">
+            Visual Schedule
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="recurring" className="space-y-4">
-          <RecurringAvailabilityCard />
+          <Card>
+            <CardHeader>
+              <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+                <CardTitle className="text-lg md:text-xl">
+                  Weekly Schedule
+                </CardTitle>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  {hasChanges && (
+                    <Badge
+                      variant="outline"
+                      className="bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400"
+                    >
+                      Unsaved Changes
+                    </Badge>
+                  )}
+                  <Button
+                    onClick={handleSaveChanges}
+                    disabled={!hasChanges || isSaving}
+                    className="bg-blue-500 hover:bg-blue-600 w-full sm:w-auto"
+                  >
+                    {isSaving ? (
+                      "Saving..."
+                    ) : (
+                      <>
+                        <Save className="h-4 w-4 mr-2" />
+                        Save Changes
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {[...Array(7)].map((_, i) => (
+                    <Skeleton key={i} className="h-48 w-full rounded-xl" />
+                  ))}
+                </div>
+              ) : (
+                <WeekView
+                  availabilities={availabilities}
+                  onChange={handleAvailabilityChange}
+                />
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="overrides" className="space-y-4">
@@ -707,7 +758,7 @@ export default function AvailabilityPage() {
                       {overrides.map((override) => (
                         <TableRow key={override.id}>
                           <TableCell className="whitespace-nowrap">
-                            {new Date(override.date).toLocaleDateString()}
+                            {override.date}
                           </TableCell>
                           <TableCell className="whitespace-nowrap">
                             <Badge
@@ -718,7 +769,7 @@ export default function AvailabilityPage() {
                               }
                               className={
                                 override.is_available
-                                  ? "bg-blue-100 text-blue-800"
+                                  ? "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400"
                                   : ""
                               }
                             >
@@ -750,7 +801,9 @@ export default function AvailabilityPage() {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuItem
-                                  onClick={() => handleEditOverride(override)}
+                                  onClick={(e) =>
+                                    handleEditOverride(override, e)
+                                  }
                                   className="text-blue-600"
                                 >
                                   <Edit className="h-4 w-4 mr-2" />
@@ -758,8 +811,8 @@ export default function AvailabilityPage() {
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   className="text-red-500"
-                                  onClick={() =>
-                                    handleDeleteOverride(override.id)
+                                  onClick={(e) =>
+                                    handleDeleteOverride(override.id, e)
                                   }
                                 >
                                   <Trash2 className="h-4 w-4 mr-2" />
@@ -786,7 +839,7 @@ export default function AvailabilityPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <VisualSchedule />
+              <VisualSchedule availabilities={availabilities} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -846,6 +899,7 @@ export default function AvailabilityPage() {
                           start_time: value,
                         }))
                       }
+                      placeholder="Start time"
                     />
                   </div>
                   <div>
@@ -858,22 +912,37 @@ export default function AvailabilityPage() {
                           end_time: value,
                         }))
                       }
+                      placeholder="End time"
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <Label>Interval (minutes)</Label>
-                  <Input
-                    type="number"
-                    min="1"
-                    value={currentOverride?.interval_minutes || 60}
-                    onChange={(e) =>
+                  <Select
+                    value={
+                      currentOverride?.interval_minutes?.toString() || "60"
+                    }
+                    onValueChange={(value) =>
                       setCurrentOverride((prev) => ({
                         ...prev,
-                        interval_minutes: parseInt(e.target.value),
+                        interval_minutes: parseInt(value),
                       }))
                     }
-                  />
+                  >
+                    <SelectTrigger className="max-w-[180px]">
+                      <SelectValue placeholder="Select interval" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {INTERVAL_OPTIONS.map((option) => (
+                        <SelectItem
+                          key={option.value}
+                          value={option.value.toString()}
+                        >
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </>
             )}
@@ -915,14 +984,6 @@ export default function AvailabilityPage() {
       </Dialog>
     </div>
   );
-}
+};
 
-function TableSkeleton() {
-  return (
-    <div className="space-y-4">
-      {[...Array(5)].map((_, i) => (
-        <Skeleton key={i} className="h-12 w-full rounded-lg" />
-      ))}
-    </div>
-  );
-}
+export default AvailabilityPage;

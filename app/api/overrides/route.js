@@ -2,43 +2,28 @@ import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase/client";
 import { DateTime } from "luxon";
 
-// Proper timezone-aware time converter
-function convertTime(time, timezone, toUTC = true) {
+// Convert time between timezones using a fixed reference date
+function convertWallTime(time, fromZone, toZone) {
   if (!time) return null;
-  
-  try {
-    // Ensure time is in HH:mm format
-    const [hours, minutes] = time.split(':').map(part => part.padStart(2, '0'));
-    const timeString = `${hours}:${minutes}`;
 
-    if (toUTC) {
-      // Convert from local timezone to UTC
-      const localTime = DateTime.fromFormat(timeString, 'HH:mm', { zone: timezone });
-      if (!localTime.isValid) {
-        console.error('Invalid local time:', localTime.invalidExplanation);
-        return null;
-      }
-      return localTime.toUTC().toFormat('HH:mm');
-    } else {
-      // Convert from UTC to local timezone
-      const utcTime = DateTime.fromFormat(timeString, 'HH:mm', { zone: 'UTC' });
-      if (!utcTime.isValid) {
-        console.error('Invalid UTC time:', utcTime.invalidExplanation);
-        return null;
-      }
-      return utcTime.setZone(timezone).toFormat('HH:mm');
-    }
+  try {
+    const [hours, minutes] = time.split(":").map(Number);
+    const dt = DateTime.fromObject(
+      { year: 2025, month: 1, day: 1, hour: hours, minute: minutes },
+      { zone: fromZone }
+    );
+    return dt.setZone(toZone).toFormat("HH:mm");
   } catch (error) {
-    console.error('Error converting time:', error);
+    console.error("Error converting wall time:", error);
     return null;
   }
 }
 
-// GET: Fetch all overrides for a business
+// GET: Fetch all overrides
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const business_id = searchParams.get("business_id");
-  const timezone = decodeURIComponent(searchParams.get("timezone")) || "UTC";
+  const timezone = searchParams.get("timezone") || "UTC";
 
   if (!business_id) {
     return NextResponse.json(
@@ -56,13 +41,14 @@ export async function GET(request) {
 
     if (error) throw error;
 
-    const result = (data || []).map((override) => ({
+    const result = data.map((override) => ({
       ...override,
+      date: override.date, // no conversion
       start_time: override.start_time
-        ? convertTime(override.start_time, timezone, false)
+        ? convertWallTime(override.start_time, "UTC", timezone)
         : null,
       end_time: override.end_time
-        ? convertTime(override.end_time, timezone, false)
+        ? convertWallTime(override.end_time, "UTC", timezone)
         : null,
     }));
 
@@ -76,16 +62,24 @@ export async function GET(request) {
   }
 }
 
-// POST: Upsert an override
+// POST: Create or update override
 export async function POST(request) {
   const body = await request.json();
 
   try {
     const { business_id, timezone = "UTC", ...override } = body;
 
-    if (!timezone) {
+    if (!business_id) {
       return NextResponse.json(
-        { error: "timezone is required in request body or params" },
+        { error: "business_id is required" },
+        { status: 400 }
+      );
+    }
+
+    const dateOnly = override.date;
+    if (!DateTime.fromISO(dateOnly).isValid) {
+      return NextResponse.json(
+        { error: "Invalid date format" },
         { status: 400 }
       );
     }
@@ -93,22 +87,50 @@ export async function POST(request) {
     let startTimeUTC = null;
     let endTimeUTC = null;
 
-    if (override.is_available && override.start_time && override.end_time) {
-      startTimeUTC = convertTime(override.start_time, timezone, true);
-      endTimeUTC = convertTime(override.end_time, timezone, true);
+    if (override.is_available) {
+      if (override.start_time) {
+        startTimeUTC = convertWallTime(override.start_time, timezone, "UTC");
+        if (!startTimeUTC) {
+          return NextResponse.json(
+            { error: "Invalid start_time format" },
+            { status: 400 }
+          );
+        }
+      }
+
+      if (override.end_time) {
+        endTimeUTC = convertWallTime(override.end_time, timezone, "UTC");
+        if (!endTimeUTC) {
+          return NextResponse.json(
+            { error: "Invalid end_time format" },
+            { status: 400 }
+          );
+        }
+      }
+
+      if (startTimeUTC && endTimeUTC) {
+        const start = DateTime.fromFormat(startTimeUTC, "HH:mm");
+        const end = DateTime.fromFormat(endTimeUTC, "HH:mm");
+        if (end <= start) {
+          return NextResponse.json(
+            { error: "End time must be after start time" },
+            { status: 400 }
+          );
+        }
+      }
     }
+
+    const dbData = {
+      ...override,
+      date: dateOnly,
+      start_time: startTimeUTC,
+      end_time: endTimeUTC,
+      business_id,
+    };
 
     const { data, error } = await supabase
       .from("overrides")
-      .upsert(
-        {
-          ...override,
-          start_time: startTimeUTC,
-          end_time: endTimeUTC,
-          business_id,
-        },
-        { onConflict: "id" }
-      )
+      .upsert(dbData, { onConflict: "id" })
       .select()
       .single();
 
@@ -116,11 +138,12 @@ export async function POST(request) {
 
     const responseData = {
       ...data,
+      date: data.date,
       start_time: data.start_time
-        ? convertTime(data.start_time, timezone, false)
+        ? convertWallTime(data.start_time, "UTC", timezone)
         : null,
       end_time: data.end_time
-        ? convertTime(data.end_time, timezone, false)
+        ? convertWallTime(data.end_time, "UTC", timezone)
         : null,
     };
 
@@ -134,23 +157,45 @@ export async function POST(request) {
   }
 }
 
-// PUT = same logic as POST (upsert)
+// PUT: Same as POST
 export async function PUT(request) {
   return POST(request);
 }
 
-// DELETE: Remove override by ID
+// DELETE: Remove override
 export async function DELETE(request) {
   const body = await request.json();
 
   try {
-    const { id } = body;
+    const { id, timezone = "UTC" } = body;
+
+    if (!id) {
+      return NextResponse.json({ error: "id is required" }, { status: 400 });
+    }
+
+    const { data: existingOverride, error: fetchError } = await supabase
+      .from("overrides")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (fetchError) throw fetchError;
 
     const { error } = await supabase.from("overrides").delete().eq("id", id);
-
     if (error) throw error;
 
-    return NextResponse.json({ success: true });
+    const responseData = {
+      ...existingOverride,
+      date: existingOverride.date,
+      start_time: existingOverride.start_time
+        ? convertWallTime(existingOverride.start_time, "UTC", timezone)
+        : null,
+      end_time: existingOverride.end_time
+        ? convertWallTime(existingOverride.end_time, "UTC", timezone)
+        : null,
+    };
+
+    return NextResponse.json(responseData);
   } catch (error) {
     console.error("Error deleting override:", error);
     return NextResponse.json(
