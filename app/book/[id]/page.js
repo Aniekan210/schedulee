@@ -75,12 +75,12 @@ export default function BookingPage() {
         if (!response.ok) throw new Error("Failed to fetch settings");
         const data = await response.json();
 
-        if (!data || !data.businessName) throw new Error("Invalid business ID");
+        if (!data || !data.businessName) throw new Error("Invalid booking ID");
         setSettings(data);
         if (data.businessTimezone) {
           setTimezone(data.businessTimezone);
+          setBusinessTimezone(data.businessTimezone);
         }
-        setBusinessTimezone(data.businessTimezone);
       } catch (err) {
         console.error("Error fetching settings:", err);
         setSettings(null);
@@ -124,7 +124,7 @@ export default function BookingPage() {
         setIsLoadingTimes(false);
       }
     }, 300),
-    [business_id, timezone]
+    [business_id, timezone, businessTimezone]
   );
 
   useEffect(() => {
@@ -266,12 +266,12 @@ END:VCALENDAR`;
   if (!settings) {
     return (
       <div className="min-h-screen w-full flex items-center justify-center bg-gray-100 p-4">
-        <div className="w-full max-w-md rounded-2xl shadow-lg bg-white p-6 text-center">
+        <div className="bg-white max-w-md w-full rounded-2xl shadow-md p-8 text-center border border-gray-200">
           <XCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
           <h2 className="text-xl font-bold mb-2">Invalid Booking Link</h2>
           <p className="text-sm text-gray-600">
-            This booking page is not available. Please check the link and try
-            again.
+            This booking page ID is invalid or no longer active. Please check
+            the link and try again.
           </p>
           <div className="mt-6">
             <a
@@ -288,7 +288,7 @@ END:VCALENDAR`;
 
   const { businessName, bgColor, logoUrl } = settings;
 
-  // Color calculations
+  // Color calculations (from second component)
   const hexColor = bgColor.replace("#", "");
   const r = parseInt(hexColor.substring(0, 2), 16);
   const g = parseInt(hexColor.substring(2, 4), 16);
@@ -332,21 +332,12 @@ END:VCALENDAR`;
   const newB = Math.round(hue2rgb(p, q, h - 1 / 3) * 255);
   const toHex = (c) => c.toString(16).padStart(2, "0");
   const newColor = `#${toHex(newR)}${toHex(newG)}${toHex(newB)}`;
-  const textColor = shouldDarken ? "text-white" : "text-gray-900";
+  const textColor = shouldDarken ? "text-white" : "text-black";
+  const borderColor = shouldDarken ? "border-white/70" : "border-black/70";
   const buttonVariant = shouldDarken ? "secondary" : "default";
-  const timezoneTextColor = shouldDarken ? "text-white" : "text-gray-700";
-  const placeholderColor = shouldDarken
-    ? "placeholder-white"
-    : "placeholder-gray-500";
-  const inputBg = shouldDarken ? "bg-white/10" : "bg-black/5";
-  const inputHover = shouldDarken ? "hover:bg-white/20" : "hover:bg-black/10";
-  const focusRingColor = shouldDarken
-    ? "focus-visible:ring-white/50"
-    : "focus-visible:ring-gray-900/50";
-  const selectedTimeBg = shouldDarken ? "bg-white/30" : "bg-black/20";
-  const timeSlotBg = shouldDarken
-    ? "bg-white/10 hover:bg-white/20"
-    : "bg-black/5 hover:bg-black/10";
+  const activeBgColor = shouldDarken ? "bg-white/20" : "bg-black/10";
+  const activeTextColor = shouldDarken ? "text-white" : "text-black";
+  const timezoneTextColor = shouldDarken ? "text-white/80" : "text-black/80";
 
   if (isSuccess) {
     return (
@@ -355,7 +346,7 @@ END:VCALENDAR`;
         style={{ backgroundColor: newColor }}
       >
         <div
-          className={`w-full max-w-md rounded-2xl shadow-xl p-6 ${textColor}`}
+          className={`w-full max-w-md rounded-2xl shadow-xl p-8 ${textColor}`}
           style={{ backgroundColor: bgColor }}
         >
           <div className="flex justify-center mb-6">
@@ -367,7 +358,7 @@ END:VCALENDAR`;
           <p className="mb-4 text-center">
             Your appointment with {businessName} is booked for:
           </p>
-          <div className="bg-white/10 rounded-lg p-4 mb-6 text-center">
+          <div className="bg-opacity-20 rounded-lg p-4 mb-6 text-center">
             <p className="font-medium">{format(date, "PPP")}</p>
             <p className="text-xl font-bold">{selectedTime}</p>
             <p className={`text-sm ${timezoneTextColor} mt-1`}>
@@ -385,10 +376,7 @@ END:VCALENDAR`;
               )}.ics`}
               className="block mb-4"
             >
-              <Button
-                variant={buttonVariant}
-                className="w-full py-3 font-semibold"
-              >
+              <Button variant="outline" className="w-full py-3 font-semibold">
                 Add to Calendar
               </Button>
             </a>
@@ -410,226 +398,248 @@ END:VCALENDAR`;
       style={{ backgroundColor: newColor }}
     >
       <div
-        className={`w-full max-w-md rounded-2xl shadow-xl p-6 ${textColor}`}
+        className={`w-full max-w-md rounded-2xl shadow-xl overflow-hidden transition-all duration-300 ${textColor}`}
         style={{ backgroundColor: bgColor }}
       >
-        {logoUrl && (
-          <div className="flex justify-center mb-6">
-            <Image
-              src={logoUrl}
-              alt="Logo"
-              width={160}
-              height={80}
-              priority
-              className="object-contain max-h-20"
-            />
-          </div>
-        )}
-
-        <h1 className="text-2xl sm:text-3xl font-bold text-center mb-6">
-          Booking with {businessName}
-        </h1>
-
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium mb-1">
-                Your Name
-              </label>
-              <Input
-                id="name"
-                name="name"
-                type="text"
-                value={formData.name}
-                onChange={handleInputChange}
-                className={`${inputBg} ${inputHover} ${placeholderColor} ${focusRingColor} transition-colors border-0 focus-visible:ring-2 focus-visible:ring-offset-2 ${
-                  errors.name ? "!border-red-500" : ""
-                }`}
-                placeholder="John Doe"
+        <div className="p-6 sm:p-8">
+          {logoUrl && (
+            <div className="flex justify-center mb-6">
+              <Image
+                src={logoUrl}
+                alt="Logo"
+                width={160}
+                height={80}
+                priority
+                className="object-contain max-h-20"
               />
-              {errors.name && (
-                <p className="mt-1 text-sm text-red-500 flex items-center">
-                  <XCircle className="w-4 h-4 mr-1" /> {errors.name}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label
-                htmlFor="phoneNumber"
-                className="block text-sm font-medium mb-1"
-              >
-                Phone Number
-              </label>
-              <Input
-                id="phoneNumber"
-                name="phoneNumber"
-                type="tel"
-                value={formData.phoneNumber}
-                onChange={handleInputChange}
-                className={`${inputBg} ${inputHover} ${placeholderColor} ${focusRingColor} transition-colors border-0 focus-visible:ring-2 focus-visible:ring-offset-2 ${
-                  errors.phoneNumber ? "!border-red-500" : ""
-                }`}
-                placeholder="(123) 456-7890"
-              />
-              {errors.phoneNumber && (
-                <p className="mt-1 text-sm text-red-500 flex items-center">
-                  <XCircle className="w-4 h-4 mr-1" /> {errors.phoneNumber}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Appointment Date
-              </label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    className={`w-full justify-start text-left font-normal ${inputBg} ${inputHover} transition-colors border-0 ${
-                      errors.date ? "!border-red-500" : ""
-                    }`}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {date ? format(date, "PPP") : <span>Select a date</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 bg-white">
-                  <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={handleDateSelect}
-                    initialFocus
-                    disabled={(date) => date < new Date()}
-                  />
-                </PopoverContent>
-              </Popover>
-              {errors.date && (
-                <p className="mt-1 text-sm text-red-500 flex items-center">
-                  <XCircle className="w-4 h-4 mr-1" /> {errors.date}
-                </p>
-              )}
-            </div>
-
-            {date && (
-              <div>
-                <div className="flex justify-between items-center mb-1 gap-1">
-                  <label className="block text-sm font-medium">
-                    Available Times
-                  </label>
-                  <div
-                    className={`flex items-center text-sm ${timezoneTextColor} gap-1`}
-                  >
-                    <Globe className="w-4 h-4" />
-                    <Select value={timezone} onValueChange={setTimezone}>
-                      <SelectTrigger
-                        className={`bg-transparent border-none p-0 h-auto text-sm ${timezoneTextColor} gap-1`}
-                        icon={
-                          <ChevronDown
-                            className={`w-4 h-4 ${timezoneTextColor}`}
-                          />
-                        }
-                      >
-                        <SelectValue placeholder="Timezone" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-white text-gray-900">
-                        {TIMEZONES.map((tz) => (
-                          <SelectItem key={tz.value} value={tz.value}>
-                            {tz.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                {isLoadingTimes ? (
-                  <div className="flex justify-center py-4">
-                    <Loader2
-                      className="h-8 w-8 animate-spin"
-                      style={{ color: shouldDarken ? "white" : "black" }}
-                    />
-                  </div>
-                ) : (
-                  <>
-                    {availableTimes.length === 1 &&
-                    (availableTimes[0] === "No available times" ||
-                      availableTimes[0] === "Error loading times") ? (
-                      <div
-                        className={`flex justify-center py-4 text-sm font-medium ${timezoneTextColor}`}
-                      >
-                        {availableTimes[0]}
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                        {availableTimes.map((time) => (
-                          <Button
-                            key={time}
-                            type="button"
-                            className={`py-2 px-3 h-auto transition-colors ${
-                              selectedTime === time
-                                ? `${selectedTimeBg} font-medium ring-2 ${
-                                    shouldDarken
-                                      ? "ring-white/50"
-                                      : "ring-gray-900/50"
-                                  }`
-                                : `${timeSlotBg}`
-                            }`}
-                            onClick={() => {
-                              if (
-                                time !== "No available times" &&
-                                time !== "Error loading times"
-                              ) {
-                                setSelectedTime(time);
-                                setErrors((prev) => ({ ...prev, time: "" }));
-                              }
-                            }}
-                          >
-                            <Clock className="w-4 h-4 mr-2" />
-                            {time}
-                          </Button>
-                        ))}
-                      </div>
-                    )}
-                  </>
-                )}
-                {errors.time && !isLoadingTimes && (
-                  <p className="mt-1 text-sm text-red-500 flex items-center">
-                    <XCircle className="w-4 h-4 mr-1" /> {errors.time}
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-
-          {errors.form && (
-            <div className="text-red-500 text-sm text-center">
-              <XCircle className="w-4 h-4 inline mr-1" />
-              {errors.form}
             </div>
           )}
 
-          <Button
-            type="submit"
-            variant={buttonVariant}
-            className="w-full py-6 text-lg font-semibold"
-            disabled={isSubmitting || !isFormComplete}
-          >
-            {isSubmitting ? (
-              <div className="flex items-center justify-center">
-                <Loader2 className="h-5 w-5 animate-spin mr-3" />
-                Processing...
-              </div>
-            ) : (
-              "Book Appointment"
-            )}
-          </Button>
-        </form>
+          <h1 className="text-2xl sm:text-3xl font-bold text-center mb-6">
+            You're booking with{" "}
+            <span className="whitespace-nowrap">{businessName}</span>
+          </h1>
 
-        <div className="mt-6 text-center text-xs opacity-70">
-          Powered by{" "}
-          <a target="_blank" href="/" className="font-medium hover:underline">
-            schedulee.app
-          </a>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-4">
+              <div>
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Name
+                </label>
+                <Input
+                  id="name"
+                  name="name"
+                  type="text"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  className={`w-full ${borderColor} bg-transparent focus-visible:ring-2 focus-visible:ring-opacity-50 ${
+                    errors.name ? "border-red-500" : ""
+                  }`}
+                  style={{
+                    borderColor: errors.name
+                      ? "#ef4444"
+                      : shouldDarken
+                      ? "rgba(255, 255, 255, 0.7)"
+                      : "rgba(0, 0, 0, 0.7)",
+                  }}
+                />
+                {errors.name && (
+                  <p className="mt-1 text-sm text-red-500 flex items-center">
+                    <XCircle className="w-4 h-4 mr-1" /> {errors.name}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label
+                  htmlFor="phoneNumber"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Phone Number
+                </label>
+                <Input
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  type="tel"
+                  value={formData.phoneNumber}
+                  onChange={handleInputChange}
+                  className={`w-full ${borderColor} bg-transparent focus-visible:ring-2 focus-visible:ring-opacity-50 ${
+                    errors.phoneNumber ? "border-red-500" : ""
+                  }`}
+                  style={{
+                    borderColor: errors.phoneNumber
+                      ? "#ef4444"
+                      : shouldDarken
+                      ? "rgba(255, 255, 255, 0.7)"
+                      : "rgba(0, 0, 0, 0.7)",
+                  }}
+                />
+                {errors.phoneNumber && (
+                  <p className="mt-1 text-sm text-red-500 flex items-center">
+                    <XCircle className="w-4 h-4 mr-1" /> {errors.phoneNumber}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Appointment Date
+                </label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={`w-full justify-start text-left font-normal ${borderColor} bg-transparent hover:border-2 ${
+                        errors.date ? "border-red-500" : ""
+                      }`}
+                      style={{
+                        borderWidth: "2px",
+                        borderColor: errors.date
+                          ? "#ef4444"
+                          : shouldDarken
+                          ? "rgba(255, 255, 255, 0.7)"
+                          : "rgba(0, 0, 0, 0.7)",
+                      }}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {date ? format(date, "PPP") : <span>Select a date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={date}
+                      onSelect={handleDateSelect}
+                      initialFocus
+                      disabled={(date) => date < new Date()}
+                    />
+                  </PopoverContent>
+                </Popover>
+                {errors.date && (
+                  <p className="mt-1 text-sm text-red-500 flex items-center">
+                    <XCircle className="w-4 h-4 mr-1" /> {errors.date}
+                  </p>
+                )}
+              </div>
+
+              {date && (
+                <div>
+                  <div className="flex justify-between items-center mb-1 gap-1">
+                    <label className="block text-sm font-medium">
+                      Available Times
+                    </label>
+                    <div
+                      className={`flex items-center text-sm ${timezoneTextColor} gap-1`}
+                    >
+                      <Globe className="w-4 h-4" />
+                      <Select value={timezone} onValueChange={setTimezone}>
+                        <SelectTrigger
+                          className={`bg-transparent border-none p-0 h-auto text-sm ${timezoneTextColor} gap-1`}
+                          icon={
+                            <ChevronDown
+                              className={`w-4 h-4 ${timezoneTextColor}`}
+                            />
+                          }
+                        >
+                          <SelectValue placeholder="Timezone" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white text-gray-900">
+                          {TIMEZONES.map((tz) => (
+                            <SelectItem key={tz.value} value={tz.value}>
+                              {tz.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  {isLoadingTimes ? (
+                    <div className="flex justify-center py-4">
+                      <Loader2
+                        className="h-8 w-8 animate-spin"
+                        style={{ color: shouldDarken ? "white" : "black" }}
+                      />
+                    </div>
+                  ) : (
+                    <>
+                      {availableTimes.length === 1 &&
+                      (availableTimes[0] === "No available times" ||
+                        availableTimes[0] === "Error loading times") ? (
+                        <div className="flex justify-center py-4 text-sm font-medium opacity-70">
+                          {availableTimes[0]}
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-1">
+                          {availableTimes.map((time) => (
+                            <button
+                              key={time}
+                              type="button"
+                              onClick={() => {
+                                if (
+                                  time !== "No available times" &&
+                                  time !== "Error loading times"
+                                ) {
+                                  setSelectedTime(time);
+                                  setErrors((prev) => ({ ...prev, time: "" }));
+                                }
+                              }}
+                              className={cn(
+                                "py-2 px-3 rounded-md text-sm font-medium transition-all",
+                                "flex items-center justify-center border-2",
+                                selectedTime === time
+                                  ? `${activeBgColor} border-2 border-transparent ${activeTextColor} font-semibold`
+                                  : `border-transparent hover:border-current ${textColor}`
+                              )}
+                            >
+                              <>
+                                <Clock className="w-4 h-4 mr-2" />
+                                {time}
+                              </>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  )}
+                  {errors.time && !isLoadingTimes && (
+                    <p className="mt-1 text-sm text-red-500 flex items-center">
+                      <XCircle className="w-4 h-4 mr-1" /> {errors.time}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <Button
+              type="submit"
+              variant={buttonVariant}
+              className={cn(
+                "w-full py-6 text-lg font-semibold transition-all",
+                isFormComplete && "hover:opacity-90",
+                !isFormComplete && "opacity-50 cursor-not-allowed"
+              )}
+              disabled={isSubmitting || !isFormComplete}
+            >
+              {isSubmitting ? (
+                <div className="flex items-center justify-center">
+                  <Loader2 className="h-5 w-5 animate-spin mr-3" />
+                  Processing...
+                </div>
+              ) : (
+                "Book Appointment"
+              )}
+            </Button>
+          </form>
+
+          <div className="mt-6 text-center text-xs opacity-70">
+            Powered by{" "}
+            <a target="_blank" href="/" className="font-medium hover:underline">
+              schedulee.app
+            </a>
+          </div>
         </div>
       </div>
     </div>

@@ -72,14 +72,16 @@ const FILTER_OPTIONS = {
 const TableSkeleton = () => (
   <div className="space-y-4 p-6">
     {[...Array(5)].map((_, i) => (
-      <Skeleton key={i} className="h-12 w-full rounded-lg" />
+      <Skeleton
+        key={i}
+        className="h-12 w-full rounded-lg bg-gray-200 dark:bg-gray-800"
+      />
     ))}
   </div>
 );
 
 const formatDisplayDate = (dateString) => {
   try {
-    // Create date in local timezone
     const date = new Date(dateString + "T00:00:00");
     return format(date, "MMM do, yyyy");
   } catch {
@@ -89,7 +91,6 @@ const formatDisplayDate = (dateString) => {
 
 const formatDisplayTime = (timeString) => {
   try {
-    // Ensure time is in HH:MM format
     const [hours, minutes] = timeString.split(":");
     return `${hours.padStart(2, "0")}:${(minutes || "00").padStart(2, "0")}`;
   } catch {
@@ -289,28 +290,35 @@ export default function BookingsOverviewPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6 space-y-6">
+    <div className="container mx-auto px-4 py-6 space-y-6 dark:bg-gray-900 min-h-screen">
       {/* Header and Booking Link Card */}
-      <div className="grid gap-6">
+      <div className="grid gap-4">
         <div className="flex flex-col space-y-1">
-          <h1 className="text-3xl font-bold">Welcome, {businessName}</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-3xl font-bold dark:text-white">
+            Welcome {businessName}
+          </h1>
+          <p className="text-muted-foreground dark:text-gray-400">
             Manage your bookings and appointments
           </p>
         </div>
 
-        <Card className="overflow-hidden">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm text-muted-foreground uppercase">
+        <Card className="overflow-hidden bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+          <CardHeader className="pb-2 pt-3">
+            <CardTitle className="text-xs text-muted-foreground dark:text-gray-400 uppercase tracking-wider">
               Your Booking Link
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pb-3">
             <div className="flex items-center gap-2 w-full">
-              <p className="flex-1 min-w-0 truncate bg-muted p-2 rounded-md text-sm font-mono">
+              <p className="flex-1 min-w-0 truncate bg-muted dark:bg-gray-700 px-3 py-1.5 rounded-md text-sm font-mono dark:text-gray-300">
                 {bookingLink}
               </p>
-              <Button variant="outline" size="sm" onClick={copyToClipboard}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={copyToClipboard}
+                className="dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white h-9"
+              >
                 <Copy className="h-4 w-4 mr-2" />
                 Copy
               </Button>
@@ -323,15 +331,21 @@ export default function BookingsOverviewPage() {
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row justify-between gap-4 items-start sm:items-center">
           <div className="flex flex-wrap gap-3 items-center">
-            <Filter className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">Filter:</span>
+            <Filter className="h-4 w-4 text-muted-foreground dark:text-gray-400" />
+            <span className="text-sm text-muted-foreground dark:text-gray-400">
+              Filter:
+            </span>
             <Select value={filter} onValueChange={handleFilterChange}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-[180px] bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-white">
                 <SelectValue placeholder="Select filter" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                 {Object.entries(FILTER_OPTIONS).map(([key, label]) => (
-                  <SelectItem key={key} value={key}>
+                  <SelectItem
+                    key={key}
+                    value={key}
+                    className="hover:bg-gray-100 dark:hover:bg-gray-700/50 dark:text-white"
+                  >
                     {label}
                   </SelectItem>
                 ))}
@@ -341,23 +355,34 @@ export default function BookingsOverviewPage() {
             {filter === "custom" && (
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-[240px] justify-start">
+                  <Button
+                    variant="outline"
+                    className="w-[240px] justify-start dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:bg-gray-700"
+                  >
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {format(customDate, "PPP")}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent align="start" className="p-0">
+                <PopoverContent
+                  align="start"
+                  className="p-0 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+                >
                   <Calendar
                     mode="single"
                     selected={customDate}
                     onSelect={setCustomDate}
                     initialFocus
+                    className="dark:bg-gray-800"
                   />
                 </PopoverContent>
               </Popover>
             )}
 
-            <Button onClick={fetchBookings} variant="outline">
+            <Button
+              onClick={fetchBookings}
+              variant="outline"
+              className="dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:bg-gray-700"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-4 w-4 mr-2"
@@ -378,7 +403,7 @@ export default function BookingsOverviewPage() {
 
           <Button
             onClick={handleAddNew}
-            className="bg-blue-500 hover:bg-blue-600"
+            className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white"
           >
             <Plus className="h-4 w-4 mr-2" />
             Add Booking
@@ -387,63 +412,91 @@ export default function BookingsOverviewPage() {
 
         {/* Active Filter Badge */}
         <div className="flex items-center gap-2">
-          <Badge variant="outline">{FILTER_OPTIONS[filter]}</Badge>
+          <Badge
+            variant="outline"
+            className="dark:border-gray-700 dark:text-gray-300"
+          >
+            {FILTER_OPTIONS[filter]}
+          </Badge>
           {!isLoading && bookings.length > 0 && (
-            <span className="text-sm text-muted-foreground">
+            <span className="text-sm text-muted-foreground dark:text-gray-400">
               {bookings.length} {bookings.length === 1 ? "booking" : "bookings"}
             </span>
           )}
         </div>
 
         {/* Table */}
-        <Card>
+        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           {isLoading ? (
             <TableSkeleton />
           ) : bookings.length === 0 ? (
-            <div className="p-8 text-center text-muted-foreground">
+            <div className="p-8 text-center text-muted-foreground dark:text-gray-400">
               No bookings found for the selected filter.
             </div>
           ) : (
             <>
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead className="px-6">Customer</TableHead>
-                    <TableHead className="px-6">Contact</TableHead>
-                    <TableHead className="px-6">Date</TableHead>
-                    <TableHead className="px-6">Time</TableHead>
-                    <TableHead className="px-6 text-right">Actions</TableHead>
+                  <TableRow className="hover:bg-transparent dark:hover:bg-transparent">
+                    <TableHead className="px-6 dark:text-gray-300">
+                      Customer
+                    </TableHead>
+                    <TableHead className="px-6 dark:text-gray-300">
+                      Contact
+                    </TableHead>
+                    <TableHead className="px-6 dark:text-gray-300">
+                      Date
+                    </TableHead>
+                    <TableHead className="px-6 dark:text-gray-300">
+                      Time
+                    </TableHead>
+                    <TableHead className="px-6 text-right dark:text-gray-300">
+                      Actions
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {bookings.map((booking) => (
-                    <TableRow key={booking.id}>
-                      <TableCell className="px-6">{booking.name}</TableCell>
-                      <TableCell className="px-6">
+                    <TableRow
+                      key={booking.id}
+                      className="dark:border-gray-700 dark:hover:bg-gray-700/50"
+                    >
+                      <TableCell className="px-6 dark:text-gray-300">
+                        {booking.name}
+                      </TableCell>
+                      <TableCell className="px-6 dark:text-gray-300">
                         {booking.phone_number}
                       </TableCell>
-                      <TableCell className="px-6">
+                      <TableCell className="px-6 dark:text-gray-300">
                         {formatDisplayDate(booking.booking_date)}
                       </TableCell>
-                      <TableCell className="px-6">
+                      <TableCell className="px-6 dark:text-gray-300">
                         {formatDisplayTime(booking.booking_time)}
                       </TableCell>
                       <TableCell className="px-6 text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <MoreVertical className="h-4 w-4" />
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="dark:hover:bg-gray-700/30"
+                            >
+                              <MoreVertical className="h-4 w-4 dark:text-gray-300" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
+                          <DropdownMenuContent
+                            align="end"
+                            className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+                          >
                             <DropdownMenuItem
                               onClick={() => handleEdit(booking)}
+                              className="dark:hover:bg-gray-700/50 dark:text-gray-300"
                             >
                               <Edit className="h-4 w-4 mr-2" />
                               Edit
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              className="text-red-500"
+                              className="text-red-600 dark:text-red-400 dark:hover:bg-gray-700/50"
                               onClick={() => handleDelete(booking.id)}
                             >
                               <Trash2 className="h-4 w-4 mr-2" />
@@ -459,8 +512,8 @@ export default function BookingsOverviewPage() {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="flex justify-between px-6 py-4 border-t">
-                  <span className="text-sm text-muted-foreground">
+                <div className="flex justify-between px-6 py-4 border-t dark:border-gray-700">
+                  <span className="text-sm text-muted-foreground dark:text-gray-400">
                     Page {currentPage} of {totalPages}
                   </span>
                   <div className="flex gap-2">
@@ -469,6 +522,7 @@ export default function BookingsOverviewPage() {
                       size="sm"
                       onClick={handlePreviousPage}
                       disabled={currentPage === 1}
+                      className="dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:bg-gray-700"
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
@@ -477,6 +531,7 @@ export default function BookingsOverviewPage() {
                       size="sm"
                       onClick={handleNextPage}
                       disabled={currentPage === totalPages}
+                      className="dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:bg-gray-700"
                     >
                       <ChevronRight className="h-4 w-4" />
                     </Button>
@@ -490,15 +545,17 @@ export default function BookingsOverviewPage() {
 
       {/* Edit/Create Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent>
+        <DialogContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="dark:text-white">
               {currentBooking?.id ? "Edit Booking" : "New Booking"}
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Customer Name</Label>
+              <Label htmlFor="name" className="dark:text-gray-300">
+                Customer Name
+              </Label>
               <Input
                 id="name"
                 value={currentBooking?.name || ""}
@@ -509,10 +566,13 @@ export default function BookingsOverviewPage() {
                   }))
                 }
                 required
+                className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number</Label>
+              <Label htmlFor="phone" className="dark:text-gray-300">
+                Phone Number
+              </Label>
               <Input
                 id="phone"
                 value={currentBooking?.phone_number || ""}
@@ -523,11 +583,14 @@ export default function BookingsOverviewPage() {
                   }))
                 }
                 required
+                className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="date">Date</Label>
+                <Label htmlFor="date" className="dark:text-gray-300">
+                  Date
+                </Label>
                 <Input
                   type="date"
                   id="date"
@@ -539,10 +602,13 @@ export default function BookingsOverviewPage() {
                     }))
                   }
                   required
+                  className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="time">Time</Label>
+                <Label htmlFor="time" className="dark:text-gray-300">
+                  Time
+                </Label>
                 <Input
                   type="time"
                   id="time"
@@ -554,11 +620,15 @@ export default function BookingsOverviewPage() {
                     }))
                   }
                   required
+                  className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 />
               </div>
             </div>
             <DialogFooter>
-              <Button type="submit" className="bg-blue-500 hover:bg-blue-600">
+              <Button
+                type="submit"
+                className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white"
+              >
                 {currentBooking?.id ? "Save Changes" : "Create Booking"}
               </Button>
             </DialogFooter>
@@ -568,17 +638,20 @@ export default function BookingsOverviewPage() {
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent>
+        <DialogContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <DialogHeader>
-            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogTitle className="dark:text-white">
+              Confirm Deletion
+            </DialogTitle>
           </DialogHeader>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground dark:text-gray-400">
             Are you sure you want to delete this booking?
           </p>
           <DialogFooter>
             <Button
               variant="outline"
               onClick={() => setIsDeleteDialogOpen(false)}
+              className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600"
             >
               Cancel
             </Button>

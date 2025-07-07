@@ -158,7 +158,12 @@ export async function GET(request) {
           intervalMinutes: availabilityConfig.interval_minutes,
         },
       }),
-      { headers: { "Content-Type": "application/json" } }
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "public, max-age=300",
+        },
+      }
     );
   } catch (error) {
     console.error("💥 Error fetching availability:", error);
@@ -188,10 +193,10 @@ function generateTimeSlots(startTime, endTime, intervalMinutes, breaks = []) {
       currentMin
     ).padStart(2, "0")}`;
 
-    // Exclude time if it's inside a break
+    // ✅ Normalize and compare breaks in HH:mm
     const isDuringBreak = breaks.some((b) => {
-      const breakStart = b.start_time;
-      const breakEnd = b.end_time;
+      const breakStart = b.start_time?.slice(0, 5); // trim to HH:mm
+      const breakEnd = b.end_time?.slice(0, 5);
       return timeStr >= breakStart && timeStr < breakEnd;
     });
 

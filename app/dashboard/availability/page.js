@@ -104,12 +104,16 @@ const INTERVAL_OPTIONS = [
 const TimePicker = ({ value, onChange, placeholder = "Select time" }) => {
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className="w-[120px]">
+      <SelectTrigger className="w-[120px] bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-white">
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
-      <SelectContent className="max-h-[300px] overflow-y-auto">
+      <SelectContent className="max-h-[300px] overflow-y-auto bg-white dark:bg-gray-800 dark:border-gray-700">
         {TIME_OPTIONS.map((time) => (
-          <SelectItem key={time} value={time}>
+          <SelectItem
+            key={time}
+            value={time}
+            className="dark:hover:bg-gray-700/50 dark:text-white"
+          >
             {DateTime.fromFormat(time, "HH:mm").toLocaleString(
               DateTime.TIME_SIMPLE
             )}
@@ -129,16 +133,18 @@ const DaySchedule = ({ day, availability, onChange }) => {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto border rounded-2xl overflow-hidden bg-white dark:bg-gray-900 shadow-sm">
+    <div className="w-full max-w-md mx-auto border rounded-2xl overflow-hidden bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-sm">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800">
+      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700">
         <div className="flex items-center gap-3">
           <Switch
             checked={availability.is_available}
             onCheckedChange={handleToggleAvailable}
             className="data-[state=checked]:bg-blue-500"
           />
-          <Label className="text-sm font-medium">{WEEKDAY_LABELS[day]}</Label>
+          <Label className="text-sm font-medium dark:text-gray-300">
+            {WEEKDAY_LABELS[day]}
+          </Label>
         </div>
 
         <Badge
@@ -155,39 +161,40 @@ const DaySchedule = ({ day, availability, onChange }) => {
 
       {/* Body */}
       {availability.is_available && (
-        <div className="p-4 space-y-6 border-t">
+        <div className="p-4 space-y-6 border-t dark:border-gray-700">
           {/* Time Settings */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-4">
             <div className="space-y-1.5">
-              <Label className="text-sm">Start Time</Label>
+              <Label className="text-sm dark:text-gray-300">Start Time</Label>
               <TimePicker
                 value={availability.start_time}
                 onChange={(value) => onChange(day, "start_time", value)}
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-sm">End Time</Label>
+              <Label className="text-sm dark:text-gray-300">End Time</Label>
               <TimePicker
                 value={availability.end_time}
                 onChange={(value) => onChange(day, "end_time", value)}
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-sm">Interval</Label>
+              <Label className="text-sm dark:text-gray-300">Interval</Label>
               <Select
                 value={availability.interval_minutes.toString()}
                 onValueChange={(value) =>
                   onChange(day, "interval_minutes", parseInt(value))
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-white">
                   <SelectValue placeholder="Select interval" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white dark:bg-gray-800 dark:border-gray-700">
                   {INTERVAL_OPTIONS.map((option) => (
                     <SelectItem
                       key={option.value}
                       value={option.value.toString()}
+                      className="dark:hover:bg-gray-700/50 dark:text-white"
                     >
                       {option.label}
                     </SelectItem>
@@ -200,7 +207,7 @@ const DaySchedule = ({ day, availability, onChange }) => {
           {/* Breaks */}
           <div className="space-y-4">
             <div className="flex items-center justify-between flex-wrap gap-2">
-              <Label className="text-sm">Breaks</Label>
+              <Label className="text-sm dark:text-gray-300">Breaks</Label>
               <Button
                 variant="ghost"
                 size="sm"
@@ -214,7 +221,7 @@ const DaySchedule = ({ day, availability, onChange }) => {
                     },
                   ]);
                 }}
-                className="text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30"
+                className="text-blue-500 hover:bg-blue-50 dark:hover:bg-gray-700 dark:text-blue-400"
               >
                 <Plus className="h-4 w-4 mr-1" />
                 Add Break
@@ -222,7 +229,7 @@ const DaySchedule = ({ day, availability, onChange }) => {
             </div>
 
             {availability.breaks.length === 0 ? (
-              <div className="text-center py-2 text-sm text-muted-foreground">
+              <div className="text-center py-2 text-sm text-muted-foreground dark:text-gray-400">
                 No breaks scheduled
               </div>
             ) : (
@@ -242,7 +249,9 @@ const DaySchedule = ({ day, availability, onChange }) => {
                       }}
                       placeholder="Start"
                     />
-                    <span className="text-muted-foreground text-sm">to</span>
+                    <span className="text-muted-foreground text-sm dark:text-gray-400">
+                      to
+                    </span>
                     <TimePicker
                       value={br.end_time}
                       onChange={(value) => {
@@ -262,7 +271,7 @@ const DaySchedule = ({ day, availability, onChange }) => {
                         );
                         onChange(day, "breaks", updatedBreaks);
                       }}
-                      className="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 px-2"
+                      className="text-red-500 hover:bg-red-50 dark:hover:bg-gray-700 dark:text-red-400 px-2"
                     >
                       <X className="h-4 w-4" />
                     </Button>
@@ -315,18 +324,18 @@ const VisualSchedule = ({ availabilities }) => {
   });
 
   return (
-    <div className="h-[calc(100vh-320px)] overflow-hidden border rounded-lg">
+    <div className="h-[calc(100vh-320px)] overflow-hidden border rounded-lg dark:border-gray-700">
       <div className="h-full overflow-auto">
         <div className="min-w-[700px]">
           {/* Header row - sticky top */}
-          <div className="grid grid-cols-8 border-b bg-white dark:bg-gray-900 z-10 sticky top-0">
-            <div className="p-2 font-medium border-r text-sm sticky left-0 bg-white dark:bg-gray-900 z-9">
+          <div className="grid grid-cols-8 border-b bg-white dark:bg-gray-800 z-10 sticky top-0">
+            <div className="p-2 font-medium border-r text-sm sticky left-0 bg-white dark:bg-gray-800 z-9 dark:text-gray-300 dark:border-gray-700">
               Time
             </div>
             {WEEKDAYS.map((day) => (
               <div
                 key={day}
-                className="p-2 font-medium text-center border-r text-sm last:border-r-0"
+                className="p-2 font-medium text-center border-r text-sm last:border-r-0 dark:text-gray-300 dark:border-gray-700"
               >
                 {WEEKDAY_SHORT_LABELS[day]}
               </div>
@@ -345,11 +354,11 @@ const VisualSchedule = ({ availabilities }) => {
               <div
                 key={time}
                 className={`grid grid-cols-8 border-b ${
-                  isHalfHour ? "bg-gray-50 dark:bg-gray-800" : ""
-                }`}
+                  isHalfHour ? "bg-gray-50 dark:bg-gray-700" : ""
+                } dark:border-gray-700`}
               >
                 {/* Time column - sticky left */}
-                <div className="p-2 border-r text-xs text-muted-foreground sticky left-0 bg-white dark:bg-gray-800 z-9">
+                <div className="p-2 border-r text-xs text-muted-foreground sticky left-0 bg-white dark:bg-gray-700 z-9 dark:border-gray-700">
                   {displayTime}
                 </div>
                 {WEEKDAYS.map((day) => {
@@ -378,8 +387,8 @@ const VisualSchedule = ({ availabilities }) => {
                           ? isBreakTime
                             ? "bg-red-100 dark:bg-red-900/30"
                             : "bg-green-100 dark:bg-green-900/30"
-                          : "bg-gray-100 dark:bg-gray-800"
-                      }`}
+                          : "bg-gray-100 dark:bg-gray-700"
+                      } dark:border-gray-700`}
                       title={
                         isWorkingHour
                           ? isBreakTime
@@ -426,7 +435,10 @@ const TableSkeleton = () => {
   return (
     <div className="space-y-4">
       {[...Array(5)].map((_, i) => (
-        <Skeleton key={i} className="h-12 w-full rounded-lg" />
+        <Skeleton
+          key={i}
+          className="h-12 w-full rounded-lg bg-gray-200 dark:bg-gray-800"
+        />
       ))}
     </div>
   );
@@ -636,34 +648,43 @@ const AvailabilityPage = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div className="container mx-auto px-4 py-6 dark:bg-gray-900 min-h-screen">
       <div className="flex flex-col space-y-1 mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold">
+        <h1 className="text-2xl sm:text-3xl font-bold dark:text-white">
           Availability Settings
         </h1>
-        <p className="text-sm sm:text-base text-muted-foreground">
+        <p className="text-sm sm:text-base text-muted-foreground dark:text-gray-400">
           Configure your regular hours and special dates
         </p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-        <TabsList className="grid grid-cols-3 w-full gap-1">
-          <TabsTrigger value="recurring" className="text-xs sm:text-sm">
+        <TabsList className="grid grid-cols-3 w-full gap-1 bg-gray-100 dark:bg-gray-800">
+          <TabsTrigger
+            value="recurring"
+            className="text-xs sm:text-sm dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white"
+          >
             Recurring Times
           </TabsTrigger>
-          <TabsTrigger value="overrides" className="text-xs sm:text-sm">
+          <TabsTrigger
+            value="overrides"
+            className="text-xs sm:text-sm dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white"
+          >
             Special Dates
           </TabsTrigger>
-          <TabsTrigger value="visual" className="text-xs sm:text-sm">
+          <TabsTrigger
+            value="visual"
+            className="text-xs sm:text-sm dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white"
+          >
             Visual Schedule
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="recurring" className="space-y-4">
-          <Card>
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardHeader>
               <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-                <CardTitle className="text-lg md:text-xl">
+                <CardTitle className="text-lg md:text-xl dark:text-white">
                   Weekly Schedule
                 </CardTitle>
                 <div className="flex flex-col sm:flex-row gap-2">
@@ -678,7 +699,7 @@ const AvailabilityPage = () => {
                   <Button
                     onClick={handleSaveChanges}
                     disabled={!hasChanges || isSaving}
-                    className="bg-blue-500 hover:bg-blue-600 w-full sm:w-auto"
+                    className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white w-full sm:w-auto"
                   >
                     {isSaving ? (
                       "Saving..."
@@ -696,7 +717,10 @@ const AvailabilityPage = () => {
               {isLoading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {[...Array(7)].map((_, i) => (
-                    <Skeleton key={i} className="h-48 w-full rounded-xl" />
+                    <Skeleton
+                      key={i}
+                      className="h-48 w-full rounded-xl bg-gray-200 dark:bg-gray-700"
+                    />
                   ))}
                 </div>
               ) : (
@@ -710,15 +734,15 @@ const AvailabilityPage = () => {
         </TabsContent>
 
         <TabsContent value="overrides" className="space-y-4">
-          <Card>
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardHeader>
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                <CardTitle className="text-lg md:text-xl">
+                <CardTitle className="text-lg md:text-xl dark:text-white">
                   Special Dates
                 </CardTitle>
                 <Button
                   onClick={handleAddOverride}
-                  className="bg-blue-500 hover:bg-blue-600 w-full sm:w-auto"
+                  className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white w-full sm:w-auto"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Add Special Date
@@ -729,35 +753,38 @@ const AvailabilityPage = () => {
               {isLoading ? (
                 <TableSkeleton />
               ) : overrides.length === 0 ? (
-                <p className="text-muted-foreground text-center py-8">
+                <p className="text-muted-foreground dark:text-gray-400 text-center py-8">
                   No special dates configured
                 </p>
               ) : (
                 <div className="overflow-x-auto">
                   <Table className="min-w-[600px]">
                     <TableHeader>
-                      <TableRow>
-                        <TableHead className="whitespace-nowrap">
+                      <TableRow className="hover:bg-transparent dark:hover:bg-transparent">
+                        <TableHead className="whitespace-nowrap dark:text-gray-300">
                           Date
                         </TableHead>
-                        <TableHead className="whitespace-nowrap">
+                        <TableHead className="whitespace-nowrap dark:text-gray-300">
                           Status
                         </TableHead>
-                        <TableHead className="whitespace-nowrap">
+                        <TableHead className="whitespace-nowrap dark:text-gray-300">
                           Hours
                         </TableHead>
-                        <TableHead className="whitespace-nowrap">
+                        <TableHead className="whitespace-nowrap dark:text-gray-300">
                           Interval
                         </TableHead>
-                        <TableHead className="text-right whitespace-nowrap">
+                        <TableHead className="text-right whitespace-nowrap dark:text-gray-300">
                           Actions
                         </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {overrides.map((override) => (
-                        <TableRow key={override.id}>
-                          <TableCell className="whitespace-nowrap">
+                        <TableRow
+                          key={override.id}
+                          className="dark:border-gray-700 dark:hover:bg-gray-700/50"
+                        >
+                          <TableCell className="whitespace-nowrap dark:text-gray-300">
                             {override.date}
                           </TableCell>
                           <TableCell className="whitespace-nowrap">
@@ -778,7 +805,7 @@ const AvailabilityPage = () => {
                                 : "Unavailable"}
                             </Badge>
                           </TableCell>
-                          <TableCell className="whitespace-nowrap">
+                          <TableCell className="whitespace-nowrap dark:text-gray-300">
                             {override.is_available
                               ? `${formatTimeDisplay(
                                   override.start_time || ""
@@ -787,7 +814,7 @@ const AvailabilityPage = () => {
                                 )}`
                               : "-"}
                           </TableCell>
-                          <TableCell className="whitespace-nowrap">
+                          <TableCell className="whitespace-nowrap dark:text-gray-300">
                             {override.is_available
                               ? `${override.interval_minutes} mins`
                               : "-"}
@@ -795,22 +822,29 @@ const AvailabilityPage = () => {
                           <TableCell className="text-right">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm">
-                                  <MoreVertical className="h-4 w-4" />
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="dark:hover:bg-gray-700/30"
+                                >
+                                  <MoreVertical className="h-4 w-4 dark:text-gray-300" />
                                 </Button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
+                              <DropdownMenuContent
+                                align="end"
+                                className="bg-white dark:bg-gray-800 dark:border-gray-700"
+                              >
                                 <DropdownMenuItem
                                   onClick={(e) =>
                                     handleEditOverride(override, e)
                                   }
-                                  className="text-blue-600"
+                                  className="text-blue-600 dark:text-blue-400 dark:hover:bg-gray-700/50"
                                 >
                                   <Edit className="h-4 w-4 mr-2" />
                                   Edit
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
-                                  className="text-red-500"
+                                  className="text-red-600 dark:text-red-400 dark:hover:bg-gray-700/50"
                                   onClick={(e) =>
                                     handleDeleteOverride(override.id, e)
                                   }
@@ -832,9 +866,9 @@ const AvailabilityPage = () => {
         </TabsContent>
 
         <TabsContent value="visual" className="space-y-4">
-          <Card>
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardHeader>
-              <CardTitle className="text-lg md:text-xl">
+              <CardTitle className="text-lg md:text-xl dark:text-white">
                 Weekly Schedule Overview
               </CardTitle>
             </CardHeader>
@@ -849,15 +883,17 @@ const AvailabilityPage = () => {
         open={isOverrideDialogOpen}
         onOpenChange={setIsOverrideDialogOpen}
       >
-        <DialogContent>
+        <DialogContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="dark:text-white">
               {currentOverride?.id ? "Edit Special Date" : "Add Special Date"}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="override-date">Date</Label>
+              <Label htmlFor="override-date" className="dark:text-gray-300">
+                Date
+              </Label>
               <Input
                 id="override-date"
                 type="date"
@@ -868,6 +904,7 @@ const AvailabilityPage = () => {
                     date: e.target.value,
                   }))
                 }
+                className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               />
             </div>
             <div className="flex items-center space-x-4">
@@ -881,7 +918,7 @@ const AvailabilityPage = () => {
                 }
                 className="data-[state=checked]:bg-blue-500"
               />
-              <Label className="text-base">
+              <Label className="text-base dark:text-gray-300">
                 {currentOverride?.is_available ? "Available" : "Unavailable"}
               </Label>
             </div>
@@ -890,7 +927,9 @@ const AvailabilityPage = () => {
               <>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label className="mb-2 block">Start Time</Label>
+                    <Label className="mb-2 block dark:text-gray-300">
+                      Start Time
+                    </Label>
                     <TimePicker
                       value={currentOverride?.start_time || "09:00"}
                       onChange={(value) =>
@@ -903,7 +942,9 @@ const AvailabilityPage = () => {
                     />
                   </div>
                   <div>
-                    <Label className="mb-2 block">End Time</Label>
+                    <Label className="mb-2 block dark:text-gray-300">
+                      End Time
+                    </Label>
                     <TimePicker
                       value={currentOverride?.end_time || "17:00"}
                       onChange={(value) =>
@@ -917,7 +958,9 @@ const AvailabilityPage = () => {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Interval (minutes)</Label>
+                  <Label className="dark:text-gray-300">
+                    Interval (minutes)
+                  </Label>
                   <Select
                     value={
                       currentOverride?.interval_minutes?.toString() || "60"
@@ -929,14 +972,15 @@ const AvailabilityPage = () => {
                       }))
                     }
                   >
-                    <SelectTrigger className="max-w-[180px]">
+                    <SelectTrigger className="max-w-[180px] bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-white">
                       <SelectValue placeholder="Select interval" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-white dark:bg-gray-800 dark:border-gray-700">
                       {INTERVAL_OPTIONS.map((option) => (
                         <SelectItem
                           key={option.value}
                           value={option.value.toString()}
+                          className="dark:hover:bg-gray-700/50 dark:text-white"
                         >
                           {option.label}
                         </SelectItem>
@@ -952,7 +996,7 @@ const AvailabilityPage = () => {
               type="button"
               onClick={handleSaveOverride}
               disabled={!currentOverride?.date}
-              className="bg-blue-500 hover:bg-blue-600"
+              className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white"
             >
               Save
             </Button>
@@ -964,15 +1008,20 @@ const AvailabilityPage = () => {
         open={isDeleteOverrideDialogOpen}
         onOpenChange={setIsDeleteOverrideDialogOpen}
       >
-        <DialogContent>
+        <DialogContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <DialogHeader>
-            <DialogTitle>Delete Special Date</DialogTitle>
+            <DialogTitle className="dark:text-white">
+              Delete Special Date
+            </DialogTitle>
           </DialogHeader>
-          <p>Are you sure you want to delete this special date?</p>
+          <p className="dark:text-gray-300">
+            Are you sure you want to delete this special date?
+          </p>
           <DialogFooter>
             <Button
               variant="outline"
               onClick={() => setIsDeleteOverrideDialogOpen(false)}
+              className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600"
             >
               Cancel
             </Button>

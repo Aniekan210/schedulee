@@ -21,12 +21,11 @@ function AuthContent({ children }) {
     </div>
   ) : (
     <main className="w-screen h-screen overflow-hidden flex [flex-flow:row_nowrap] m-0 p-0">
-      <DashboardSidebar isActive={hasPaid} trialDays={daysLeft} />
-      <div className="w-full h-full overflow-x-hidden overflow-y-auto">
+      <DashboardSidebar isPaid={hasPaid} trialDays={daysLeft} />
+      <div className="w-screen h-screen overflow-x-hidden overflow-y-auto">
         {children}
         <Toaster />
       </div>
     </main>
   );
 }
-
