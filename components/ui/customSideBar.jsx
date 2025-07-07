@@ -50,7 +50,7 @@ export default function DashboardSidebar({ trialDays = 14, isPaid = false }) {
   return (
     <>
       {/* TEMPORARY DARK MODE TOGGLE */}
-      <div className="fixed top-6 right-8 z-50">
+      <div className="fixed top-3 right-4 md:top-6 md:right-8 z-50">
         <Button
           variant="outline"
           size="icon"
@@ -58,9 +58,9 @@ export default function DashboardSidebar({ trialDays = 14, isPaid = false }) {
           onClick={() => setDarkMode(!darkMode)}
         >
           {darkMode ? (
-            <Sun className="h-4 w-4" />
+            <Sun className="h-7 w-7 md:h-4 md:w-4" />
           ) : (
-            <Moon className="h-4 w-4" />
+            <Moon className="h-7 w-7 md:h-4 md:w-4" />
           )}
         </Button>
       </div>
