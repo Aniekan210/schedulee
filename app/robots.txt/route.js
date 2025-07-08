@@ -10,6 +10,7 @@ Allow: /upgrade
 Allow: /success
 Allow: /terms
 Allow: /privacy
+Allow: /reset-password
 
 # Disallow private/dashboard pages
 Disallow: /dashboard/*
