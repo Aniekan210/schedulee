@@ -14,14 +14,43 @@ const geistMono = Geist_Mono({
 
 export const metadata = {
   title: "Schedulee.app | Modern Booking & Scheduling Platform",
-  description: "Simplify your scheduling process with Schedulee.app - The intuitive booking platform for businesses and professionals.",
-  metadataBase: new URL('https://schedulee.app'),
+  description:
+    "Simplify your scheduling process with Schedulee.app - The intuitive booking platform for businesses and professionals.",
+  metadataBase: new URL("https://schedulee.app"),
   alternates: {
-    canonical: '/',
+    canonical: "/",
   },
+  keywords: [
+    "online booking system",
+    "cheap scheduling software",
+    "appointment booking for solo business",
+    "freelancer booking app",
+    "small business scheduling tool",
+    "simple booking system",
+    "affordable booking software",
+    "no login appointment booking",
+    "easy booking page creator",
+    "calendar app for small business",
+    "solo entrepreneur tools",
+    "side hustle booking tool",
+    "appointment scheduler for freelancers",
+    "automatic appointment reminders",
+    "mobile-friendly booking platform",
+    "online scheduling for consultants",
+    "booking website without coding",
+    "bookings for personal trainers",
+    "coaching business booking system",
+    "beauty salon appointment app",
+    "appointment app with free trial",
+    "Stripe booking integration",
+    "small team calendar sharing",
+    "self-employed appointment app",
+    "client booking without sign-up",
+  ],
   openGraph: {
     title: "Schedulee.app | Modern Booking & Scheduling Platform",
-    description: "Simplify your scheduling process with Schedulee.app - The intuitive booking platform for businesses and professionals.",
+    description:
+      "Simplify your scheduling process with Schedulee.app - The intuitive booking platform for businesses and professionals.",
     url: "https://schedulee.app",
     siteName: "Schedulee.app",
     images: [
@@ -38,7 +67,8 @@ export const metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Schedulee.app | Modern Booking & Scheduling Platform",
-    description: "Simplify your scheduling process with Schedulee.app - The intuitive booking platform for businesses and professionals.",
+    description:
+      "Simplify your scheduling process with Schedulee.app - The intuitive booking platform for businesses and professionals.",
     images: {
       url: "https://schedulee.app/logo.png",
       alt: "Schedulee.app Logo",
@@ -71,20 +101,22 @@ export default function RootLayout({ children }) {
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "SoftwareApplication",
-              "name": "Schedulee.app",
-              "description": "Online booking and scheduling platform",
-              "applicationCategory": "BusinessApplication",
-              "operatingSystem": "Web",
-              "offers": {
+              name: "Schedulee.app",
+              description: "Online booking and scheduling platform",
+              applicationCategory: "BusinessApplication",
+              operatingSystem: "Web",
+              offers: {
                 "@type": "Offer",
-                "price": "8.99",
-                "priceCurrency": "CAD"
-              }
-            })
+                price: "8.99",
+                priceCurrency: "CAD",
+              },
+            }),
           }}
         />
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
         {children}
       </body>
     </html>
