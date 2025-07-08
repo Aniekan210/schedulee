@@ -34,28 +34,32 @@ export default function DashboardSidebar({ trialDays = 14, isPaid = false }) {
       name: "Bookings",
       icon: Calendar,
       href: "/dashboard/bookings",
+      ariaLabel: "View and manage your bookings",
     },
     {
       name: "Availability",
       icon: Clock,
       href: "/dashboard/availability",
+      ariaLabel: "Set your available hours",
     },
     {
       name: "Booking Page",
       icon: LayoutTemplate,
       href: "/dashboard/customize",
+      ariaLabel: "Customize your booking page",
     },
   ];
 
   return (
     <>
       {/* TEMPORARY DARK MODE TOGGLE */}
-      <div className="fixed top-3 right-4 md:top-6 md:right-8 z-50">
+      <div className="hidden fixed top-3 right-4 md:top-6 md:right-8 z-50">
         <Button
           variant="outline"
           size="icon"
           className="shadow-lg bg-white dark:bg-gray-800"
           onClick={() => setDarkMode(!darkMode)}
+          aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
         >
           {darkMode ? (
             <Sun className="h-7 w-7 md:h-4 md:w-4" />
@@ -65,18 +69,19 @@ export default function DashboardSidebar({ trialDays = 14, isPaid = false }) {
         </Button>
       </div>
 
-      {/* Mobile Edge Trigger */}
+      {/* Improved Mobile Trigger - Larger and more accessible */}
       <div className="md:hidden fixed left-0 top-1/2 z-20 -translate-y-1/2">
         <button
           onClick={() => setIsMobileOpen(true)}
-          className="w-8 h-20 bg-white dark:bg-gray-800 border border-l-0 border-gray-200 dark:border-gray-700 rounded-r-lg shadow-lg flex items-center justify-center transition-all hover:bg-gray-50 dark:hover:bg-gray-700 hover:scale-105 active:scale-95 group"
+          className="w-12 h-24 bg-white dark:bg-gray-800 border border-l-0 border-gray-200 dark:border-gray-700 rounded-r-lg shadow-lg flex items-center justify-center transition-all hover:bg-gray-50 dark:hover:bg-gray-700 hover:scale-105 active:scale-95 group"
+          aria-label="Open navigation menu"
         >
-          <div className="absolute inset-y-0 left-0 w-1 bg-blue-500 rounded-r-md opacity-0 group-hover:opacity-100 transition-opacity" />
-          <ChevronRight className="h-5 w-5 text-gray-500 dark:text-gray-400 transition-transform duration-200" />
+          <div className="absolute inset-y-0 left-0 w-1.5 bg-blue-500 rounded-r-md opacity-0 group-hover:opacity-100 transition-opacity" />
+          <ChevronRight className="h-6 w-6 text-gray-500 dark:text-gray-400 transition-transform duration-200" />
         </button>
       </div>
 
-      {/* Mobile Sidebar Overlay */}
+      {/* Mobile Sidebar Overlay with better transitions */}
       {isMobileOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-30 md:hidden transition-opacity duration-300 ease-out"
@@ -85,11 +90,13 @@ export default function DashboardSidebar({ trialDays = 14, isPaid = false }) {
             pointerEvents: isMobileOpen ? 'auto' : 'none'
           }}
           onClick={() => setIsMobileOpen(false)}
+          aria-hidden="true"
         />
       )}
 
       {/* Sidebar - Desktop & Mobile */}
-      <div
+      <aside
+        aria-label="Main navigation"
         className={cn(
           "fixed md:sticky top-0 h-screen bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 z-40",
           "w-64",
@@ -100,8 +107,8 @@ export default function DashboardSidebar({ trialDays = 14, isPaid = false }) {
         )}
       >
         <div className="flex flex-col h-full">
-          {/* Logo Section */}
-          <div 
+          {/* Logo Section with better semantics */}
+          <header 
             className={cn(
               "flex items-center h-16 px-4 border-b border-gray-200 dark:border-gray-800",
               isCollapsed ? "justify-center" : "px-6"
@@ -111,52 +118,55 @@ export default function DashboardSidebar({ trialDays = 14, isPaid = false }) {
               width={32}
               height={32}
               src="/logo.avif"
-              alt="logo"
+              alt="Schedulee.app logo"
+              priority
             />
             {!isCollapsed && (
-              <span className="font-semibold ml-2 text-lg dark:text-white">Schedulee.app</span>
+              <h1 className="font-semibold ml-2 text-lg dark:text-white">Schedulee.app</h1>
             )}
-          </div>
+          </header>
 
-          {/* Navigation Links */}
-          <div className="flex-1 overflow-y-auto py-4">
-            <nav className="space-y-1 px-3">
+          {/* Navigation Links with better accessibility */}
+          <nav className="flex-1 overflow-y-auto py-4">
+            <ul className="space-y-1 px-3">
               {navItems.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={cn(
-                    "group flex items-center px-3 py-3 rounded-lg text-sm font-medium transition-all duration-200",
-                    pathname.startsWith(item.href)
-                      ? "bg-blue-50 dark:bg-gray-800 text-blue-600 dark:text-blue-500"
-                      : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300",
-                    isCollapsed ? "justify-center" : "px-4"
-                  )}
-                  title={isCollapsed ? item.name : ""}
-                >
-                  <item.icon className="h-5 w-5 transition-transform group-hover:scale-110" />
-                  {!isCollapsed && (
-                    <span className="ml-3 transition-all duration-200 group-hover:translate-x-1">
-                      {item.name}
-                    </span>
-                  )}
-                  {isCollapsed && (
-                    <div className="absolute left-full ml-4 px-3 py-2 bg-gray-900 dark:bg-gray-700 text-white text-sm rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-200 z-50 pointer-events-none whitespace-nowrap">
-                      {item.name}
-                      <div className="absolute right-full top-1/2 -mt-2 w-0 h-0 border-t-4 border-b-4 border-l-0 border-r-4 border-t-transparent border-b-transparent border-r-gray-900 dark:border-r-gray-700" />
-                    </div>
-                  )}
-                </Link>
+                <li key={item.name}>
+                  <Link
+                    href={item.href}
+                    className={cn(
+                      "group flex items-center px-3 py-3 rounded-lg text-sm font-medium transition-all duration-200",
+                      pathname.startsWith(item.href)
+                        ? "bg-blue-50 dark:bg-gray-800 text-blue-600 dark:text-blue-500"
+                        : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300",
+                      isCollapsed ? "justify-center" : "px-4"
+                    )}
+                    aria-current={pathname.startsWith(item.href) ? "page" : undefined}
+                    aria-label={item.ariaLabel}
+                  >
+                    <item.icon className="h-5 w-5 transition-transform group-hover:scale-110" aria-hidden="true" />
+                    {!isCollapsed && (
+                      <span className="ml-3 transition-all duration-200 group-hover:translate-x-1">
+                        {item.name}
+                      </span>
+                    )}
+                    {isCollapsed && (
+                      <div className="absolute left-full ml-4 px-3 py-2 bg-gray-900 dark:bg-gray-700 text-white text-sm rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-200 z-50 pointer-events-none whitespace-nowrap">
+                        {item.name}
+                        <div className="absolute right-full top-1/2 -mt-2 w-0 h-0 border-t-4 border-b-4 border-l-0 border-r-4 border-t-transparent border-b-transparent border-r-gray-900 dark:border-r-gray-700" />
+                      </div>
+                    )}
+                  </Link>
+                </li>
               ))}
-            </nav>
-          </div>
+            </ul>
+          </nav>
 
-          {/* Bottom Section */}
-          <div className={cn(
+          {/* Bottom Section with better semantics */}
+          <footer className={cn(
             "p-3 border-t border-gray-200 dark:border-gray-800 space-y-2",
             isCollapsed ? "flex flex-col items-center" : ""
           )}>
-            {/* Subscription Status - Subtle Links */}
+            {/* Subscription Status */}
             {isPaid ? (
               <Link 
                 href="/cancel-plan" 
@@ -164,12 +174,12 @@ export default function DashboardSidebar({ trialDays = 14, isPaid = false }) {
                   "px-3 py-2 text-sm rounded-md flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300 transition-colors",
                   isCollapsed ? "justify-center" : ""
                 )}
-                title="Cancel Plan"
+                aria-label="Manage your subscription"
               >
                 {!isCollapsed ? (
                   <span>Manage Subscription</span>
                 ) : (
-                  <span>⚙️</span>
+                  <span aria-hidden="true">⚙️</span>
                 )}
               </Link>
             ) : (
@@ -179,17 +189,17 @@ export default function DashboardSidebar({ trialDays = 14, isPaid = false }) {
                   "px-3 py-2 text-sm rounded-md flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300 transition-colors",
                   isCollapsed ? "justify-center" : ""
                 )}
-                title="Upgrade Plan"
+                aria-label={`Upgrade your plan, ${trialDays} days left in trial`}
               >
                 {!isCollapsed ? (
                   <span>Trial: {trialDays} days left</span>
                 ) : (
-                  <span className="animate-pulse">⏳</span>
+                  <span className="animate-pulse" aria-hidden="true">⏳</span>
                 )}
               </Link>
             )}
 
-            {/* Sign Out Button */}
+            {/* Sign Out Button with better loading state */}
             <Button
               variant="ghost"
               size={isCollapsed ? "icon" : "default"}
@@ -221,11 +231,12 @@ export default function DashboardSidebar({ trialDays = 14, isPaid = false }) {
                 }
               }}
               disabled={isSigningOut}
+              aria-label={isSigningOut ? "Signing out..." : "Sign out"}
             >
               {isSigningOut ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
+                <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
               ) : (
-                <LogOut className="h-5 w-5" />
+                <LogOut className="h-5 w-5" aria-hidden="true" />
               )}
               {!isCollapsed && (
                 <span className="ml-3 transition-all duration-200 group-hover:translate-x-1">
@@ -233,15 +244,16 @@ export default function DashboardSidebar({ trialDays = 14, isPaid = false }) {
                 </span>
               )}
             </Button>
-          </div>
+          </footer>
 
-          {/* Collapse Button */}
+          {/* Collapse Button with better semantics */}
           <div className="p-3 border-t border-gray-200 dark:border-gray-800 hidden md:block">
             <Button
               variant="ghost"
               size="sm"
               className="w-full text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg px-3 py-3 justify-start"
               onClick={() => setIsCollapsed(!isCollapsed)}
+              aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -252,6 +264,7 @@ export default function DashboardSidebar({ trialDays = 14, isPaid = false }) {
                 style={{
                   transform: isCollapsed ? 'rotate(180deg)' : 'none'
                 }}
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -268,7 +281,7 @@ export default function DashboardSidebar({ trialDays = 14, isPaid = false }) {
             </Button>
           </div>
         </div>
-      </div>
+      </aside>
     </>
   );
 }

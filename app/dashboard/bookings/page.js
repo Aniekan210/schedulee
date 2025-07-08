@@ -294,10 +294,10 @@ export default function BookingsOverviewPage() {
       {/* Header and Booking Link Card */}
       <div className="grid gap-4">
         <div className="flex flex-col space-y-1">
-          <h1 className="text-3xl font-bold dark:text-white">
+          <h1 className="text-2xl sm:text-3xl font-bold dark:text-white">
             Welcome {businessName}
           </h1>
-          <p className="text-muted-foreground dark:text-gray-400">
+          <p className="text-sm sm:text-base text-muted-foreground dark:text-gray-400">
             Manage your bookings and appointments
           </p>
         </div>

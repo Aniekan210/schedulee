@@ -5,7 +5,12 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "randomuser.me",
-        pathname: '/api/portraits/**',
+        pathname: "/api/portraits/**",
+      },
+      {
+        protocol: "https",
+        hostname: "nvmjfvxaehroofhpyzfg.supabase.co",
+        pathname: "/storage/v1/object/public/form-assets/form-logos/**",
       },
     ],
   },
