@@ -50,7 +50,7 @@ export default function ResetPasswordClient() {
 
       // Redirect on success
       window.location.href = `/success?message=${encodeURIComponent(
-        "Password Reset Successfully"
+        "Your password has been reset!!!"
       )}`;
     } catch (err) {
       setError(err.message);

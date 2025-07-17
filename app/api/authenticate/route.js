@@ -15,12 +15,12 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const trialDays = 14;
+    const trialDays = 30;
     const createdAt = new Date(user.created_at);
     const now = new Date();
     const daysElapsed = Math.floor((now - createdAt) / 86400000);
     const daysLeft = Math.max(0, trialDays - daysElapsed);
-    
+
     return NextResponse.json({
       user,
       hasPaid: user.user_metadata?.is_paid || false,

@@ -51,7 +51,7 @@ export default function TermsOfService() {
                     </h2>
                     <div className="bg-gray-50 rounded-lg p-6">
                         <p className="text-gray-700">
-                            The service is free for 14 days. After the trial, a paid subscription of $8.99 CAD/month is required to continue using the service. Payments are processed securely through Stripe. After your trial ends, access to your account will be restricted until payment is made.
+                            The service is free for 30 days. After the trial, a paid subscription of $8.99 CAD/month is required to continue using the service. Payments are processed securely through Stripe. After your trial ends, access to your account will be restricted until payment is made.
                         </p>
                     </div>
                 </section>

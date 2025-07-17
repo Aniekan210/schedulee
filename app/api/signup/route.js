@@ -28,7 +28,7 @@ export async function POST(request) {
     }
 
     // Create user
-    const message = encodeURIComponent("Email Confirmed Successfully");
+    const message = encodeURIComponent("Your email has been confirmed!!!");
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,

@@ -17,7 +17,7 @@ export const metadata = {
     "free booking page setup",
     "best booking platform for small business",
     "instant appointment booking setup",
-    "14 day free booking app trial",
+    "30 day free booking app trial",
     "easy client booking software",
     "affordable appointment app signup",
     "simple booking software for beginners",
@@ -30,7 +30,7 @@ export const metadata = {
   openGraph: {
     title: "Sign Up | Schedulee.app - Get Started in Seconds",
     description:
-      "Create your account and start accepting bookings in minutes. 14 day Free Trial.",
+      "Create your account and start accepting bookings in minutes. 30 day Free Trial.",
     url: "https://schedulee.app/signup",
     images: [
       {
@@ -45,7 +45,7 @@ export const metadata = {
     card: "summary_large_image",
     title: "Sign Up | Schedulee.app - Get Started in Seconds",
     description:
-      "Create your account and start accepting bookings in minutes. 14 day Free Trial.",
+      "Create your account and start accepting bookings in minutes. 30 day Free Trial.",
     images: "https://schedulee.app/logo.png",
   },
 };
