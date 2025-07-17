@@ -30,8 +30,8 @@ export default function CheckoutLayout({ children }) {
       </header>
 
       {/* Checkout Container */}
-      <main className="flex-1 flex items-center justify-center px-4 py-10">
-        <div className="w-full max-w-xl bg-white shadow-lg rounded-2xl p-6 md:p-10">
+      <main className="flex-1 flex items-center justify-center px-4 py-8">
+        <div className="w-full max-w-md bg-white shadow-lg rounded-2xl p-4 md:p-8">
           {children}
         </div>
       </main>

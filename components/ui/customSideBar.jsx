@@ -169,7 +169,7 @@ export default function DashboardSidebar({ trialDays = 14, isPaid = false }) {
             {/* Subscription Status */}
             {isPaid ? (
               <Link 
-                href="/cancel-plan" 
+                href="/cancel" 
                 className={cn(
                   "px-3 py-2 text-sm rounded-md flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300 transition-colors",
                   isCollapsed ? "justify-center" : ""

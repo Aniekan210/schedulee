@@ -57,7 +57,7 @@ function ErrorContent() {
 
           <div className="mt-8 space-y-3">
             <Link
-              href="/retry"
+              href="/login"
               className="
                 block w-full
                 bg-gradient-to-r from-red-600 to-red-500
@@ -68,7 +68,7 @@ function ErrorContent() {
                 focus:outline-none focus:ring-4 focus:ring-red-300
               "
             >
-              Retry
+              Back to Login
             </Link>
 
             <Link
