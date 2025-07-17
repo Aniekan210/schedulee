@@ -1,83 +1,61 @@
-"use client";
-
-import { useEffect } from "react";
-import { useSearchParams } from "next/navigation";
-import { stripe } from "@/lib/stripe"; // Only if this is a client-safe stripe helper (see notes below)
+import { redirect } from "next/navigation";
+import { stripe } from "@/lib/stripe";
 import { supabase } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
-import { Suspense } from "react";
 
-function ReturnPageContent() {
-  const searchParams = useSearchParams();
-  const router = useRouter();
+export default async function ReturnPage({ searchParams }) {
+  const session_id = searchParams?.session_id;
 
-  useEffect(() => {
-    const handleCheckoutResult = async () => {
-      const session_id = searchParams.get("session_id");
+  if (!session_id) {
+    redirect(`/error?message=${encodeURIComponent("Missing session_id")}`);
+  }
 
-      if (!session_id) {
-        router.replace(
-          `/error?message=${encodeURIComponent(
-            "Missing session_id in the URL"
-          )}`
-        );
-        return;
-      }
+  let session;
+  try {
+    session = await stripe.checkout.sessions.retrieve(session_id, {
+      expand: ["line_items", "payment_intent", "customer_details"],
+    });
+  } catch (err) {
+    redirect(`/error?message=${encodeURIComponent("Invalid session ID")}`);
+  }
 
-      try {
-        const res = await fetch(`/api/stripe-session?session_id=${session_id}`);
-        const data = await res.json();
+  const { status, customer_details } = session;
+  const customerEmail = customer_details?.email ?? "your email";
 
-        if (!res.ok) throw new Error(data?.message || "Unable to retrieve session");
+  if (status === "open") {
+    redirect(
+      `/error?message=${encodeURIComponent(
+        "Your payment was cancelled or failed."
+      )}`
+    );
+  }
 
-        const { status, customer_email } = data;
+  if (status === "complete") {
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
 
-        if (status === "open") {
-          router.replace(
-            `/error?message=${encodeURIComponent(
-              "Your payment has failed or was cancelled"
-            )}`
-          );
-          return;
-        }
+    if (userError || !user) {
+      redirect(
+        `/error?message=${encodeURIComponent("User not authenticated.")}`
+      );
+    }
 
-        if (status === "complete") {
-          const { error } = await supabase.auth.updateUser({
-            data: { is_paid: true },
-          });
+    const { error: updateError } = await supabase.auth.updateUser({
+      data: { is_paid: true },
+    });
 
-          if (error) {
-            router.replace(
-              `/error?message=${encodeURIComponent(error.message)}`
-            );
-            return;
-          }
+    if (updateError) {
+      redirect(`/error?message=${encodeURIComponent(updateError.message)}`);
+    }
 
-          router.replace(
-            `/success?message=${encodeURIComponent(
-              `Your payment was successful. A confirmation has been sent to ${customer_email}`
-            )}`
-          );
-        }
-      } catch (err) {
-        router.replace(
-          `/error?message=${encodeURIComponent(
-            err.message || "Something went wrong"
-          )}`
-        );
-      }
-    };
+    redirect(
+      `/success?message=${encodeURIComponent(
+        `Your payment was successful. A confirmation has been sent to ${customerEmail}`
+      )}`
+    );
+  }
 
-    handleCheckoutResult();
-  }, [searchParams, router]);
-
-  return <div className="text-center animate-pulse text-gray-500 mt-12">Processing payment...</div>;
-}
-
-export default function ReturnPage() {
-  return (
-    <Suspense fallback={<div className="text-center mt-12">Loading...</div>}>
-      <ReturnPageContent />
-    </Suspense>
-  );
+  // fallback for unknown status
+  redirect(`/error?message=${encodeURIComponent("Unknown payment status.")}`);
 }
