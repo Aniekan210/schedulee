@@ -5,6 +5,8 @@ export function GET() {
     { url: "/signup", lastModified: new Date(), priority: 0.9 },
     { url: "/login", lastModified: new Date(), priority: 0.8 },
     { url: "/upgrade", lastModified: new Date(), priority: 0.7 },
+    { url: "/cancel", lastModified: new Date(), priority: 0.4 },
+    { url: "/return", lastModified: new Date(), priority: 0.4 },
     { url: "/success", lastModified: new Date(), priority: 0.5 },
     { url: "/error", lastModified: new Date(), priority: 0.5 },
     { url: "/update-password", lastModified: new Date(), priority: 0.4 },

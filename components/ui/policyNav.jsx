@@ -10,7 +10,7 @@ const PolicyNav = () => {
                     alt="Schedulee.app Logo"
                     className="h-10 w-10 rounded-lg"
                 />
-                <span className="text-2xl font-bold text-blue-500">Schedulee.app</span>
+                <span className="text-2xl font-bold text-gray-900">Schedulee.app</span>
             </a>
             <a href="/" className="text-gray-600 hover:text-blue-500 transition">
                 Back to Home

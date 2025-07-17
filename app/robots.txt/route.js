@@ -12,6 +12,8 @@ Allow: /terms
 Allow: /privacy
 Allow: /update-password
 Allow: /error
+Allow: /cancel
+Allow: /return
 
 # Disallow private/dashboard pages
 Disallow: /dashboard/*
