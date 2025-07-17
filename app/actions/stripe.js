@@ -5,7 +5,7 @@ import { stripe } from "../../lib/stripe";
 export async function fetchClientSecret() {
   try {
     const price_id =
-      process.env.NODE_ENV !== "dev"
+      process.env.NODE_ENV === "development"
         ? "price_1RllBOHVBc6jypLZau5D6cxA"
         : "price_1RiVlnHVBc6jypLZNs5z8XiW";
 
