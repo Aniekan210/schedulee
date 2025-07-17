@@ -1,11 +1,37 @@
 "use client";
 
+import { useEffect } from "react";
 import Image from "next/image";
 
 export default function CheckoutLayout({ children }) {
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await fetch("/api/authenticate");
+        if (!res.ok) {
+          // Unauthenticated
+          window.location.href = "/login";
+          return;
+        }
+
+        const data = await res.json();
+
+        if (data.hasPaid) {
+          // Already paid
+          window.location.href = "/dashboard/bookings";
+        }
+      } catch (error) {
+        console.error("Authentication error:", error);
+        window.location.href = "/login";
+      }
+    };
+
+    checkAuth();
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Clean Sticky Navbar */}
+      {/* Sticky Navbar */}
       <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
         <div className="w-full max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
           <a href="/" className="flex items-center space-x-3">
