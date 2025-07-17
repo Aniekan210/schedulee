@@ -84,120 +84,119 @@ export default function SignUpPage() {
 
   return (
     <>
-      {
-        showForgotPassword ? (
-          <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-            <div className="w-full max-w-md">
-              <ForgotPasswordForm onBack={() => setShowForgotPassword(false)} />
-            </div>
+      {showForgotPassword ? (
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+          <div className="w-full max-w-md">
+            <ForgotPasswordForm onBack={() => setShowForgotPassword(false)} />
           </div>
-        ) : (
-          <div className="min-h-screen bg-white flex items-center justify-center p-4">
-            <Card className="w-full max-w-md shadow-lg rounded-xl border border-gray-100">
-              <CardHeader className="p-8 text-center">
-                <div className="flex justify-center mb-6">
-                  <Image
-                    src="/logo.avif"
-                    alt="Schedulee Logo"
-                    width={64}
-                    height={64}
-                    className="h-14 w-14 object-contain"
+        </div>
+      ) : (
+        <div className="min-h-screen bg-white flex items-center justify-center p-4">
+          <Card className="w-full max-w-md shadow-lg rounded-xl border border-gray-100">
+            <CardHeader className="p-8 text-center">
+              <div className="flex justify-center mb-6">
+                <Image
+                  src="/logo.avif"
+                  alt="Schedulee Logo"
+                  width={64}
+                  height={64}
+                  className="h-14 w-14 object-contain"
+                />
+              </div>
+              <CardTitle className="text-2xl font-bold text-gray-900">
+                Welcome back
+              </CardTitle>
+              <CardDescription className="text-gray-500 mt-2">
+                Sign in to manage your bookings
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent className="px-8 pb-6">
+              <Button
+                onClick={handleGoogleLogin}
+                variant="outline"
+                className="w-full flex items-center justify-center gap-3 mb-6 h-11 rounded-lg border-gray-300 hover:bg-gray-50"
+                disabled={loading}
+              >
+                <GoogleIcon />
+                Continue with Google
+              </Button>
+
+              <div className="flex items-center my-6">
+                <div className="flex-1 h-px bg-gray-200"></div>
+                <span className="mx-4 text-sm text-gray-400">or</span>
+                <div className="flex-1 h-px bg-gray-200"></div>
+              </div>
+
+              {error && (
+                <div className="mb-4 p-3 text-sm text-red-600 bg-red-50 rounded-md border border-red-100">
+                  {error}
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-gray-700">
+                    Email
+                  </Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    className="h-11 rounded-lg focus:ring-blue-500 border-gray-300"
+                    required
                   />
                 </div>
-                <CardTitle className="text-2xl font-bold text-gray-900">
-                  Welcome back
-                </CardTitle>
-                <CardDescription className="text-gray-500 mt-2">
-                  Sign in to manage your bookings
-                </CardDescription>
-              </CardHeader>
 
-              <CardContent className="px-8 pb-6">
-                <Button
-                  onClick={handleGoogleLogin}
-                  variant="outline"
-                  className="w-full flex items-center justify-center gap-3 mb-6 h-11 rounded-lg border-gray-300 hover:bg-gray-50"
-                  disabled={loading}
-                >
-                  <GoogleIcon />
-                  Continue with Google
-                </Button>
-
-                <div className="flex items-center my-6">
-                  <div className="flex-1 h-px bg-gray-200"></div>
-                  <span className="mx-4 text-sm text-gray-400">or</span>
-                  <div className="flex-1 h-px bg-gray-200"></div>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <Label htmlFor="password" className="text-gray-700">
+                      Password
+                    </Label>
+                    <span
+                      onClick={() => {
+                        setShowForgotPassword(true);
+                      }}
+                      className="text-sm cursor-pointer text-blue-600 hover:text-blue-700 hover:underline"
+                    >
+                      Forgot password?
+                    </span>
+                  </div>
+                  <Input
+                    id="password"
+                    name="password"
+                    type="password"
+                    placeholder="••••••••"
+                    className="h-11 rounded-lg focus:ring-blue-500 border-gray-300"
+                    required
+                  />
                 </div>
 
-                {error && (
-                  <div className="mb-4 p-3 text-sm text-red-600 bg-red-50 rounded-md border border-red-100">
-                    {error}
-                  </div>
-                )}
+                <Button
+                  type="submit"
+                  className="w-full h-11 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-medium"
+                  disabled={loading}
+                >
+                  {loading ? <Spinner /> : "Sign In"}
+                </Button>
+              </form>
+            </CardContent>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-gray-700">
-                      Email
-                    </Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      placeholder="you@example.com"
-                      className="h-11 rounded-lg focus:ring-blue-500 border-gray-300"
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <Label htmlFor="password" className="text-gray-700">
-                        Password
-                      </Label>
-                      <span
-                        onClick={() => { setShowForgotPassword(true); }}
-                        className="text-sm text-blue-600 hover:text-blue-700 hover:underline"
-                      >
-                        Forgot password?
-                      </span>
-                    </div>
-                    <Input
-                      id="password"
-                      name="password"
-                      type="password"
-                      placeholder="••••••••"
-                      className="h-11 rounded-lg focus:ring-blue-500 border-gray-300"
-                      required
-                    />
-                  </div>
-
-                  <Button
-                    type="submit"
-                    className="w-full h-11 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-medium"
-                    disabled={loading}
-                  >
-                    {loading ? <Spinner /> : "Sign In"}
-                  </Button>
-                </form>
-              </CardContent>
-
-              <CardFooter className="px-8 py-6 border-t border-gray-100 bg-gray-50">
-                <p className="text-sm text-center text-gray-600">
-                  Don't have an account?{" "}
-                  <Link
-                    href="/signup"
-                    className="font-medium text-blue-600 hover:text-blue-700 hover:underline"
-                  >
-                    Sign up
-                  </Link>
-                </p>
-              </CardFooter>
-            </Card>
-          </div>
-
-        )
-      }
+            <CardFooter className="px-8 py-6 border-t border-gray-100 bg-gray-50">
+              <p className="text-sm text-center text-gray-600">
+                Don't have an account?{" "}
+                <Link
+                  href="/signup"
+                  className="font-medium text-blue-600 hover:text-blue-700 hover:underline"
+                >
+                  Sign up
+                </Link>
+              </p>
+            </CardFooter>
+          </Card>
+        </div>
+      )}
     </>
   );
 }

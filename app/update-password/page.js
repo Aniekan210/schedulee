@@ -1,33 +1,13 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
-import ForgotPasswordForm from "@/components/ui/forgotPasswordForm";
+import { useState } from "react";
+import { supabase } from "@/lib/supabase/client";
 
-function ResetPasswordClient() {
-  const searchParams = useSearchParams();
-
+export default function ResetPasswordClient() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [tokenValid, setTokenValid] = useState(null);
-  const [code, setCode] = useState("");
-  const [email, setEmail] = useState("");
-
-  useEffect(() => {
-    const codeParam = searchParams.get("code");
-    const emailFromHash = searchParams.get("email");
-
-    if (!codeParam || !emailFromHash) {
-      setError("Invalid or expired password reset link");
-      setTokenValid(false);
-    } else {
-      setCode(codeParam);
-      setEmail(decodeURIComponent(emailFromHash));
-      setTokenValid(true);
-    }
-  }, [searchParams]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -45,43 +25,39 @@ function ResetPasswordClient() {
 
     setLoading(true);
     try {
-      const response = await fetch("/api/reset-password", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          password,
-          code,
-          email, // Send the actual email address
-        }),
+      // Directly update user password via Supabase client
+      const { error: updateError } = await supabase.auth.updateUser({
+        password,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to reset password");
+      if (updateError) {
+        let userError = "Failed to reset password. Please try again.";
+        if (
+          updateError.message.includes("invalid token") ||
+          updateError.message.includes("invalid request")
+        ) {
+          userError =
+            "Invalid or expired reset link. Please request a new one.";
+        } else if (updateError.message.includes("different from the old")) {
+          userError =
+            "New password must be different from your current password.";
+        }
+        throw new Error(userError);
       }
 
-      if (data.redirectUrl) {
-        window.location.href = data.redirectUrl;
-      }
+      // Optionally sign out after password change (recommended)
+      await supabase.auth.signOut();
+
+      // Redirect on success
+      window.location.href = `/success?message=${encodeURIComponent(
+        "Password Reset Successfully"
+      )}`;
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
   };
-
-  if (tokenValid === false) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-        <div className="w-full max-w-md">
-          <ForgotPasswordForm />
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
@@ -151,7 +127,7 @@ function ResetPasswordClient() {
 
           <button
             type="submit"
-            disabled={loading || !tokenValid}
+            disabled={loading}
             className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
             {loading ? (
@@ -185,20 +161,5 @@ function ResetPasswordClient() {
         </form>
       </div>
     </div>
-  );
-}
-
-// 👇 Export the Suspense-wrapped version
-export default function ResetPasswordPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen flex items-center justify-center text-gray-500">
-          Loading...
-        </div>
-      }
-    >
-      <ResetPasswordClient />
-    </Suspense>
   );
 }
