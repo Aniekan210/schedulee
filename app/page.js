@@ -332,21 +332,21 @@ function TestimonialsSection() {
         "Schedulee.app transformed how I manage my consulting business. No more back-and-forth emails trying to find a time that works!",
       name: "Sarah M.",
       business: "Marketing Consultant",
-      avatar: "https://randomuser.me/api/portraits/women/44.jpg",
+      avatar: "https://randomuser.me/api/portraits/thumb/women/44.jpg",
     },
     {
       quote:
         "The payment integration is a game-changer. I get paid upfront and never have to chase clients for payment anymore.",
       name: "Mike R.",
       business: "Fitness Coach",
-      avatar: "https://randomuser.me/api/portraits/men/32.jpg",
+      avatar: "https://randomuser.me/api/portraits/thumb/men/32.jpg",
     },
     {
       quote:
         "Setup took me less than 10 minutes. Now my clients can book appointments anytime, and I never double-book again.",
       name: "Jessica L.",
       business: "Therapist",
-      avatar: "https://randomuser.me/api/portraits/women/68.jpg",
+      avatar: "https://randomuser.me/api/portraits/thumb/women/68.jpg",
     },
   ];
 
