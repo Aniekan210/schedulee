@@ -173,6 +173,7 @@ export default function BookingForm({ business_id }) {
 
     try {
       const bookingData = {
+        id: 1,
         business_id,
         name: formData.name,
         phone_number: formData.phoneNumber,

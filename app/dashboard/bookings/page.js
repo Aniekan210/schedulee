@@ -56,7 +56,8 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const ITEMS_PER_PAGE = 5;
+const DEFAULT_ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE_OPTIONS = [5, 10, 20, 50];
 
 const FILTER_OPTIONS = {
   today: "Today",
@@ -112,6 +113,8 @@ export default function BookingsOverviewPage() {
   const [customDate, setCustomDate] = useState(new Date());
   const [isLoading, setIsLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_ITEMS_PER_PAGE);
+  const [totalBookings, setTotalBookings] = useState(0);
 
   const bookingLink = `${process.env.NEXT_PUBLIC_SITE_URL}/book/${user?.id}`;
 
@@ -143,7 +146,7 @@ export default function BookingsOverviewPage() {
       const params = new URLSearchParams({
         filter,
         page: currentPage,
-        itemsPerPage: ITEMS_PER_PAGE,
+        itemsPerPage,
         timezone,
         ...(filter === "custom" && {
           customDate: customDate.toISOString().split("T")[0],
@@ -161,6 +164,7 @@ export default function BookingsOverviewPage() {
       if (data.bookings) {
         setBookings(data.bookings);
         setTotalPages(data.totalPages || 1);
+        setTotalBookings(data.totalCount || 0);
       } else {
         throw new Error("Invalid response format");
       }
@@ -176,7 +180,7 @@ export default function BookingsOverviewPage() {
   // Fetch bookings on dependencies change
   useEffect(() => {
     fetchBookings();
-  }, [user, filter, currentPage, customDate, timezone]);
+  }, [user, filter, currentPage, customDate, timezone, itemsPerPage]);
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(bookingLink);
@@ -215,7 +219,7 @@ export default function BookingsOverviewPage() {
 
       if (data.success) {
         toast.success("Booking deleted successfully");
-        setBookings(bookings.filter((b) => b.id !== bookingToDelete));
+        fetchBookings(); // Refresh the list
       } else {
         throw new Error(data.error || "Failed to delete booking");
       }
@@ -278,6 +282,11 @@ export default function BookingsOverviewPage() {
 
   const handleFilterChange = (value) => {
     setFilter(value);
+    setCurrentPage(1);
+  };
+
+  const handleItemsPerPageChange = (value) => {
+    setItemsPerPage(Number(value));
     setCurrentPage(1);
   };
 
@@ -378,27 +387,54 @@ export default function BookingsOverviewPage() {
               </Popover>
             )}
 
-            <Button
-              onClick={fetchBookings}
-              variant="outline"
-              className="dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:bg-gray-700"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4 mr-2"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={fetchBookings}
+                variant="outline"
+                className="dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:bg-gray-700"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                />
-              </svg>
-              Refresh
-            </Button>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4 mr-2"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  />
+                </svg>
+                Refresh
+              </Button>
+
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground dark:text-gray-400">
+                  Per page:
+                </span>
+                <Select
+                  value={itemsPerPage.toString()}
+                  onValueChange={handleItemsPerPageChange}
+                >
+                  <SelectTrigger className="w-[80px] bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                    {ITEMS_PER_PAGE_OPTIONS.map((option) => (
+                      <SelectItem
+                        key={option}
+                        value={option.toString()}
+                        className="hover:bg-gray-100 dark:hover:bg-gray-700/50 dark:text-white"
+                      >
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </div>
 
           <Button
@@ -418,9 +454,10 @@ export default function BookingsOverviewPage() {
           >
             {FILTER_OPTIONS[filter]}
           </Badge>
-          {!isLoading && bookings.length > 0 && (
+          {!isLoading && (
             <span className="text-sm text-muted-foreground dark:text-gray-400">
-              {bookings.length} {bookings.length === 1 ? "booking" : "bookings"}
+              Showing {bookings.length} of {totalBookings}{" "}
+              {totalBookings === 1 ? "booking" : "bookings"}
             </span>
           )}
         </div>
@@ -511,33 +548,31 @@ export default function BookingsOverviewPage() {
               </Table>
 
               {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="flex justify-between px-6 py-4 border-t dark:border-gray-700">
-                  <span className="text-sm text-muted-foreground dark:text-gray-400">
-                    Page {currentPage} of {totalPages}
-                  </span>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handlePreviousPage}
-                      disabled={currentPage === 1}
-                      className="dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:bg-gray-700"
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleNextPage}
-                      disabled={currentPage === totalPages}
-                      className="dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:bg-gray-700"
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </div>
+              <div className="flex justify-between items-center px-6 py-4 border-t dark:border-gray-700">
+                <span className="text-sm text-muted-foreground dark:text-gray-400">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handlePreviousPage}
+                    disabled={currentPage === 1}
+                    className="dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:bg-gray-700"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleNextPage}
+                    disabled={currentPage === totalPages}
+                    className="dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:bg-gray-700"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
                 </div>
-              )}
+              </div>
             </>
           )}
         </Card>

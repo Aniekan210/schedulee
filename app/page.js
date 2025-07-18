@@ -42,7 +42,7 @@ function Header() {
         <div className="flex gap-2 items-center">
           <img
             alt="Schedulee.app logo"
-            src="/logo.png"
+            src="/logo.avif"
             className="object-cover overflow-hidden w-8 h-8"
             width={32}
             height={32}
@@ -450,7 +450,7 @@ function Footer() {
         <div className="flex gap-2 justify-center items-center mb-6">
           <img
             alt="Schedulee.app logo"
-            src="/logo.png"
+            src="/logo.avif"
             className="object-cover overflow-hidden w-6 h-6"
             width={24}
             height={24}

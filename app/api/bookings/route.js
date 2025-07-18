@@ -3,26 +3,17 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
 function convertToUTC(dateStr, timeStr, timezone) {
-  // Create a Luxon DateTime in the specified timezone
   const localDateTime = DateTime.fromISO(`${dateStr}T${timeStr}`, {
     zone: timezone,
   });
-
-  // Convert to UTC and return as ISO string
   return localDateTime.toUTC().toISO();
 }
 
 function convertFromUTC(timestampUtc, timezone) {
-  // Create a Luxon DateTime from UTC timestamp
   const utcDateTime = DateTime.fromISO(timestampUtc, { zone: "utc" });
-
-  // Convert to the specified timezone
   const localDateTime = utcDateTime.setZone(timezone);
-
-  // Format as date and time strings
   const dateStr = localDateTime.toISODate();
   const timeStr = localDateTime.toFormat("HH:mm");
-
   return { booking_date: dateStr, booking_time: timeStr };
 }
 
@@ -46,17 +37,18 @@ export async function GET(request) {
 
     const today = DateTime.now().setZone(timezone).startOf("day");
 
-    let query = supabase
+    // First get the count without pagination
+    let countQuery = supabase
       .from("bookings")
-      .select("*")
-      .eq("business_id", user.id)
-      .order("timestamp_utc", { ascending: true });
+      .select("*", { count: "exact", head: true })
+      .eq("business_id", user.id);
 
+    // Apply the same filters to the count query
     switch (filter) {
       case "today": {
         const startUtc = today.toUTC().toISO();
         const endUtc = today.plus({ days: 1 }).toUTC().toISO();
-        query = query
+        countQuery = countQuery
           .gte("timestamp_utc", startUtc)
           .lt("timestamp_utc", endUtc);
         break;
@@ -65,7 +57,7 @@ export async function GET(request) {
         const tomorrow = today.plus({ days: 1 });
         const startUtc = tomorrow.toUTC().toISO();
         const endUtc = tomorrow.plus({ days: 1 }).toUTC().toISO();
-        query = query
+        countQuery = countQuery
           .gte("timestamp_utc", startUtc)
           .lt("timestamp_utc", endUtc);
         break;
@@ -73,27 +65,101 @@ export async function GET(request) {
       case "next7": {
         const startUtc = today.toUTC().toISO();
         const nextWeek = today.plus({ days: 7 }).endOf("day");
-        query = query
+        countQuery = countQuery
           .gte("timestamp_utc", startUtc)
           .lte("timestamp_utc", nextWeek.toUTC().toISO());
         break;
       }
       case "upcoming": {
         const startUtc = today.toUTC().toISO();
-        query = query.gte("timestamp_utc", startUtc);
+        countQuery = countQuery.gte("timestamp_utc", startUtc);
         break;
       }
       case "past30": {
         const pastDate = today.minus({ days: 30 });
         const todayEnd = today.endOf("day");
-        query = query
+        countQuery = countQuery
           .gte("timestamp_utc", pastDate.toUTC().toISO())
           .lte("timestamp_utc", todayEnd.toUTC().toISO());
         break;
       }
       case "recent": {
         const recentDate = DateTime.now().minus({ days: 7 });
-        query = query
+        countQuery = countQuery.gte("created_at", recentDate.toUTC().toISO());
+        break;
+      }
+      case "custom": {
+        if (customDate) {
+          const startUtc = DateTime.fromISO(`${customDate}T00:00:00`, {
+            zone: timezone,
+          })
+            .toUTC()
+            .toISO();
+          const endUtc = DateTime.fromISO(`${customDate}T23:59:59.999`, {
+            zone: timezone,
+          })
+            .toUTC()
+            .toISO();
+          countQuery = countQuery
+            .gte("timestamp_utc", startUtc)
+            .lte("timestamp_utc", endUtc);
+        }
+        break;
+      }
+    }
+
+    const { count } = await countQuery;
+
+    // Now get the paginated data
+    let dataQuery = supabase
+      .from("bookings")
+      .select("*")
+      .eq("business_id", user.id)
+      .order("timestamp_utc", { ascending: filter !== "recent" });
+
+    // Reapply filters for the data query
+    switch (filter) {
+      case "today": {
+        const startUtc = today.toUTC().toISO();
+        const endUtc = today.plus({ days: 1 }).toUTC().toISO();
+        dataQuery = dataQuery
+          .gte("timestamp_utc", startUtc)
+          .lt("timestamp_utc", endUtc);
+        break;
+      }
+      case "tomorrow": {
+        const tomorrow = today.plus({ days: 1 });
+        const startUtc = tomorrow.toUTC().toISO();
+        const endUtc = tomorrow.plus({ days: 1 }).toUTC().toISO();
+        dataQuery = dataQuery
+          .gte("timestamp_utc", startUtc)
+          .lt("timestamp_utc", endUtc);
+        break;
+      }
+      case "next7": {
+        const startUtc = today.toUTC().toISO();
+        const nextWeek = today.plus({ days: 7 }).endOf("day");
+        dataQuery = dataQuery
+          .gte("timestamp_utc", startUtc)
+          .lte("timestamp_utc", nextWeek.toUTC().toISO());
+        break;
+      }
+      case "upcoming": {
+        const startUtc = today.toUTC().toISO();
+        dataQuery = dataQuery.gte("timestamp_utc", startUtc);
+        break;
+      }
+      case "past30": {
+        const pastDate = today.minus({ days: 30 });
+        const todayEnd = today.endOf("day");
+        dataQuery = dataQuery
+          .gte("timestamp_utc", pastDate.toUTC().toISO())
+          .lte("timestamp_utc", todayEnd.toUTC().toISO());
+        break;
+      }
+      case "recent": {
+        const recentDate = DateTime.now().minus({ days: 7 });
+        dataQuery = dataQuery
           .gte("created_at", recentDate.toUTC().toISO())
           .order("created_at", { ascending: false });
         break;
@@ -110,7 +176,7 @@ export async function GET(request) {
           })
             .toUTC()
             .toISO();
-          query = query
+          dataQuery = dataQuery
             .gte("timestamp_utc", startUtc)
             .lte("timestamp_utc", endUtc);
         }
@@ -118,16 +184,13 @@ export async function GET(request) {
       }
     }
 
-    const { count } = await query.select("*", { count: "exact", head: true });
-
-    const { data, error } = await query.range(
-      (page - 1) * itemsPerPage,
-      page * itemsPerPage - 1
-    );
+    // Apply pagination
+    const from = (page - 1) * itemsPerPage;
+    const to = from + itemsPerPage - 1;
+    const { data, error } = await dataQuery.range(from, to);
 
     if (error) throw error;
 
-    // Convert UTC timestamps back to local date and time
     const bookingsWithLocalTime = data.map((booking) => ({
       ...booking,
       ...convertFromUTC(booking.timestamp_utc, timezone),
@@ -135,12 +198,16 @@ export async function GET(request) {
 
     return NextResponse.json({
       bookings: bookingsWithLocalTime,
-      total: count,
+      totalCount: count || 0,
       page,
-      totalPages: Math.ceil(count / itemsPerPage),
+      totalPages: Math.ceil((count || 0) / itemsPerPage),
     });
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("Error fetching bookings:", error);
+    return NextResponse.json(
+      { error: error.message || "Failed to fetch bookings" },
+      { status: 500 }
+    );
   }
 }
 
@@ -148,7 +215,7 @@ export async function POST(request) {
   try {
     const supabase = await createSupabaseServerClient();
 
-    const { timezone, ...bookingData } = await request.json();
+    const { timezone, id, ...bookingData } = await request.json();
 
     // Validate required fields
     if (
@@ -195,6 +262,7 @@ export async function POST(request) {
 
     return NextResponse.json(responseData, { status: 201 });
   } catch (error) {
+    console.error(error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
