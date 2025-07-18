@@ -485,7 +485,7 @@ function Footer() {
           </a>
           <a
             className="flex items-center gap-1 text-sm no-underline transition-colors duration-200 text-zinc-500 hover:text-zinc-700"
-            href="https://www.instagram.com/schedulee_app/"
+            href="https://www.instagram.com/schedulee_app?igsh=b2loZGhzeDJnMnNn"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Follow Schedulee.app on Instagram"

@@ -52,11 +52,11 @@ export default function BookingForm({ business_id }) {
   const [isLoadingTimes, setIsLoadingTimes] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
-    phoneNumber: "",
+    email: "",
   });
   const [errors, setErrors] = useState({
     name: "",
-    phoneNumber: "",
+    email: "",
     date: "",
     time: "",
   });
@@ -135,25 +135,25 @@ export default function BookingForm({ business_id }) {
     if (newDate) fetchAvailableTimes(newDate);
   };
 
-  const validatePhoneNumber = (phone) =>
-    /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/.test(phone);
+  const validateEmail = (email) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     let formIsValid = true;
-    const newErrors = { name: "", phoneNumber: "", date: "", time: "" };
+    const newErrors = { name: "", email: "", date: "", time: "" };
 
     if (!formData.name.trim()) {
       newErrors.name = "Name is required";
       formIsValid = false;
     }
-    if (!formData.phoneNumber.trim()) {
-      newErrors.phoneNumber = "Phone number is required";
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
       formIsValid = false;
-    } else if (!validatePhoneNumber(formData.phoneNumber)) {
-      newErrors.phoneNumber = "Enter a valid phone number";
+    } else if (!validateEmail(formData.email)) {
+      newErrors.email = "Enter a valid email address";
       formIsValid = false;
     }
     if (!date) {
@@ -176,7 +176,7 @@ export default function BookingForm({ business_id }) {
         id: 1,
         business_id,
         name: formData.name,
-        phone_number: formData.phoneNumber,
+        email: formData.email,
         booking_date: format(date, "yyyy-MM-dd"),
         booking_time: selectedTime,
         timezone,
@@ -247,8 +247,8 @@ END:VCALENDAR`;
 
   const isFormComplete =
     formData.name &&
-    formData.phoneNumber &&
-    validatePhoneNumber(formData.phoneNumber) &&
+    formData.email &&
+    validateEmail(formData.email) &&
     date &&
     selectedTime;
 
@@ -452,31 +452,31 @@ END:VCALENDAR`;
 
               <div>
                 <label
-                  htmlFor="phoneNumber"
+                  htmlFor="email"
                   className="block text-sm font-medium mb-1"
                 >
-                  Phone Number
+                  Email
                 </label>
                 <Input
-                  id="phoneNumber"
-                  name="phoneNumber"
-                  type="tel"
-                  value={formData.phoneNumber}
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
                   onChange={handleInputChange}
                   className={`w-full ${borderColor} bg-transparent focus-visible:ring-2 focus-visible:ring-opacity-50 ${
-                    errors.phoneNumber ? "border-red-500" : ""
+                    errors.email ? "border-red-500" : ""
                   }`}
                   style={{
-                    borderColor: errors.phoneNumber
+                    borderColor: errors.email
                       ? "#ef4444"
                       : shouldDarken
                       ? "rgba(255, 255, 255, 0.7)"
                       : "rgba(0, 0, 0, 0.7)",
                   }}
                 />
-                {errors.phoneNumber && (
+                {errors.email && (
                   <p className="mt-1 text-sm text-red-500 flex items-center">
-                    <XCircle className="w-4 h-4 mr-1" /> {errors.phoneNumber}
+                    <XCircle className="w-4 h-4 mr-1" /> {errors.email}
                   </p>
                 )}
               </div>

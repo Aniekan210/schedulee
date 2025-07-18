@@ -220,7 +220,7 @@ export async function POST(request) {
     // Validate required fields
     if (
       !bookingData.name ||
-      !bookingData.phone_number ||
+      !bookingData.email ||
       !bookingData.booking_date ||
       !bookingData.booking_time
     ) {
@@ -277,7 +277,7 @@ export async function PUT(request) {
     if (!user)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const { id, timezone, booking_date, booking_time, phone, ...rest } =
+    const { id, timezone, booking_date, booking_time, email, ...rest } =
       await request.json();
 
     const { data: existingBooking } = await supabase
@@ -307,7 +307,7 @@ export async function PUT(request) {
       .from("bookings")
       .update({
         ...cleanRest,
-        phone_number: phone,
+        email,
         timestamp_utc,
       })
       .eq("id", id)

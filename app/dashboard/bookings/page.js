@@ -191,7 +191,7 @@ export default function BookingsOverviewPage() {
     setCurrentBooking({
       id: booking.id,
       name: booking.name,
-      phone_number: booking.phone_number,
+      email: booking.email,
       booking_date: booking.booking_date,
       booking_time: booking.booking_time,
     });
@@ -273,7 +273,7 @@ export default function BookingsOverviewPage() {
     setCurrentBooking({
       id: "",
       name: "",
-      phone_number: "",
+      email: "",
       booking_date: now.toISOString().split("T")[0],
       booking_time: now.getHours().toString().padStart(2, "0") + ":00",
     });
@@ -479,7 +479,7 @@ export default function BookingsOverviewPage() {
                       Customer
                     </TableHead>
                     <TableHead className="px-6 dark:text-gray-300">
-                      Contact
+                      Email
                     </TableHead>
                     <TableHead className="px-6 dark:text-gray-300">
                       Date
@@ -502,7 +502,7 @@ export default function BookingsOverviewPage() {
                         {booking.name}
                       </TableCell>
                       <TableCell className="px-6 dark:text-gray-300">
-                        {booking.phone_number}
+                        {booking.email}
                       </TableCell>
                       <TableCell className="px-6 dark:text-gray-300">
                         {formatDisplayDate(booking.booking_date)}
@@ -605,16 +605,17 @@ export default function BookingsOverviewPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="phone" className="dark:text-gray-300">
-                Phone Number
+              <Label htmlFor="email" className="dark:text-gray-300">
+                Email
               </Label>
               <Input
-                id="phone"
-                value={currentBooking?.phone_number || ""}
+                id="email"
+                type="email"
+                value={currentBooking?.email || ""}
                 onChange={(e) =>
                   setCurrentBooking((prev) => ({
                     ...prev,
-                    phone_number: e.target.value,
+                    email: e.target.value,
                   }))
                 }
                 required
