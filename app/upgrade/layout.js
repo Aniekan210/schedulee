@@ -9,7 +9,6 @@ export default function CheckoutLayout({ children }) {
       try {
         const res = await fetch("/api/authenticate");
         if (!res.ok) {
-          // Unauthenticated
           window.location.href = "/login";
           return;
         }
@@ -17,7 +16,6 @@ export default function CheckoutLayout({ children }) {
         const data = await res.json();
 
         if (data.hasPaid) {
-          // Already paid
           window.location.href = "/dashboard/bookings";
         }
       } catch (error) {

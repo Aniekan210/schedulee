@@ -1,249 +1,503 @@
-// app/page.js
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
-import Image from "next/image"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
+"use client";
+import { useState } from "react";
 import {
-  MobileMenu,
-  TestimonialCarousel,
-  DemoVideo,
-  HowItWorksSection,
-  BackToTop
-} from "@/components/ui/interactive-elements"
-import { Calendar, Palette, User } from "lucide-react"
+  CalendarCheck,
+  Zap,
+  Clock,
+  ShieldCheck,
+  Globe,
+  Sparkles,
+  Mail,
+  Instagram,
+  Menu,
+  X,
+} from "lucide-react";
 
-const DEFAULT_TESTIMONIALS = [
-  {
-    quote: "schedulee.app has saved me hours each week. My clients love how easy it is to book, and I love having all my appointments in one place.",
-    author: "Sarah K., Freelance Designer",
-    avatar: "https://randomuser.me/api/portraits/women/32.jpg"
-  },
-  {
-    quote: "The no-login feature is a game changer. My older clients were struggling with other systems, but now they book with just a phone call's worth of information.",
-    author: "Michael T., Consultant",
-    avatar: "https://randomuser.me/api/portraits/men/45.jpg"
-  },
-  {
-    quote: "For $8.99/month, this is a no-brainer. I was paying triple for a more complex system I didn't need.",
-    author: "Jessica L., Massage Therapist",
-    avatar: "https://randomuser.me/api/portraits/women/68.jpg"
-  },
-  {
-    quote: "Setup took 10 minutes and I was accepting bookings the same day. The trial convinced me to stay.",
-    author: "David R., Tutor",
-    avatar: "https://randomuser.me/api/portraits/men/12.jpg"
-  },
-  {
-    quote: "My no-show rate dropped by 60% since using schedulee.app. The automated reminders are perfect.",
-    author: "Emma S., Hair Stylist",
-    avatar: "https://randomuser.me/api/portraits/women/55.jpg"
-  },
-  {
-    quote: "Finally a booking system that doesn't overwhelm my clients with accounts and logins. Simple and effective.",
-    author: "James P., Photographer",
-    avatar: "https://randomuser.me/api/portraits/men/23.jpg"
-  }
-]
-
-export default function Home() {
+export default function ScheduleeLandingPage() {
   return (
-    <div className="min-h-screen bg-white">
-      <MobileMenu />
+    <div className="min-h-screen bg-zinc-100">
+      <Header />
+      <main>
+        <HeroSection />
+        <VideoSection />
+        <FeaturesSection />
+        <TestimonialsSection />
+        <CTASection />
+      </main>
+      <Footer />
+    </div>
+  );
+}
 
-      {/* Hero Section */}
-      <section className="pt-24 pb-12 md:pt-32 md:pb-20 px-4 sm:px-6">
-        <div className="container mx-auto max-w-6xl">
-          <div className="flex flex-col lg:flex-row items-center gap-12">
-            <div className="lg:w-1/2 text-center lg:text-left space-y-8">
-              <div>
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-[1.2] tracking-[-0.02em]">
-                  Booking Made Beautiful <br />
-                  <span className="text-indigo-600">Without the Hassle</span>
-                </h1>
-                <p className="text-lg md:text-xl text-gray-600 mt-6 max-w-lg mx-auto lg:mx-0 leading-[1.5]">
-                  Professional scheduling that works for you and your clients. No accounts, no complexity.
-                </p>
-              </div>
+function Header() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <Link href="/dashboard/bookings" aria-label="Start free trial">
-                  <Button className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-6 text-base sm:text-lg shadow-sm hover:shadow-md transition-all group w-full sm:w-auto">
-                    <span className="group-hover:scale-105 transition-transform">Start 14-Day Free Trial</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg>
-                  </Button>
-                </Link>
-                <Button variant="outline" className="px-8 py-6 text-base sm:text-lg border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all w-full sm:w-auto">
-                  Learn More
-                </Button>
-              </div>
+  function toggleMobileMenu() {
+    setMobileMenuOpen(!mobileMenuOpen);
+  }
 
-              <p className="text-gray-500 font-medium">Only $8.99 CAD/month after trial</p>
-            </div>
-
-            <DemoVideo className="hidden lg:block" />
-          </div>
+  return (
+    <header className="sticky top-0 z-50 bg-white border-b border-solid border-zinc-200">
+      <div className="flex justify-between items-center px-4 py-0 mx-auto h-16 max-w-[1200px]">
+        <div className="flex gap-2 items-center">
+          <img
+            alt="Schedulee.app logo"
+            src="/logo.png"
+            className="object-cover overflow-hidden w-8 h-8"
+            width={32}
+            height={32}
+          />
+          <span className="text-xl font-bold text-neutral-800">
+            Schedulee.app
+          </span>
         </div>
-      </section>
-
-      {/* Features Section */}
-      <section id="features" className="py-12 md:py-20 bg-gray-50">
-        <div className="container mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-[1.2] tracking-[-0.02em]">
-              Everything You Need in One Place
-            </h2>
-            <p className="text-lg md:text-xl text-gray-600 leading-[1.5]">
-              Schedulee.app gives you all the tools without the complexity
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {[
-              {
-                icon: <Calendar className="h-6 w-6 text-indigo-600" />,
-                title: "Smart Availability",
-                description: "Set your working hours and time off. We handle the rest automatically."
-              },
-              {
-                icon: <Palette className="h-6 w-6 text-indigo-600" />,
-                title: "Brand Customization",
-                description: "Customize your booking page with your branding in minutes."
-              },
-              {
-                icon: <User className="h-6 w-6 text-indigo-600" />,
-                title: "No Login Required",
-                description: "Clients book with just name and phone number - no accounts needed."
+        <nav
+          className="hidden md:flex flex-1 gap-8 justify-center items-center"
+          role="navigation"
+          aria-label="Main navigation"
+        >
+          <a
+            className="text-sm font-medium no-underline transition-colors duration-200 text-zinc-500 hover:text-zinc-700"
+            href="#features"
+          >
+            Features
+          </a>
+          <a
+            className="text-sm font-medium no-underline transition-colors duration-200 text-zinc-500 hover:text-zinc-700"
+            href="#testimonials"
+          >
+            Testimonials
+          </a>
+          <a
+            className="text-sm font-medium no-underline transition-colors duration-200 text-zinc-500 hover:text-zinc-700"
+            href="#contact"
+          >
+            Contact
+          </a>
+        </nav>
+        <div className="flex gap-3 items-center">
+          <a
+            className="no-underline hidden md:block"
+            href="/dashboard/bookings"
+          >
+            <button
+              className="px-4 py-2 text-sm font-medium transition-all duration-200 rounded-md cursor-pointer text-white bg-blue-500 hover:bg-blue-600 active:scale-95"
+              aria-label="Start your 30-day free trial"
+            >
+              Start Free Trial
+            </button>
+          </a>
+          <button
+            className="block p-2 cursor-pointer md:hidden"
+            aria-label="Toggle mobile menu"
+            aria-controls="mobile-navigation"
+            aria-expanded={mobileMenuOpen}
+            onClick={toggleMobileMenu}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                toggleMobileMenu();
               }
-            ].map((card, index) => (
-              <Card
-                key={index}
-                className="border border-gray-200 rounded-lg hover:shadow-sm transition-all hover:border-indigo-100"
-              >
-                <CardHeader className="text-center p-6">
-                  <div className="flex justify-center mb-5">
-                    <div className="inline-flex p-3 bg-indigo-50 rounded-full hover:bg-indigo-100 transition-colors">
-                      {card.icon}
-                    </div>
-                  </div>
-                  <CardTitle className="text-lg font-medium mb-2">
-                    {card.title}
-                  </CardTitle>
-                  <CardDescription className="text-gray-600 text-sm">
-                    {card.description}
-                  </CardDescription>
-                </CardHeader>
-              </Card>
+            }}
+          >
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
+      </div>
+      <div
+        className={`px-4 py-4 bg-white border-t border-solid border-zinc-200 ${
+          mobileMenuOpen ? "block" : "hidden"
+        }`}
+        id="mobile-navigation"
+      >
+        <nav
+          role="navigation"
+          aria-label="Mobile navigation"
+          className="flex flex-col gap-4"
+        >
+          <a
+            className="text-base font-medium no-underline text-zinc-500 hover:text-zinc-700"
+            href="#features"
+            onClick={toggleMobileMenu}
+          >
+            Features
+          </a>
+          <a
+            className="text-base font-medium no-underline text-zinc-500 hover:text-zinc-700"
+            href="#testimonials"
+            onClick={toggleMobileMenu}
+          >
+            Testimonials
+          </a>
+          <a
+            className="text-base font-medium no-underline text-zinc-500 hover:text-zinc-700"
+            href="#contact"
+            onClick={toggleMobileMenu}
+          >
+            Contact
+          </a>
+          <a className="no-underline" href="/dashboard/bookings">
+            <button
+              className="w-full px-4 py-3 mt-2 text-base font-medium transition-all duration-200 rounded-md cursor-pointer text-white bg-blue-500 hover:bg-blue-600 active:scale-95"
+              aria-label="Start your 30-day free trial"
+            >
+              Start Free Trial
+            </button>
+          </a>
+        </nav>
+      </div>
+    </header>
+  );
+}
+
+function HeroSection() {
+  return (
+    <section className="px-4 py-20 mx-auto max-w-[1200px] sm:py-16">
+      <div className="px-6 py-12 text-center bg-white rounded-xl shadow-sm sm:px-4 sm:py-8">
+        <div className="inline-flex items-center px-3 py-1.5 mb-6 text-xs font-medium bg-blue-100 rounded-full text-blue-600">
+          <Sparkles size={14} className="mr-1" />
+          Schedulee.app launches with 30-day free trial
+        </div>
+        <h1 className="mb-6 text-5xl font-bold leading-tight text-neutral-800 sm:text-4xl">
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-blue-600">
+            Stop wasting time
+          </span>{" "}
+          on scheduling headaches
+        </h1>
+        <p className="mx-auto mb-8 text-xl leading-relaxed text-zinc-500 max-w-[600px] sm:text-lg">
+          Automate your appointment booking, eliminate no-shows, and get paid
+          faster—all while saving 10+ hours every week.
+        </p>
+        <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+          <a
+            className="w-full sm:w-auto no-underline"
+            href="/dashboard/bookings"
+          >
+            <button
+              className="w-full min-w-[220px] px-6 py-3 text-base font-semibold transition-all duration-200 bg-blue-500 rounded-lg cursor-pointer text-white hover:bg-blue-600 active:scale-95"
+              aria-label="Start your 30-day free trial - no credit card required"
+            >
+              Start 30-Day Free Trial
+            </button>
+          </a>
+          <a href="#see-how-it-works" className="w-full sm:w-auto no-underline">
+            <button
+              className="w-full min-w-[220px] px-6 py-3 text-base font-semibold transition-all duration-200 bg-white border rounded-lg cursor-pointer text-zinc-700 border-zinc-300 hover:border-zinc-400 active:scale-95"
+              aria-label="See how it works"
+            >
+              See how it works
+            </button>
+          </a>
+        </div>
+        <p className="mt-4 text-sm text-zinc-500">
+          No credit card required • Cancel anytime
+        </p>
+
+        {/* Social proof element */}
+        <div className="flex items-center justify-center gap-2 mt-8 text-sm text-zinc-500">
+          <div className="flex -space-x-2">
+            {[1, 2, 3].map((item) => (
+              <img
+                key={item}
+                src={`https://i.pravatar.cc/40?img=${item}`}
+                alt="Happy user"
+                className="w-8 h-8 rounded-full border-2 border-white"
+                width={32}
+                height={32}
+              />
             ))}
           </div>
+          <span>Trusted by owners everywhere</span>
         </div>
-      </section>
+      </div>
+    </section>
+  );
+}
 
-      <HowItWorksSection />
-
-      {/* Testimonials */}
-      <section id="testimonials" className="py-12 md:py-20 bg-indigo-50">
-        <div className="container mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-[1.2] tracking-[-0.02em]">
-              Trusted by Professionals Worldwide
-            </h2>
-            <p className="text-lg md:text-xl text-gray-600 leading-[1.5]">
-              Join thousands who have simplified their scheduling
-            </p>
-          </div>
-
-          <div className="max-w-4xl mx-auto">
-            <TestimonialCarousel testimonials={DEFAULT_TESTIMONIALS} />
-          </div>
+function VideoSection() {
+  return (
+    <section
+      id="see-how-it-works"
+      className="px-4 py-20 mx-auto max-w-[1200px] sm:py-16"
+    >
+      <div className="px-6 py-12 text-center bg-white rounded-xl shadow-sm sm:px-4 sm:py-8">
+        <div className="inline-flex items-center px-3 py-1.5 mb-6 text-xs font-medium bg-gray-200 rounded-full text-neutral-800">
+          <Zap size={14} className="mr-1" />
+          See it in action
         </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-12 md:py-20 px-4 sm:px-6">
-        <div className="container mx-auto max-w-4xl">
-          <div className="bg-white border border-gray-200 rounded-2xl p-8 md:p-12 text-center shadow-sm hover:shadow-md transition-all">
-            <div className="max-w-2xl mx-auto">
-              <h2 className="text-2xl md:text-3xl font-bold mb-6 leading-[1.2] tracking-[-0.02em]">
-                Ready to Transform Your Scheduling?
-              </h2>
-              <p className="text-lg md:text-xl text-gray-600 mb-8 leading-[1.5]">
-                Join thousands of professionals who save hours every week with Schedulee.app
-              </p>
-              <div className="flex flex-col sm:flex-row justify-center gap-4">
-                <Link href="/dashboard/bookings" aria-label="Start free trial">
-                  <Button className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-6 text-base sm:text-lg shadow-sm hover:shadow-md transition-all group w-full sm:w-auto">
-                    <span className="group-hover:scale-105 transition-transform">Start 14-Day Free Trial</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg>
-                  </Button>
-                </Link>
-                <Button variant="outline" className="px-8 py-6 text-base sm:text-lg border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all w-full sm:w-auto">
-                  Learn More
-                </Button>
-              </div>
-              <p className="mt-4 text-gray-500 text-sm md:text-base">Only $8.99 CAD/month after trial. Cancel anytime.</p>
-            </div>
+        <h2 className="mb-4 text-3xl font-bold text-neutral-800 sm:text-2xl">
+          Watch how Schedulee.app works
+        </h2>
+        <p className="mx-auto mb-8 text-lg leading-normal text-zinc-500 max-w-[600px] sm:text-base">
+          See how easy it is to set up your booking page and start accepting
+          appointments in minutes.
+        </p>
+        <div className="flex overflow-hidden relative justify-center items-center mx-auto w-full rounded-xl border-2 border-dashed aspect-[16/9] bg-zinc-100 border-zinc-200 max-w-[800px]">
+          <div className="text-center text-zinc-500">
+            <p className="mb-2 text-base font-medium">Video Coming Soon</p>
           </div>
         </div>
-      </section>
+      </div>
+    </section>
+  );
+}
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="container mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-8">
-            <div className="flex flex-col items-center md:items-start">
-              <Link href="#" className="flex items-center group mb-4" aria-label="Schedulee.app Home">
-                <div className="relative w-10 h-10 mr-3 transition-transform group-hover:scale-105">
-                  <Image
-                    src="/logo.avif"
-                    alt="Schedulee.app Logo"
-                    width={40}
-                    height={40}
-                    className="object-contain rounded-md"
-                  />
-                </div>
-                <span className="text-xl font-bold group-hover:text-indigo-400 transition-colors">Schedulee.app</span>
-              </Link>
-              <p className="text-gray-400 text-center md:text-left">
-                The simplest way to manage appointments.
-              </p>
-            </div>
+function FeaturesSection() {
+  const features = [
+    {
+      icon: <CalendarCheck size={24} className="text-blue-500" />,
+      title: "Never Miss a Booking",
+      description:
+        "Your booking page works 24/7, accepting appointments even while you sleep. Clients can schedule at their convenience without you lifting a finger.",
+    },
+    {
+      icon: <Sparkles size={24} className="text-blue-500" />,
+      title: "Look Professional Online",
+      description:
+        "Create a stunning, branded booking page that reflects your business. Customize colors, add your logo, and impress clients from their first visit.",
+    },
+    {
+      icon: <Zap size={24} className="text-blue-500" />,
+      title: "No Tech Skills Needed",
+      description:
+        "Get up and running in under 10 minutes with our intuitive setup wizard. No coding or complex configurations required.",
+    },
+    {
+      icon: <Clock size={24} className="text-blue-500" />,
+      title: "Flexible Availability",
+      description:
+        "Define complex availability patterns with ease. Set different hours for different days, block vacations, and create recurring schedules.",
+    },
+    {
+      icon: <ShieldCheck size={24} className="text-blue-500" />,
+      title: "Smart Conflict Prevention",
+      description:
+        "Automatically prevents double bookings and respects your buffer times, travel time between appointments, and personal blocks.",
+    },
+    {
+      icon: <Globe size={24} className="text-blue-500" />,
+      title: "Timezone Awareness",
+      description:
+        "Clients always see times in their timezone. Automatic daylight saving handling makes global business effortless.",
+    },
+  ];
 
-            <div className="flex flex-col items-center md:items-end gap-4">
-              <div className="flex gap-6 flex-wrap justify-center">
-                <Link href="/terms" className="text-gray-400 hover:text-white transition-colors flex items-center gap-1.5 group">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9z" clipRule="evenodd" />
-                  </svg>
-                  Terms
-                </Link>
-                <Link href="/privacy" className="text-gray-400 hover:text-white transition-colors flex items-center gap-1.5 group">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-                  </svg>
-                  Privacy
-                </Link>
-                <a href="mailto:support@schedulee.app" className="text-gray-400 hover:text-white transition-colors flex items-center gap-1.5 group">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                  </svg>
-                  Support
-                </a>
-              </div>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400 text-sm">
-            <p>© {new Date().getFullYear()} Schedulee.app. All rights reserved.</p>
-          </div>
+  return (
+    <section
+      id="features"
+      className="flex flex-col gap-0 px-4 py-20 mx-auto max-w-[1200px] sm:py-16"
+    >
+      <div className="mb-12 text-center">
+        <div className="inline-flex items-center px-3 py-1.5 mb-4 text-xs font-medium bg-gray-200 rounded-full text-neutral-800">
+          <Zap size={14} className="mr-1" />
+          Features
         </div>
-      </footer>
+        <h2 className="mb-4 text-4xl font-bold text-neutral-800 sm:text-3xl">
+          Everything you need to manage appointments
+        </h2>
+        <p className="mx-auto text-lg text-zinc-500 max-w-[600px]">
+          Powerful features designed for businesses who value their time.
+        </p>
+      </div>
+      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        {features.map((feature, index) => (
+          <FeatureCard
+            key={index}
+            icon={feature.icon}
+            title={feature.title}
+            description={feature.description}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
 
-      <BackToTop />
-    </div>
-  )
+function FeatureCard({ icon, title, description }) {
+  return (
+    <article className="flex flex-col p-6 transition-all duration-200 bg-white rounded-xl hover:shadow-md">
+      <div className="flex items-center justify-center w-12 h-12 mb-4 rounded-full bg-blue-50">
+        {icon}
+      </div>
+      <h3 className="mb-3 text-xl font-semibold text-neutral-800">{title}</h3>
+      <p className="text-base leading-relaxed text-zinc-500">{description}</p>
+    </article>
+  );
+}
+
+function TestimonialsSection() {
+  const testimonials = [
+    {
+      quote:
+        "Schedulee.app transformed how I manage my consulting business. No more back-and-forth emails trying to find a time that works!",
+      name: "Sarah M.",
+      business: "Marketing Consultant",
+      avatar: "https://randomuser.me/api/portraits/women/44.jpg",
+    },
+    {
+      quote:
+        "The payment integration is a game-changer. I get paid upfront and never have to chase clients for payment anymore.",
+      name: "Mike R.",
+      business: "Fitness Coach",
+      avatar: "https://randomuser.me/api/portraits/men/32.jpg",
+    },
+    {
+      quote:
+        "Setup took me less than 10 minutes. Now my clients can book appointments anytime, and I never double-book again.",
+      name: "Jessica L.",
+      business: "Therapist",
+      avatar: "https://randomuser.me/api/portraits/women/68.jpg",
+    },
+  ];
+
+  return (
+    <section
+      id="testimonials"
+      className="px-4 py-20 mx-auto max-w-[1200px] sm:py-16"
+    >
+      <div className="mb-12 text-center">
+        <div className="inline-flex items-center px-3 py-1.5 mb-4 text-xs font-medium bg-gray-200 rounded-full text-neutral-800">
+          <Sparkles size={14} className="mr-1" />
+          Testimonials
+        </div>
+        <h2 className="mb-4 text-4xl font-bold text-neutral-800 sm:text-3xl">
+          Loved by business owners everywhere
+        </h2>
+      </div>
+      <div className="grid gap-6 grid-cols-1 md:grid-cols-3">
+        {testimonials.map((testimonial, index) => (
+          <TestimonialCard
+            key={index}
+            quote={testimonial.quote}
+            name={testimonial.name}
+            business={testimonial.business}
+            avatar={testimonial.avatar}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function TestimonialCard({ quote, name, business, avatar }) {
+  return (
+    <article className="flex flex-col p-6 bg-white rounded-xl shadow-sm">
+      <div className="mb-4 text-2xl text-blue-500">&quot;</div>
+      <p className="mb-6 text-base italic leading-relaxed text-neutral-800">
+        {quote}
+      </p>
+      <div className="flex items-center mt-auto">
+        <img
+          src={avatar}
+          alt={name}
+          className="w-10 h-10 mr-3 rounded-full"
+          width={40}
+          height={40}
+        />
+        <div>
+          <div className="mb-1 font-semibold text-neutral-800">{name}</div>
+          <div className="text-sm text-zinc-500">{business}</div>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function CTASection() {
+  return (
+    <section className="px-4 py-20 mx-auto max-w-[1200px] sm:py-16">
+      <div className="px-8 py-12 text-center bg-white rounded-xl shadow-sm sm:px-6 sm:py-8">
+        <h2 className="mb-4 text-3xl font-bold text-neutral-800 sm:text-2xl">
+          Ready to simplify your scheduling?
+        </h2>
+        <p className="mx-auto mb-8 text-lg text-zinc-500 max-w-[500px]">
+          Join thousands of business owners who've transformed their appointment
+          booking process.
+        </p>
+        <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
+          <a
+            href="/dashboard/bookings"
+            className="w-full sm:w-auto no-underline"
+          >
+            <button
+              className="w-full min-w-[220px] px-6 py-3 text-base font-semibold transition-all duration-200 bg-blue-500 rounded-lg cursor-pointer text-white hover:bg-blue-600 active:scale-95"
+              aria-label="Start your free trial today"
+            >
+              Start Your Free Trial
+            </button>
+          </a>
+          <a href="#features" className="w-full sm:w-auto no-underline">
+            <button
+              className="w-full min-w-[220px] px-6 py-3 text-base font-semibold transition-all duration-200 bg-white border rounded-lg cursor-pointer text-zinc-700 border-zinc-300 hover:border-zinc-400 active:scale-95"
+              aria-label="Learn more about features"
+            >
+              Learn More
+            </button>
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Footer() {
+  return (
+    <footer
+      id="contact"
+      className="px-4 pt-12 pb-6 bg-white border-t border-solid border-zinc-200"
+    >
+      <div className="mx-auto text-center max-w-[1200px]">
+        <div className="flex gap-2 justify-center items-center mb-6">
+          <img
+            alt="Schedulee.app logo"
+            src="/logo.png"
+            className="object-cover overflow-hidden w-6 h-6"
+            width={24}
+            height={24}
+          />
+          <span className="text-lg font-bold text-neutral-800">
+            Schedulee.app
+          </span>
+        </div>
+        <nav
+          role="navigation"
+          aria-label="Footer navigation"
+          className="flex flex-wrap gap-6 justify-center mb-6"
+        >
+          <a
+            className="flex items-center gap-1 text-sm no-underline transition-colors duration-200 text-zinc-500 hover:text-zinc-700"
+            href="/terms"
+          >
+            Terms
+          </a>
+          <a
+            className="flex items-center gap-1 text-sm no-underline transition-colors duration-200 text-zinc-500 hover:text-zinc-700"
+            href="/privacy"
+          >
+            Privacy
+          </a>
+          <a
+            className="flex items-center gap-1 text-sm no-underline transition-colors duration-200 text-zinc-500 hover:text-zinc-700"
+            href="mailto:support@schedulee.app"
+          >
+            <Mail size={14} />
+            Contact
+          </a>
+          <a
+            className="flex items-center gap-1 text-sm no-underline transition-colors duration-200 text-zinc-500 hover:text-zinc-700"
+            href="https://www.instagram.com/schedulee_app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Follow Schedulee.app on Instagram"
+          >
+            <Instagram size={14} />
+            Instagram
+          </a>
+        </nav>
+        <p className="text-xs text-zinc-500">
+          © {new Date().getFullYear()} Schedulee.app. All rights reserved.
+        </p>
+      </div>
+    </footer>
+  );
 }
