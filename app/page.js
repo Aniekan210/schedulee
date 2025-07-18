@@ -329,24 +329,24 @@ function TestimonialsSection() {
   const testimonials = [
     {
       quote:
-        "Schedulee.app transformed how I manage my consulting business. No more back-and-forth emails trying to find a time that works!",
+        "Schedulee made managing my salon appointments effortless. Sharing a simple booking link means fewer calls and no more scheduling headaches.",
       name: "Sarah M.",
-      business: "Marketing Consultant",
+      business: "Salon Owner",
       avatar: "https://randomuser.me/api/portraits/thumb/women/44.jpg",
     },
     {
       quote:
-        "The payment integration is a game-changer. I get paid upfront and never have to chase clients for payment anymore.",
-      name: "Mike R.",
-      business: "Fitness Coach",
-      avatar: "https://randomuser.me/api/portraits/thumb/men/32.jpg",
+        "The 30-day free trial helped me move clients and see real results before paying a dime. It gave me the confidence to fully commit to Schedulee.",
+      name: "David K.",
+      business: "Consultant",
+      avatar: "https://randomuser.me/api/portraits/thumb/men/45.jpg",
     },
     {
       quote:
-        "Setup took me less than 10 minutes. Now my clients can book appointments anytime, and I never double-book again.",
-      name: "Jessica L.",
-      business: "Therapist",
-      avatar: "https://randomuser.me/api/portraits/thumb/women/68.jpg",
+        "At just $8.99 a month, Schedulee is an incredible value. It’s the perfect affordable tool for my tutoring business.",
+      name: "Mike R.",
+      business: "Tutor",
+      avatar: "https://randomuser.me/api/portraits/thumb/men/32.jpg",
     },
   ];
 
