@@ -8,11 +8,10 @@ import {
   Clock,
   X,
   Check,
-  ChevronDown,
-  ChevronUp,
   Edit,
   Trash2,
   MoreVertical,
+  Copy,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -24,7 +23,6 @@ import { DateTime } from "luxon";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
 import {
   Select,
   SelectContent,
@@ -104,7 +102,7 @@ const INTERVAL_OPTIONS = [
 const TimePicker = ({ value, onChange, placeholder = "Select time" }) => {
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className="w-[120px] bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-white">
+      <SelectTrigger className="w-full bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-white">
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent className="max-h-[300px] overflow-y-auto bg-white dark:bg-gray-800 dark:border-gray-700">
@@ -124,7 +122,7 @@ const TimePicker = ({ value, onChange, placeholder = "Select time" }) => {
   );
 };
 
-const DaySchedule = ({ day, availability, onChange }) => {
+const DaySchedule = ({ day, availability, onChange, onCopyToAll }) => {
   const [isExpanded, setIsExpanded] = useState(availability.is_available);
 
   const handleToggleAvailable = (checked) => {
@@ -133,7 +131,7 @@ const DaySchedule = ({ day, availability, onChange }) => {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto border rounded-2xl overflow-hidden bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-sm">
+    <div className="w-full border rounded-xl overflow-hidden bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700">
         <div className="flex items-center gap-3">
@@ -147,36 +145,49 @@ const DaySchedule = ({ day, availability, onChange }) => {
           </Label>
         </div>
 
-        <Badge
-          variant="outline"
-          className={
-            availability.is_available
-              ? "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-400"
-              : "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-400"
-          }
-        >
-          {availability.is_available ? "Available" : "Unavailable"}
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Badge
+            variant="outline"
+            className={
+              availability.is_available
+                ? "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-400"
+                : "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-400"
+            }
+          >
+            {availability.is_available ? "Available" : "Unavailable"}
+          </Badge>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onCopyToAll(availability)}
+            className="text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-300 p-2"
+            title="Copy to all days"
+          >
+            <Copy className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
       {/* Body */}
       {availability.is_available && (
         <div className="p-4 space-y-6 border-t dark:border-gray-700">
           {/* Time Settings */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-4">
-            <div className="space-y-1.5">
-              <Label className="text-sm dark:text-gray-300">Start Time</Label>
-              <TimePicker
-                value={availability.start_time}
-                onChange={(value) => onChange(day, "start_time", value)}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-sm dark:text-gray-300">End Time</Label>
-              <TimePicker
-                value={availability.end_time}
-                onChange={(value) => onChange(day, "end_time", value)}
-              />
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label className="text-sm dark:text-gray-300">Start Time</Label>
+                <TimePicker
+                  value={availability.start_time}
+                  onChange={(value) => onChange(day, "start_time", value)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-sm dark:text-gray-300">End Time</Label>
+                <TimePicker
+                  value={availability.end_time}
+                  onChange={(value) => onChange(day, "end_time", value)}
+                />
+              </div>
             </div>
             <div className="space-y-1.5">
               <Label className="text-sm dark:text-gray-300">Interval</Label>
@@ -186,7 +197,7 @@ const DaySchedule = ({ day, availability, onChange }) => {
                   onChange(day, "interval_minutes", parseInt(value))
                 }
               >
-                <SelectTrigger className="bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-white">
+                <SelectTrigger className="w-[180px] bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-white">
                   <SelectValue placeholder="Select interval" />
                 </SelectTrigger>
                 <SelectContent className="bg-white dark:bg-gray-800 dark:border-gray-700">
@@ -206,8 +217,10 @@ const DaySchedule = ({ day, availability, onChange }) => {
 
           {/* Breaks */}
           <div className="space-y-4">
-            <div className="flex items-center justify-between flex-wrap gap-2">
-              <Label className="text-sm dark:text-gray-300">Breaks</Label>
+            <div className="flex items-center justify-between">
+              <Label className="text-sm dark:text-gray-300">
+                Breaks between
+              </Label>
               <Button
                 variant="ghost"
                 size="sm"
@@ -233,35 +246,39 @@ const DaySchedule = ({ day, availability, onChange }) => {
                 No breaks scheduled
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-3 overflow-x-auto">
                 {availability.breaks.map((br) => (
                   <div
                     key={br.id}
-                    className="flex items-center gap-4 flex-wrap"
+                    className="flex items-center gap-3 flex-nowrap"
                   >
-                    <TimePicker
-                      value={br.start_time}
-                      onChange={(value) => {
-                        const updatedBreaks = availability.breaks.map((b) =>
-                          b.id === br.id ? { ...b, start_time: value } : b
-                        );
-                        onChange(day, "breaks", updatedBreaks);
-                      }}
-                      placeholder="Start"
-                    />
+                    <div className="flex-1">
+                      <TimePicker
+                        value={br.start_time}
+                        onChange={(value) => {
+                          const updatedBreaks = availability.breaks.map((b) =>
+                            b.id === br.id ? { ...b, start_time: value } : b
+                          );
+                          onChange(day, "breaks", updatedBreaks);
+                        }}
+                        placeholder="Start"
+                      />
+                    </div>
                     <span className="text-muted-foreground text-sm dark:text-gray-400">
                       to
                     </span>
-                    <TimePicker
-                      value={br.end_time}
-                      onChange={(value) => {
-                        const updatedBreaks = availability.breaks.map((b) =>
-                          b.id === br.id ? { ...b, end_time: value } : b
-                        );
-                        onChange(day, "breaks", updatedBreaks);
-                      }}
-                      placeholder="End"
-                    />
+                    <div className="flex-1">
+                      <TimePicker
+                        value={br.end_time}
+                        onChange={(value) => {
+                          const updatedBreaks = availability.breaks.map((b) =>
+                            b.id === br.id ? { ...b, end_time: value } : b
+                          );
+                          onChange(day, "breaks", updatedBreaks);
+                        }}
+                        placeholder="End"
+                      />
+                    </div>
                     <Button
                       variant="ghost"
                       size="sm"
@@ -271,7 +288,7 @@ const DaySchedule = ({ day, availability, onChange }) => {
                         );
                         onChange(day, "breaks", updatedBreaks);
                       }}
-                      className="text-red-500 hover:bg-red-50 dark:hover:bg-gray-700 dark:text-red-400 px-2"
+                      className="text-red-500 hover:bg-red-50 dark:hover:bg-gray-700 dark:text-red-400 px-2 flex-shrink-0"
                     >
                       <X className="h-4 w-4" />
                     </Button>
@@ -287,6 +304,21 @@ const DaySchedule = ({ day, availability, onChange }) => {
 };
 
 const WeekView = ({ availabilities, onChange }) => {
+  const handleCopyToAll = (sourceAvailability) => {
+    const { is_available, start_time, end_time, interval_minutes, breaks } =
+      sourceAvailability;
+
+    WEEKDAYS.forEach((day) => {
+      onChange(day, "is_available", is_available);
+      if (is_available) {
+        onChange(day, "start_time", start_time);
+        onChange(day, "end_time", end_time);
+        onChange(day, "interval_minutes", interval_minutes);
+        onChange(day, "breaks", [...breaks]);
+      }
+    });
+  };
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3 gap-6">
       {WEEKDAYS.map((day) => {
@@ -307,119 +339,10 @@ const WeekView = ({ availabilities, onChange }) => {
             day={day}
             availability={dayAvailability}
             onChange={onChange}
+            onCopyToAll={handleCopyToAll}
           />
         );
       })}
-    </div>
-  );
-};
-
-const VisualSchedule = ({ availabilities }) => {
-  const timeSlots = Array.from({ length: 24 * 2 }, (_, i) => {
-    const hour = Math.floor(i / 2);
-    const minute = (i % 2) * 30;
-    return `${hour.toString().padStart(2, "0")}:${minute
-      .toString()
-      .padStart(2, "0")}`;
-  });
-
-  return (
-    <div className="h-[calc(100vh-320px)] overflow-hidden border rounded-lg dark:border-gray-700">
-      <div className="h-full overflow-auto">
-        <div className="min-w-[700px]">
-          {/* Header row - sticky top */}
-          <div className="grid grid-cols-8 border-b bg-white dark:bg-gray-800 z-10 sticky top-0">
-            <div className="p-2 font-medium border-r text-sm sticky left-0 bg-white dark:bg-gray-800 z-9 dark:text-gray-300 dark:border-gray-700">
-              Time
-            </div>
-            {WEEKDAYS.map((day) => (
-              <div
-                key={day}
-                className="p-2 font-medium text-center border-r text-sm last:border-r-0 dark:text-gray-300 dark:border-gray-700"
-              >
-                {WEEKDAY_SHORT_LABELS[day]}
-              </div>
-            ))}
-          </div>
-
-          {/* Time slots */}
-          {timeSlots.map((time) => {
-            const [hour, minute] = time.split(":").map(Number);
-            const isHalfHour = minute === 30;
-            const displayTime = `${hour.toString().padStart(2, "0")}:${minute
-              .toString()
-              .padStart(2, "0")}`;
-
-            return (
-              <div
-                key={time}
-                className={`grid grid-cols-8 border-b ${
-                  isHalfHour ? "bg-gray-50 dark:bg-gray-700" : ""
-                } dark:border-gray-700`}
-              >
-                {/* Time column - sticky left */}
-                <div className="p-2 border-r text-xs text-muted-foreground sticky left-0 bg-white dark:bg-gray-700 z-9 dark:border-gray-700">
-                  {displayTime}
-                </div>
-                {WEEKDAYS.map((day) => {
-                  const dayAvailability = availabilities.find(
-                    (a) => a.weekday === day
-                  );
-                  if (!dayAvailability) return null;
-
-                  const isAvailable = dayAvailability.is_available;
-                  const isWorkingHour =
-                    isAvailable &&
-                    time >= dayAvailability.start_time &&
-                    time < dayAvailability.end_time;
-
-                  const isBreakTime = isWorkingHour
-                    ? dayAvailability.breaks.some(
-                        (br) => time >= br.start_time && time < br.end_time
-                      )
-                    : false;
-
-                  return (
-                    <div
-                      key={`${day}-${time}`}
-                      className={`p-1 border-r text-center ${
-                        isWorkingHour
-                          ? isBreakTime
-                            ? "bg-red-100 dark:bg-red-900/30"
-                            : "bg-green-100 dark:bg-green-900/30"
-                          : "bg-gray-100 dark:bg-gray-700"
-                      } dark:border-gray-700`}
-                      title={
-                        isWorkingHour
-                          ? isBreakTime
-                            ? `Break: ${dayAvailability.breaks
-                                .filter(
-                                  (br) =>
-                                    time >= br.start_time && time < br.end_time
-                                )
-                                .map((br) => `${br.start_time}-${br.end_time}`)
-                                .join(", ")}`
-                            : `Available (${dayAvailability.start_time}-${dayAvailability.end_time})`
-                          : "Unavailable"
-                      }
-                    >
-                      {isWorkingHour ? (
-                        isBreakTime ? (
-                          <Clock className="h-3 w-3 mx-auto text-red-500 dark:text-red-400" />
-                        ) : (
-                          <Check className="h-3 w-3 mx-auto text-green-500 dark:text-green-400" />
-                        )
-                      ) : (
-                        <X className="h-3 w-3 mx-auto text-gray-500 dark:text-gray-400" />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            );
-          })}
-        </div>
-      </div>
     </div>
   );
 };
@@ -465,7 +388,7 @@ const AvailabilityPage = () => {
     const defaultAvailabilities = WEEKDAYS.map((weekday) => ({
       id: `temp-${weekday}`,
       business_id: user.id,
-      is_available: weekday !== "saturday" && weekday !== "sunday",
+      is_available: false,
       weekday,
       start_time: "09:00",
       end_time: "17:00",
@@ -659,7 +582,7 @@ const AvailabilityPage = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-        <TabsList className="grid grid-cols-3 w-full gap-1 bg-gray-100 dark:bg-gray-800">
+        <TabsList className="grid grid-cols-2 w-full gap-1 bg-gray-100 dark:bg-gray-800">
           <TabsTrigger
             value="recurring"
             className="text-xs sm:text-sm dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white"
@@ -671,12 +594,6 @@ const AvailabilityPage = () => {
             className="text-xs sm:text-sm dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white"
           >
             Special Dates
-          </TabsTrigger>
-          <TabsTrigger
-            value="visual"
-            className="text-xs sm:text-sm dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white"
-          >
-            Visual Schedule
           </TabsTrigger>
         </TabsList>
 
@@ -715,7 +632,7 @@ const AvailabilityPage = () => {
             </CardHeader>
             <CardContent>
               {isLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3 gap-6">
                   {[...Array(7)].map((_, i) => (
                     <Skeleton
                       key={i}
@@ -861,19 +778,6 @@ const AvailabilityPage = () => {
                   </Table>
                 </div>
               )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="visual" className="space-y-4">
-          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-            <CardHeader>
-              <CardTitle className="text-lg md:text-xl dark:text-white">
-                Weekly Schedule Overview
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <VisualSchedule availabilities={availabilities} />
             </CardContent>
           </Card>
         </TabsContent>
