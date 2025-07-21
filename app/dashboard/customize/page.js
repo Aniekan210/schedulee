@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { UploadCloud, X } from "lucide-react";
 import BookingForm from "@/components/ui/booking-form";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const TIMEZONES = [
   { value: "America/New_York", label: "Eastern Time (ET)" },
@@ -266,37 +267,46 @@ export default function FormSettingsPage() {
 
   if (isLoading) {
     return (
-      <div className="grid gap-4 md:grid-cols-2 p-4 h-[calc(100vh-64px)]">
-        <Skeleton className="h-full w-full rounded" />
-        <Skeleton className="h-full w-full rounded" />
+      <div className="container mx-auto px-4 py-6 space-y-6 min-h-screen">
+        <div className="grid gap-4 md:grid-cols-2 h-[calc(100vh-64px)]">
+          <Skeleton className="h-full w-full rounded" />
+          <Skeleton className="h-full w-full rounded" />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-4 min-h-screen overflow-y-auto flex flex-col">
-      <div className="mb-4">
+    <div className="container mx-auto px-4 py-6 space-y-6 min-h-screen">
+      {/* Header */}
+      <div className="flex flex-col space-y-1">
         <h1 className="text-2xl sm:text-3xl font-bold">Form Settings</h1>
         <p className="text-sm sm:text-base text-muted-foreground">
           Customize your booking form appearance
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 flex-grow min-h-0">
+      {/* Main Content */}
+      <div className="grid gap-4 md:grid-cols-2">
         {/* Preview Section */}
-        <div className="flex flex-col h-full">
-          <h2 className="text-lg font-semibold mb-2">Live Preview</h2>
-          <div className="border rounded bg-white flex-grow overflow-hidden">
-            <div className="pointer-events-none opacity-75 h-full">
+        <Card className="h-full">
+          <CardHeader>
+            <CardTitle>Live Preview</CardTitle>
+          </CardHeader>
+          <CardContent className="h-full overflow-hidden">
+            <div className="pointer-events-none h-full relative">
+              <div className=" h-full w-full absolute top-0 left-0 bg-black opacity-20"></div>
               <BookingForm business_id={user?.id} key={refreshKey} />
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Settings Form */}
-        <div className="flex flex-col h-full">
-          <h2 className="text-lg font-semibold mb-2">Customization</h2>
-          <div className="border rounded bg-white flex-grow p-4 overflow-y-auto">
+        <Card className="h-full">
+          <CardHeader>
+            <CardTitle>Customization</CardTitle>
+          </CardHeader>
+          <CardContent className="h-full overflow-hidden">
             <form onSubmit={handleSubmit} className="h-full flex flex-col">
               <div className="space-y-4">
                 <div className="space-y-2">
@@ -375,8 +385,8 @@ export default function FormSettingsPage() {
                 </div>
               </div>
             </form>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
