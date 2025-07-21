@@ -295,7 +295,7 @@ export default function FormSettingsPage() {
           </CardHeader>
           <CardContent className="h-full overflow-hidden">
             <div className="pointer-events-none h-full relative">
-              <div className=" h-full w-full absolute top-0 left-0 bg-black opacity-20"></div>
+              <div className=" h-full w-full absolute top-0 left-0 bg-black opacity-[0.03]"></div>
               <BookingForm business_id={user?.id} key={refreshKey} />
             </div>
           </CardContent>
