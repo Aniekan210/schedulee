@@ -42,7 +42,7 @@ function Header() {
         <div className="flex gap-2 items-center">
           <img
             alt="Schedulee.app logo"
-            src="/logo.avif"
+            src="/logo.png"
             className="object-cover overflow-hidden w-8 h-8"
             width={32}
             height={32}
@@ -215,26 +215,47 @@ function HeroSection() {
 }
 
 function VideoSection() {
-  const [muted, setMuted] = useState(false);
+  const [muted, setMuted] = useState(true); // Start muted by default for autoplay
   const [isLoaded, setIsLoaded] = useState(false);
   const videoRef = useRef(null);
   const containerRef = useRef(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && videoRef.current) {
-          if (!videoRef.current.src) {
-            videoRef.current.src = "/demo-video.mp4";
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && videoRef.current) {
+            // Set src if not already set
+            if (!videoRef.current.src) {
+              videoRef.current.src = "/demo-video.mp4";
+            }
+
+            // Attempt to play
+            const playPromise = videoRef.current.play();
+
+            if (playPromise !== undefined) {
+              playPromise
+                .then(() => {
+                  // Autoplay started
+                })
+                .catch((error) => {
+                  // Autoplay was prevented - mute and try again
+                  videoRef.current.muted = true;
+                  setMuted(true);
+                  videoRef.current
+                    .play()
+                    .catch((e) => console.log("Autoplay prevented:", e));
+                });
+            }
+          } else if (videoRef.current && !videoRef.current.paused) {
+            videoRef.current.pause();
           }
-          videoRef.current
-            .play()
-            .catch((e) => console.log("Autoplay prevented:", e));
-        } else if (videoRef.current) {
-          videoRef.current.pause();
-        }
+        });
       },
-      { threshold: 0.7 }
+      {
+        threshold: 0.7,
+        rootMargin: "0px 0px 50px 0px", // Add some margin to start loading before fully in view
+      }
     );
 
     if (containerRef.current) {
@@ -303,8 +324,7 @@ function VideoSection() {
             playsInline
             muted={muted}
             loop
-            preload="metadata"
-            poster="/video-poster.jpg"
+            preload="auto" // Changed from metadata to auto for better preloading
             controls={false}
             onLoadedData={() => setIsLoaded(true)}
             onError={() => console.error("Video loading failed")}
@@ -567,7 +587,7 @@ function Footer() {
         <div className="flex gap-2 justify-center items-center mb-6">
           <img
             alt="Schedulee.app logo"
-            src="/logo.avif"
+            src="/logo.png"
             className="object-cover overflow-hidden w-6 h-6"
             width={24}
             height={24}
