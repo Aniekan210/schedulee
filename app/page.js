@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   CalendarCheck,
   Zap,
@@ -215,6 +215,56 @@ function HeroSection() {
 }
 
 function VideoSection() {
+  const [muted, setMuted] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const videoRef = useRef(null);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && videoRef.current) {
+          if (!videoRef.current.src) {
+            videoRef.current.src = "/demo-video.mp4";
+          }
+          videoRef.current
+            .play()
+            .catch((e) => console.log("Autoplay prevented:", e));
+        } else if (videoRef.current) {
+          videoRef.current.pause();
+        }
+      },
+      { threshold: 0.7 }
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  const toggleMute = (e) => {
+    e.stopPropagation();
+    if (videoRef.current) {
+      videoRef.current.muted = !videoRef.current.muted;
+      setMuted(videoRef.current.muted);
+    }
+  };
+
+  const handleFullscreen = () => {
+    const elem = containerRef.current;
+    if (!elem) return;
+
+    if (elem.requestFullscreen) {
+      elem.requestFullscreen();
+    } else if (elem.webkitRequestFullscreen) {
+      elem.webkitRequestFullscreen();
+    } else if (elem.msRequestFullscreen) {
+      elem.msRequestFullscreen();
+    }
+  };
+
   return (
     <section
       id="see-how-it-works"
@@ -230,11 +280,78 @@ function VideoSection() {
         </h2>
         <p className="mx-auto mb-8 text-lg leading-normal text-zinc-500 max-w-[600px] sm:text-base">
           See how easy it is to set up your booking page and start accepting
-          appointments in minutes.
+          appointments in seconds.
         </p>
-        <div className="flex overflow-hidden relative justify-center items-center mx-auto w-full rounded-xl border-2 border-dashed aspect-[16/9] bg-zinc-100 border-zinc-200 max-w-[800px]">
-          <div className="text-center text-zinc-500">
-            <p className="mb-2 text-base font-medium">Video Coming Soon</p>
+        <div
+          ref={containerRef}
+          className="relative overflow-hidden mx-auto w-full rounded-xl aspect-[16/9] bg-zinc-100 max-w-[800px]"
+          onClick={handleFullscreen}
+        >
+          {!isLoaded && (
+            <div className="absolute inset-0 flex items-center justify-center bg-zinc-100">
+              <div className="text-center">
+                <div className="w-12 h-12 mx-auto mb-3 border-4 border-zinc-300 border-t-blue-500 rounded-full animate-spin" />
+                <p className="text-zinc-500">Loading video...</p>
+              </div>
+            </div>
+          )}
+          <video
+            ref={videoRef}
+            className={`absolute top-0 left-0 w-full h-full object-cover ${
+              isLoaded ? "block" : "hidden"
+            }`}
+            playsInline
+            muted={muted}
+            loop
+            preload="metadata"
+            poster="/video-poster.jpg"
+            controls={false}
+            onLoadedData={() => setIsLoaded(true)}
+            onError={() => console.error("Video loading failed")}
+          />
+
+          <div className="absolute bottom-4 right-4 z-10">
+            <button
+              onClick={toggleMute}
+              className="flex items-center justify-center w-8 h-8 transition-all duration-200 bg-white rounded-full shadow-sm hover:bg-zinc-100 active:scale-95"
+              aria-label={muted ? "Unmute video" : "Mute video"}
+            >
+              {muted ? (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-zinc-700"
+                >
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                  <line x1="23" y1="9" x2="17" y2="15"></line>
+                  <line x1="17" y1="9" x2="23" y2="15"></line>
+                </svg>
+              ) : (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-zinc-700"
+                >
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                </svg>
+              )}
+            </button>
           </div>
         </div>
       </div>
