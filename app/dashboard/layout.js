@@ -3,12 +3,47 @@
 import DashboardSidebar from "@/components/ui/customSideBar";
 import { AuthProvider, useAuth } from "@/context/auth-context";
 import { Toaster } from "@/components/ui/sonner";
+import Head from "next/head"; // import Head to use Next.js metadata handling
 
 export default function RootLayout({ children }) {
   return (
-    <AuthProvider>
-      <AuthContent>{children}</AuthContent>
-    </AuthProvider>
+    <>
+      <Head>
+        <title>Dashboard | Schedulee.app - Manage Your Bookings</title>
+        <meta
+          name="description"
+          content="Access your Schedulee dashboard to manage your bookings, availability, and boooking form with ease."
+        />
+        <meta
+          name="keywords"
+          content="Schedulee dashboard, Schedulee.app dashboard, appointment scheduling, client booking, calendar management, schedule app"
+        />
+        <meta name="author" content="Schedulee" />
+
+        {/* Open Graph / Facebook */}
+        <meta property="og:title" content="Schedulee.app Dashboard" />
+        <meta
+          property="og:description"
+          content="Manage your bookings, clients, and availability with the Schedulee.app dashboard."
+        />
+        <meta property="og:image" content="/logo.png" />
+        <meta property="og:type" content="website" />
+
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Schedulee.app Dashboard" />
+        <meta
+          name="twitter:description"
+          content="Manage your bookings, clients, and availability with the Schedulee.app dashboard."
+        />
+        <meta name="twitter:image" content="/logo.png" />
+
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+      <AuthProvider>
+        <AuthContent>{children}</AuthContent>
+      </AuthProvider>
+    </>
   );
 }
 

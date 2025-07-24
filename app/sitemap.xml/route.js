@@ -6,7 +6,7 @@ export function GET() {
     { url: "/login", lastModified: new Date(), priority: 0.8 },
     { url: "/upgrade", lastModified: new Date(), priority: 0.7 },
     { url: "/cancel", lastModified: new Date(), priority: 0.4 },
-    { url: "/return", lastModified: new Date(), priority: 0.4 },
+    { url: "/dashboard/bookings", lastModified: new Date(), priority: 0.8 },
     { url: "/success", lastModified: new Date(), priority: 0.5 },
     { url: "/error", lastModified: new Date(), priority: 0.5 },
     { url: "/update-password", lastModified: new Date(), priority: 0.4 },

@@ -13,12 +13,12 @@ Allow: /privacy
 Allow: /update-password
 Allow: /error
 Allow: /cancel
-Allow: /return
+Allow: /dashboard/*
 
-# Disallow private/dashboard pages
-Disallow: /dashboard/*
+# Disallow private pages
 Disallow: /book/*
 Disallow: /auth/confirm
+Disallow: /return
 
 # Sitemap
 Sitemap: https://schedulee.app/sitemap.xml

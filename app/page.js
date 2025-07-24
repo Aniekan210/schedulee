@@ -8,10 +8,12 @@ import {
   Globe,
   Sparkles,
   Mail,
+  Youtube,
   Instagram,
   Menu,
   X,
 } from "lucide-react";
+import { FaPinterestP } from "react-icons/fa";
 
 const trackPinterestSignup = () => {
   if (window.pintrk) {
@@ -224,7 +226,7 @@ function HeroSection() {
 }
 
 function VideoSection() {
-  const [muted, setMuted] = useState(false);
+  const [muted, setMuted] = useState(true);
   const [isLoaded, setIsLoaded] = useState(false);
   const videoRef = useRef(null);
   const containerRef = useRef(null);
@@ -244,8 +246,8 @@ function VideoSection() {
               playPromise
                 .then(() => {})
                 .catch((error) => {
-                  videoRef.current.muted = false;
-                  setMuted(false);
+                  videoRef.current.muted = true;
+                  setMuted(true);
                   videoRef.current
                     .play()
                     .catch((e) => console.log("Autoplay prevented:", e));
@@ -622,13 +624,33 @@ function Footer() {
           </a>
           <a
             className="flex items-center gap-1 text-sm no-underline transition-colors duration-200 text-zinc-500 hover:text-zinc-700"
-            href="https://www.instagram.com/schedulee_app?igsh=b2loZGhzeDJnMnNn"
+            href="https://www.instagram.com/schedulee_app"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Follow Schedulee.app on Instagram"
           >
             <Instagram size={14} />
             Instagram
+          </a>
+          <a
+            className="flex items-center gap-1 text-sm no-underline transition-colors duration-200 text-zinc-500 hover:text-zinc-700"
+            href="https://www.youtube.com/@schedulee_app"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Follow Schedulee.app on Youtube"
+          >
+            <Youtube size={14} />
+            Youtube
+          </a>
+          <a
+            className="flex items-center gap-1 text-sm no-underline transition-colors duration-200 text-zinc-500 hover:text-zinc-700"
+            href="https://www.pinterest.com/schedulee_app"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Follow Schedulee.app on Pinterest"
+          >
+            <FaPinterestP size={14} />
+            Pinterest
           </a>
         </nav>
         <p className="text-xs text-zinc-500">
