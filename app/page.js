@@ -215,7 +215,7 @@ function HeroSection() {
 }
 
 function VideoSection() {
-  const [muted, setMuted] = useState(true); // Start muted by default for autoplay
+  const [muted, setMuted] = useState(false); 
   const [isLoaded, setIsLoaded] = useState(false);
   const videoRef = useRef(null);
   const containerRef = useRef(null);

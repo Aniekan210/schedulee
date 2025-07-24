@@ -1,5 +1,5 @@
 import { Geist, Geist_Mono } from "next/font/google";
-import { SpeedInsights } from "@vercel/speed-insights/next"
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import Script from "next/script";
 
@@ -25,13 +25,11 @@ export const metadata = {
     "online booking system",
     "cheap scheduling software",
     "appointment booking for solo business",
-    "freelancer booking app",
     "small business scheduling tool",
     "simple booking system",
     "affordable booking software",
     "no login appointment booking",
     "easy booking page creator",
-    "calendar app for small business",
     "solo entrepreneur tools",
     "side hustle booking tool",
     "appointment scheduler for freelancers",
@@ -43,10 +41,6 @@ export const metadata = {
     "coaching business booking system",
     "beauty salon appointment app",
     "appointment app with free trial",
-    "Stripe booking integration",
-    "small team calendar sharing",
-    "self-employed appointment app",
-    "client booking without sign-up",
   ],
   openGraph: {
     title: "Schedulee.app | Modern Booking & Scheduling Platform",
