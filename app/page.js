@@ -215,7 +215,7 @@ function HeroSection() {
 }
 
 function VideoSection() {
-  const [muted, setMuted] = useState(false); 
+  const [muted, setMuted] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const videoRef = useRef(null);
   const containerRef = useRef(null);
@@ -240,8 +240,8 @@ function VideoSection() {
                 })
                 .catch((error) => {
                   // Autoplay was prevented - mute and try again
-                  videoRef.current.muted = true;
-                  setMuted(true);
+                  videoRef.current.muted = false;
+                  setMuted(false);
                   videoRef.current
                     .play()
                     .catch((e) => console.log("Autoplay prevented:", e));
