@@ -13,6 +13,22 @@ import {
   X,
 } from "lucide-react";
 
+const trackPinterestSignup = () => {
+  if (window.pintrk) {
+    pintrk("track", "signup", {
+      event_id: "eventId0001",
+    });
+  } else {
+    console.warn("Pinterest tracking not loaded");
+  }
+};
+
+const handleFreeTrialClick = (e) => {
+  e.preventDefault();
+  trackPinterestSignup();
+  window.location.href = "/dashboard/bookings";
+};
+
 export default function ScheduleeLandingPage() {
   return (
     <div className="min-h-screen bg-zinc-100">
@@ -76,17 +92,13 @@ function Header() {
           </a>
         </nav>
         <div className="flex gap-3 items-center">
-          <a
-            className="no-underline hidden md:block"
-            href="/dashboard/bookings"
+          <button
+            className="px-4 py-2 text-sm font-medium transition-all duration-200 rounded-md cursor-pointer text-white bg-blue-500 hover:bg-blue-600 active:scale-95 hidden md:block"
+            aria-label="Start your 30-day free trial"
+            onClick={handleFreeTrialClick}
           >
-            <button
-              className="px-4 py-2 text-sm font-medium transition-all duration-200 rounded-md cursor-pointer text-white bg-blue-500 hover:bg-blue-600 active:scale-95"
-              aria-label="Start your 30-day free trial"
-            >
-              Start Free Trial
-            </button>
-          </a>
+            Start Free Trial
+          </button>
           <button
             className="block p-2 cursor-pointer md:hidden"
             aria-label="Toggle mobile menu"
@@ -136,14 +148,16 @@ function Header() {
           >
             Contact
           </a>
-          <a className="no-underline" href="/dashboard/bookings">
-            <button
-              className="w-full px-4 py-3 mt-2 text-base font-medium transition-all duration-200 rounded-md cursor-pointer text-white bg-blue-500 hover:bg-blue-600 active:scale-95"
-              aria-label="Start your 30-day free trial"
-            >
-              Start Free Trial
-            </button>
-          </a>
+          <button
+            className="w-full px-4 py-3 mt-2 text-base font-medium transition-all duration-200 rounded-md cursor-pointer text-white bg-blue-500 hover:bg-blue-600 active:scale-95"
+            aria-label="Start your 30-day free trial"
+            onClick={(e) => {
+              handleFreeTrialClick(e);
+              toggleMobileMenu();
+            }}
+          >
+            Start Free Trial
+          </button>
         </nav>
       </div>
     </header>
@@ -169,17 +183,13 @@ function HeroSection() {
           faster—all while saving 10+ hours every week.
         </p>
         <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-          <a
-            className="w-full sm:w-auto no-underline"
-            href="/dashboard/bookings"
+          <button
+            className="w-full min-w-[220px] px-6 py-3 text-base font-semibold transition-all duration-200 bg-blue-500 rounded-lg cursor-pointer text-white hover:bg-blue-600 active:scale-95 sm:w-auto"
+            aria-label="Start your 30-day free trial - no credit card required"
+            onClick={handleFreeTrialClick}
           >
-            <button
-              className="w-full min-w-[220px] px-6 py-3 text-base font-semibold transition-all duration-200 bg-blue-500 rounded-lg cursor-pointer text-white hover:bg-blue-600 active:scale-95"
-              aria-label="Start your 30-day free trial - no credit card required"
-            >
-              Start 30-Day Free Trial
-            </button>
-          </a>
+            Start 30-Day Free Trial
+          </button>
           <a href="#see-how-it-works" className="w-full sm:w-auto no-underline">
             <button
               className="w-full min-w-[220px] px-6 py-3 text-base font-semibold transition-all duration-200 bg-white border rounded-lg cursor-pointer text-zinc-700 border-zinc-300 hover:border-zinc-400 active:scale-95"
@@ -193,7 +203,6 @@ function HeroSection() {
           No credit card required • Cancel anytime
         </p>
 
-        {/* Social proof element */}
         <div className="flex items-center justify-center gap-2 mt-8 text-sm text-zinc-500">
           <div className="flex -space-x-2">
             {[1, 2, 3].map((item) => (
@@ -225,21 +234,16 @@ function VideoSection() {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting && videoRef.current) {
-            // Set src if not already set
             if (!videoRef.current.src) {
               videoRef.current.src = "/demo-video.mp4";
             }
 
-            // Attempt to play
             const playPromise = videoRef.current.play();
 
             if (playPromise !== undefined) {
               playPromise
-                .then(() => {
-                  // Autoplay started
-                })
+                .then(() => {})
                 .catch((error) => {
-                  // Autoplay was prevented - mute and try again
                   videoRef.current.muted = false;
                   setMuted(false);
                   videoRef.current
@@ -254,7 +258,7 @@ function VideoSection() {
       },
       {
         threshold: 0.7,
-        rootMargin: "0px 0px 50px 0px", // Add some margin to start loading before fully in view
+        rootMargin: "0px 0px 50px 0px",
       }
     );
 
@@ -324,7 +328,7 @@ function VideoSection() {
             playsInline
             muted={muted}
             loop
-            preload="auto" // Changed from metadata to auto for better preloading
+            preload="auto"
             controls={false}
             onLoadedData={() => setIsLoaded(true)}
             onError={() => console.error("Video loading failed")}
@@ -480,7 +484,7 @@ function TestimonialsSection() {
     },
     {
       quote:
-        "At just $8.99 a month, Schedulee is an incredible value. It’s the perfect affordable tool for my tutoring business.",
+        "At just $8.99 a month, Schedulee is an incredible value. It's the perfect affordable tool for my tutoring business.",
       name: "Mike R.",
       business: "Tutor",
       avatar: "https://randomuser.me/api/portraits/thumb/men/32.jpg",
@@ -552,17 +556,13 @@ function CTASection() {
           booking process.
         </p>
         <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
-          <a
-            href="/dashboard/bookings"
-            className="w-full sm:w-auto no-underline"
+          <button
+            className="w-full min-w-[220px] px-6 py-3 text-base font-semibold transition-all duration-200 bg-blue-500 rounded-lg cursor-pointer text-white hover:bg-blue-600 active:scale-95 sm:w-auto"
+            aria-label="Start your free trial today"
+            onClick={handleFreeTrialClick}
           >
-            <button
-              className="w-full min-w-[220px] px-6 py-3 text-base font-semibold transition-all duration-200 bg-blue-500 rounded-lg cursor-pointer text-white hover:bg-blue-600 active:scale-95"
-              aria-label="Start your free trial today"
-            >
-              Start Your Free Trial
-            </button>
-          </a>
+            Start Your Free Trial
+          </button>
           <a href="#features" className="w-full sm:w-auto no-underline">
             <button
               className="w-full min-w-[220px] px-6 py-3 text-base font-semibold transition-all duration-200 bg-white border rounded-lg cursor-pointer text-zinc-700 border-zinc-300 hover:border-zinc-400 active:scale-95"
