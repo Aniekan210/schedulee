@@ -14,6 +14,7 @@ Allow: /update-password
 Allow: /error
 Allow: /cancel
 Allow: /dashboard/*
+Allow: /waitlist
 
 # Disallow private pages
 Disallow: /book/*
