@@ -414,13 +414,13 @@ function Header() {
           </a>
           <a
             className="text-sm font-medium no-underline transition-colors duration-200 text-zinc-500 hover:text-zinc-700"
-            href="#features"
+            href="/#features"
           >
             Features
           </a>
           <a
             className="text-sm font-medium no-underline transition-colors duration-200 text-zinc-500 hover:text-zinc-700"
-            href="#contact"
+            href="/#contact"
           >
             Contact
           </a>
