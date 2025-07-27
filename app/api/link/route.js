@@ -4,24 +4,53 @@ import { supabase } from "@/lib/supabase/client";
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
+  const username = searchParams.get("username");
 
-  if (!id) {
-    return NextResponse.json({ error: "Missing id" }, { status: 400 });
+  // If username is provided, fetch the ID
+  if (username) {
+    const { data, error } = await supabase
+      .from("link_map")
+      .select("user_id")
+      .eq("username", username)
+      .single();
+
+    if (error) {
+      console.error(error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    if (!data) {
+      return NextResponse.json({ error: "Username not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ id: data.user_id });
   }
 
-  const { data, error } = await supabase
-    .from("link_map")
-    .select("username")
-    .eq("user_id", id)
-    .single();
+  // If ID is provided, fetch the username (original functionality)
+  if (id) {
+    const { data, error } = await supabase
+      .from("link_map")
+      .select("username")
+      .eq("user_id", id)
+      .single();
 
+    if (error) {
+      console.error(error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
 
-  if (error) {
-    console.error(error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    if (!data) {
+      return NextResponse.json({ error: "ID not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ customLink: data.username });
   }
 
-  return NextResponse.json({ customLink: data.username });
+  // If neither ID nor username is provided
+  return NextResponse.json(
+    { error: "Missing id or username parameter" },
+    { status: 400 }
+  );
 }
 
 export async function POST(req) {
