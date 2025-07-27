@@ -12,6 +12,11 @@ import {
   Instagram,
   Menu,
   X,
+  Play,
+  Pause,
+  Volume2,
+  VolumeX,
+  Maximize2,
 } from "lucide-react";
 import { FaPinterestP } from "react-icons/fa";
 
@@ -207,7 +212,7 @@ function HeroSection() {
 
         <div className="flex items-center justify-center gap-2 mt-8 text-sm text-zinc-500">
           <div className="flex -space-x-2">
-            {[1, 2, 3].map((item) => (
+            {[24, 35, 57].map((item) => (
               <img
                 key={item}
                 src={`https://i.pravatar.cc/40?img=${item}`}
@@ -226,51 +231,35 @@ function HeroSection() {
 }
 
 function VideoSection() {
-  const [muted, setMuted] = useState(true);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [muted, setMuted] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const videoRef = useRef(null);
   const containerRef = useRef(null);
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && videoRef.current) {
-            if (!videoRef.current.src) {
-              videoRef.current.src = "/demo-video.mp4";
-            }
+  // Handle play/pause
+  const togglePlayPause = async () => {
+    if (!videoRef.current) return;
 
-            const playPromise = videoRef.current.play();
-
-            if (playPromise !== undefined) {
-              playPromise
-                .then(() => {})
-                .catch((error) => {
-                  videoRef.current.muted = true;
-                  setMuted(true);
-                  videoRef.current
-                    .play()
-                    .catch((e) => console.log("Autoplay prevented:", e));
-                });
-            }
-          } else if (videoRef.current && !videoRef.current.paused) {
-            videoRef.current.pause();
-          }
-        });
-      },
-      {
-        threshold: 0.7,
-        rootMargin: "0px 0px 50px 0px",
+    try {
+      if (videoRef.current.paused) {
+        await videoRef.current.play();
+        setIsPlaying(true);
+      } else {
+        videoRef.current.pause();
+        setIsPlaying(false);
       }
-    );
-
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
+    } catch (err) {
+      console.error("Playback error:", err);
+      // Fallback to muted autoplay if needed
+      videoRef.current.muted = true;
+      setMuted(true);
+      await videoRef.current.play();
+      setIsPlaying(true);
     }
+  };
 
-    return () => observer.disconnect();
-  }, []);
-
+  // Toggle mute
   const toggleMute = (e) => {
     e.stopPropagation();
     if (videoRef.current) {
@@ -279,18 +268,44 @@ function VideoSection() {
     }
   };
 
-  const handleFullscreen = () => {
+  // Toggle fullscreen
+  const toggleFullscreen = (e) => {
+    e.stopPropagation();
     const elem = containerRef.current;
     if (!elem) return;
 
-    if (elem.requestFullscreen) {
-      elem.requestFullscreen();
-    } else if (elem.webkitRequestFullscreen) {
-      elem.webkitRequestFullscreen();
-    } else if (elem.msRequestFullscreen) {
-      elem.msRequestFullscreen();
+    if (!document.fullscreenElement) {
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen().then(() => setIsFullscreen(true));
+      } else if (elem.webkitRequestFullscreen) {
+        elem.webkitRequestFullscreen().then(() => setIsFullscreen(true));
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().then(() => setIsFullscreen(false));
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen().then(() => setIsFullscreen(false));
+      }
     }
   };
+
+  // Check when fullscreen changes
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      document.removeEventListener(
+        "webkitfullscreenchange",
+        handleFullscreenChange
+      );
+    };
+  }, []);
 
   return (
     <section
@@ -311,71 +326,75 @@ function VideoSection() {
         </p>
         <div
           ref={containerRef}
-          className="relative overflow-hidden mx-auto w-full rounded-xl aspect-[16/9] bg-zinc-100 max-w-[800px]"
-          onClick={handleFullscreen}
+          className="relative overflow-hidden mx-auto w-full rounded-xl aspect-[16/9] bg-zinc-900 max-w-[800px]"
+          onClick={togglePlayPause}
         >
-          {!isLoaded && (
-            <div className="absolute inset-0 flex items-center justify-center bg-zinc-100">
-              <div className="text-center">
-                <div className="w-12 h-12 mx-auto mb-3 border-4 border-zinc-300 border-t-blue-500 rounded-full animate-spin" />
-                <p className="text-zinc-500">Loading video...</p>
-              </div>
-            </div>
-          )}
+          {/* Video element */}
           <video
             ref={videoRef}
-            className={`absolute top-0 left-0 w-full h-full object-cover ${
-              isLoaded ? "block" : "hidden"
-            }`}
+            className="absolute top-0 left-0 w-full h-full object-cover"
             playsInline
             muted={muted}
             loop
             preload="auto"
             controls={false}
-            onLoadedData={() => setIsLoaded(true)}
-            onError={() => console.error("Video loading failed")}
-          />
+            onPause={() => setIsPlaying(false)}
+            onPlay={() => setIsPlaying(true)}
+          >
+            <source src="/demo-video.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
 
-          <div className="absolute bottom-4 right-4 z-10">
+          {/* Center Play/Pause Button */}
+          <div
+            className={`absolute inset-0 flex items-center justify-center transition-opacity duration-200 ${
+              isPlaying ? "opacity-0 hover:opacity-100" : "opacity-100"
+            }`}
+          >
+            <button
+              className="flex items-center justify-center w-12 h-12 transition-all duration-200 bg-white rounded-full shadow-md hover:bg-gray-100 active:scale-95"
+              aria-label={isPlaying ? "Pause video" : "Play video"}
+              onClick={(e) => {
+                e.stopPropagation();
+                togglePlayPause();
+              }}
+            >
+              {isPlaying ? (
+                <Pause size={24} className="text-black" />
+              ) : (
+                <Play size={24} className="text-black" fill="currentColor" />
+              )}
+            </button>
+          </div>
+
+          {/* Bottom Right Controls - Mute and Fullscreen */}
+          <div className="absolute bottom-3 right-3 z-10 flex gap-2">
+            {/* Mute Button */}
             <button
               onClick={toggleMute}
-              className="flex items-center justify-center w-8 h-8 transition-all duration-200 bg-white rounded-full shadow-sm hover:bg-zinc-100 active:scale-95"
+              className="flex items-center justify-center w-8 h-8 transition-all duration-200 bg-white rounded-full shadow-md hover:bg-gray-100 active:scale-95"
               aria-label={muted ? "Unmute video" : "Mute video"}
             >
               {muted ? (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="text-zinc-700"
-                >
-                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                  <line x1="23" y1="9" x2="17" y2="15"></line>
-                  <line x1="17" y1="9" x2="23" y2="15"></line>
-                </svg>
+                <VolumeX size={16} className="text-black" />
               ) : (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="text-zinc-700"
-                >
-                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
-                </svg>
+                <Volume2 size={16} className="text-black" />
+              )}
+            </button>
+
+            {/* Fullscreen Button */}
+            <button
+              onClick={toggleFullscreen}
+              className="flex items-center justify-center w-8 h-8 transition-all duration-200 bg-white rounded-full shadow-md hover:bg-gray-100 active:scale-95"
+              aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+            >
+              {isFullscreen ? (
+                <Maximize2
+                  size={16}
+                  className="text-black transform rotate-45"
+                />
+              ) : (
+                <Maximize2 size={16} className="text-black" />
               )}
             </button>
           </div>
