@@ -72,10 +72,19 @@ export async function POST(req) {
     .eq("user_id", id);
 
   if (error) {
-    return NextResponse.json(
-      { error: "This username is already taken. Please choose another one." },
-      { status: 409 }
-    );
+    // Handle uniqueness constraint violation (PostgreSQL error code 23505)
+    if (
+      error.code === "23505" ||
+      error.message.toLowerCase().includes("duplicate key value")
+    ) {
+      return NextResponse.json({
+        error: "This username is already taken. Please choose another one.",
+        status: 409,
+      });
+    }
+
+    // Generic server error
+    return NextResponse.json({ error: error.message, status: 500 });
   }
 
   return NextResponse.json({

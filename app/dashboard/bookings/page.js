@@ -336,7 +336,7 @@ export default function BookingsOverviewPage() {
         setLinkEditError("");
         toast.success("Booking link updated successfully");
       } else {
-        throw new Error(data.error || "Failed to save custom link");
+        throw new Error(data.error || "Error saving link");
       }
     } catch (error) {
       console.error("Error saving custom link:", error);
