@@ -115,17 +115,31 @@ export default function BookingsOverviewPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_ITEMS_PER_PAGE);
   const [totalBookings, setTotalBookings] = useState(0);
+  const [customLinkPart, setCustomLinkPart] = useState(user?.id || "");
+  const [editLinkPart, setEditLinkPart] = useState(user?.id || "");
+  const [linkEditError, setLinkEditError] = useState("");
+  const [isLinkEditOpen, setIsLinkEditOpen] = useState(false);
 
-  const bookingLink = `${process.env.NEXT_PUBLIC_SITE_URL}/book/${user?.id}`;
+  const bookingLink = `${process.env.NEXT_PUBLIC_SITE_URL}/book/${customLinkPart}`;
 
-  // Fetch business settings
+  // Fetch business settings and custom link
   useEffect(() => {
     const getSettings = async () => {
       try {
-        const response = await fetch(`/api/form-settings?id=${user?.id}`);
-        const data = await response.json();
-        setBusinessName(data.businessName);
-        setTimezone(data.timezone || "America/Halifax");
+        const [settingsResponse, linkResponse] = await Promise.all([
+          fetch(`/api/form-settings?id=${user?.id}`),
+          fetch(`/api/link?id=${user?.id}`),
+        ]);
+
+        const settingsData = await settingsResponse.json();
+        setBusinessName(settingsData.businessName);
+        setTimezone(settingsData.timezone || "America/Halifax");
+
+        const linkData = await linkResponse.json();
+        if (linkData.customLink) {
+          setCustomLinkPart(linkData.customLink);
+          setEditLinkPart(linkData.customLink);
+        }
       } catch (err) {
         console.error("Error fetching settings:", err);
       }
@@ -298,6 +312,38 @@ export default function BookingsOverviewPage() {
     if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
   };
 
+  const handleSaveCustomLink = async () => {
+    if (!editLinkPart.trim()) {
+      setLinkEditError("Link identifier cannot be empty");
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: user.id, username: editLinkPart }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save custom link");
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        setCustomLinkPart(editLinkPart);
+        setIsLinkEditOpen(false);
+        setLinkEditError("");
+        toast.success("Booking link updated successfully");
+      } else {
+        throw new Error(data.error || "Failed to save custom link");
+      }
+    } catch (error) {
+      console.error("Error saving custom link:", error);
+      setLinkEditError(error.message);
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-6 space-y-6 dark:bg-gray-900 min-h-screen">
       {/* Header and Booking Link Card */}
@@ -325,17 +371,73 @@ export default function BookingsOverviewPage() {
               <Button
                 variant="outline"
                 size="sm"
+                onClick={() => {
+                  setEditLinkPart(customLinkPart);
+                  setIsLinkEditOpen(true);
+                }}
+                className="dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white h-9"
+              >
+                <Edit className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Edit</span>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={copyToClipboard}
                 className="dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white h-9"
               >
-                <Copy className="h-4 w-4 mr-2" />
-                Copy
+                <Copy className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Copy</span>
               </Button>
             </div>
           </CardContent>
         </Card>
       </div>
 
+      {/* Link Edit Dialog */}
+      <Dialog open={isLinkEditOpen} onOpenChange={setIsLinkEditOpen}>
+        <DialogContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+          <DialogHeader>
+            <DialogTitle className="dark:text-white">
+              Edit Booking Link
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground dark:text-gray-400">
+                {process.env.NEXT_PUBLIC_SITE_URL}/book/{editLinkPart}
+              </p>
+              <Input
+                value={editLinkPart}
+                onChange={(e) => setEditLinkPart(e.target.value)}
+                className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              />
+              {linkEditError && (
+                <p className="text-sm text-red-500 dark:text-red-400">
+                  {linkEditError}
+                </p>
+              )}
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setIsLinkEditOpen(false)}
+                className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSaveCustomLink}
+                className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white"
+              >
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Rest of the code remains exactly the same */}
       {/* Filters and Table */}
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row justify-between gap-4 items-start sm:items-center">
