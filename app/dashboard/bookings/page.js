@@ -120,7 +120,7 @@ export default function BookingsOverviewPage() {
   const [linkEditError, setLinkEditError] = useState("");
   const [isLinkEditOpen, setIsLinkEditOpen] = useState(false);
 
-  const bookingLink = `${process.env.NEXT_PUBLIC_SITE_URL}/book/${customLinkPart}`;
+  const bookingLink = `${process.env.NEXT_PUBLIC_SITE_URL}/${customLinkPart}`;
 
   // Fetch business settings and custom link
   useEffect(() => {
@@ -405,7 +405,7 @@ export default function BookingsOverviewPage() {
           <div className="space-y-4">
             <div className="space-y-2">
               <p className="text-xs text-muted-foreground dark:text-gray-400">
-                {process.env.NEXT_PUBLIC_SITE_URL}/book/{editLinkPart}
+                {process.env.NEXT_PUBLIC_SITE_URL}/{editLinkPart}
               </p>
               <Input
                 value={editLinkPart}
