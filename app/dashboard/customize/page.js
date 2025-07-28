@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { toast } from "sonner";
-import { UploadCloud, X } from "lucide-react";
+import { UploadCloud, X, Settings, Eye } from "lucide-react";
 import BookingForm from "@/components/ui/booking-form";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,6 +31,40 @@ const TIMEZONES = [
   { value: "Australia/Sydney", label: "Sydney (AEST/AEDT)" },
 ];
 
+const FONT_FAMILIES = [
+  { value: "Inter", label: "Inter (Default)" },
+  { value: "Roboto", label: "Roboto" },
+  { value: "Open Sans", label: "Open Sans" },
+  { value: "Montserrat", label: "Montserrat" },
+  { value: "Poppins", label: "Poppins" },
+  { value: "Lato", label: "Lato" },
+  { value: "Nunito", label: "Nunito" },
+  { value: "Playfair Display", label: "Playfair Display" },
+  { value: "Raleway", label: "Raleway" },
+  { value: "Merriweather", label: "Merriweather" },
+  { value: "Source Sans Pro", label: "Source Sans Pro" },
+  { value: "Noto Sans", label: "Noto Sans" },
+  { value: "Rubik", label: "Rubik" },
+  { value: "Quicksand", label: "Quicksand" },
+  { value: "Work Sans", label: "Work Sans" },
+  { value: "Manrope", label: "Manrope" },
+  { value: "Fira Sans", label: "Fira Sans" },
+  { value: "IBM Plex Sans", label: "IBM Plex Sans" },
+  { value: "Jost", label: "Jost" },
+  { value: "Plus Jakarta Sans", label: "Plus Jakarta Sans" },
+  { value: "Archivo", label: "Archivo" },
+  { value: "Sora", label: "Sora" },
+  { value: "Epilogue", label: "Epilogue" },
+  { value: "Space Grotesk", label: "Space Grotesk" },
+];
+
+const BORDER_RADIUS_OPTIONS = [
+  { value: "0", label: "None", class: "rounded-none" },
+  { value: "0.25rem", label: "Small", class: "rounded-sm" },
+  { value: "0.5rem", label: "Medium", class: "rounded-md" },
+  { value: "0.75rem", label: "Large", class: "rounded-lg" },
+];
+
 export default function FormSettingsPage() {
   const { user } = useAuth();
   const [formData, setFormData] = useState({
@@ -38,6 +72,11 @@ export default function FormSettingsPage() {
     logoUrl: "",
     bgColor: "#ffffff",
     timezone: "America/Halifax",
+    textColor: "#000000",
+    accentColor: "#2563eb",
+    fontFamily: "Inter",
+    borderRadius: "0.5rem",
+    ctaText: "Book Now",
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -60,6 +99,11 @@ export default function FormSettingsPage() {
           logoUrl: data.logoUrl || "",
           bgColor: data.bgColor || "#ffffff",
           timezone: data.timezone || "America/Halifax",
+          textColor: data.textColor || "#000000",
+          accentColor: data.accentColor || "#2563eb",
+          fontFamily: data.fontFamily || "Inter",
+          borderRadius: data.borderRadius || "0.5rem",
+          ctaText: data.ctaText || "Book Now",
         });
       } catch (err) {
         console.error("Error fetching settings:", err);
@@ -86,7 +130,6 @@ export default function FormSettingsPage() {
   const handleRemoveFile = async () => {
     if (!user) return;
 
-    // If there's an existing logo (not just a newly selected file)
     if (formData.logoUrl && !selectedFile) {
       try {
         setIsSaving(true);
@@ -106,7 +149,6 @@ export default function FormSettingsPage() {
         setIsSaving(false);
       }
     }
-    // Clear the local state regardless
     setSelectedFile(null);
     setFormData((prev) => ({ ...prev, logoUrl: "" }));
   };
@@ -123,6 +165,11 @@ export default function FormSettingsPage() {
       formDataToSend.append("businessName", formData.businessName);
       formDataToSend.append("bgColor", formData.bgColor);
       formDataToSend.append("timezone", formData.timezone);
+      formDataToSend.append("textColor", formData.textColor);
+      formDataToSend.append("accentColor", formData.accentColor);
+      formDataToSend.append("fontFamily", formData.fontFamily);
+      formDataToSend.append("borderRadius", formData.borderRadius);
+      formDataToSend.append("ctaText", formData.ctaText);
 
       if (selectedFile) {
         formDataToSend.append("logoFile", selectedFile);
@@ -268,9 +315,9 @@ export default function FormSettingsPage() {
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-6 space-y-6 min-h-screen">
-        <div className="grid gap-4 md:grid-cols-2 h-[calc(100vh-64px)]">
-          <Skeleton className="h-full w-full rounded" />
-          <Skeleton className="h-full w-full rounded" />
+        <div className="flex flex-col md:flex-row gap-6">
+          <Skeleton className="h-[600px] w-full rounded-lg" />
+          <Skeleton className="h-[600px] w-full md:w-[400px] rounded-lg" />
         </div>
       </div>
     );
@@ -286,107 +333,312 @@ export default function FormSettingsPage() {
         </p>
       </div>
 
-      {/* Main Content */}
-      <div className="grid gap-4 md:grid-cols-2">
-        {/* Preview Section */}
-        <Card className="h-full">
-          <CardHeader>
-            <CardTitle>Live Preview</CardTitle>
-          </CardHeader>
-          <CardContent className="h-full overflow-hidden">
-            <div className="pointer-events-none h-full relative">
-              <div className=" h-full w-full absolute top-0 left-0 bg-black opacity-[0.03]"></div>
-              <BookingForm business_id={user?.id} key={refreshKey} />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Settings Form */}
-        <Card className="h-full">
-          <CardHeader>
-            <CardTitle>Customization</CardTitle>
-          </CardHeader>
-          <CardContent className="h-full overflow-hidden">
-            <form onSubmit={handleSubmit} className="h-full flex flex-col">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="businessName">Business Name</Label>
-                  <Input
-                    id="businessName"
-                    name="businessName"
-                    value={formData.businessName}
-                    onChange={handleInputChange}
-                    placeholder="Your company name"
-                    required
-                  />
+      {/* Main Content - Flex Layout */}
+      <div className="flex flex-col lg:flex-row gap-6">
+        {/* Preview Section - Takes remaining space */}
+        <div className="flex-1">
+          <Card className="w-full h-full">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Eye className="h-5 w-5 text-blue-500" />
+                <CardTitle>Live Preview</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="h-auto min-h-[500px] w-full">
+                <div className="h-full w-full pointer-events-none p-6">
+                  <BookingForm business_id={user.id} key={refreshKey} />
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
-                <div className="space-y-2">
-                  <Label>Logo</Label>
-                  <FileUploader />
-                </div>
+        {/* Settings Panel - Fixed width on larger screens */}
+        <div className="w-full lg:w-[400px]">
+          <Card className="sticky top-6">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Settings className="h-5 w-5 text-blue-500" />
+                <CardTitle>Customization</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Business Info */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                    Business Info
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="businessName">Business Name</Label>
+                      <Input
+                        id="businessName"
+                        name="businessName"
+                        value={formData.businessName}
+                        onChange={handleInputChange}
+                        placeholder="Your company name"
+                        required
+                      />
+                    </div>
 
-                <div className="space-y-2">
-                  <Label>Background Color</Label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="color"
-                      value={formData.bgColor}
-                      onChange={(e) =>
-                        handleInputChange({
-                          target: { name: "bgColor", value: e.target.value },
-                        })
-                      }
-                      className="w-10 h-10 rounded border cursor-pointer"
-                    />
-                    <Input
-                      value={formData.bgColor}
-                      onChange={(e) =>
-                        handleInputChange({
-                          target: { name: "bgColor", value: e.target.value },
-                        })
-                      }
-                      name="bgColor"
-                      className="flex-1"
-                      placeholder="#FFFFFF"
-                    />
+                    <div className="space-y-2">
+                      <Label>Logo</Label>
+                      <FileUploader />
+                    </div>
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="timezone">Timezone</Label>
-                  <Select
-                    value={formData.timezone}
-                    onValueChange={(value) =>
-                      setFormData((prev) => ({ ...prev, timezone: value }))
-                    }
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select timezone" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {TIMEZONES.map((tz) => (
-                        <SelectItem key={tz.value} value={tz.value}>
-                          {tz.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                {/* Design Settings */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                    Design
+                  </h3>
+                  <div className="space-y-3">
+                    {/* Color Picker Grid */}
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="space-y-1">
+                        <Label className="text-xs">Background</Label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="color"
+                            value={formData.bgColor}
+                            onChange={(e) =>
+                              handleInputChange({
+                                target: {
+                                  name: "bgColor",
+                                  value: e.target.value,
+                                },
+                              })
+                            }
+                            className="w-7 h-7 rounded-md border cursor-pointer"
+                          />
+                          <Input
+                            value={formData.bgColor}
+                            onChange={(e) =>
+                              handleInputChange({
+                                target: {
+                                  name: "bgColor",
+                                  value: e.target.value,
+                                },
+                              })
+                            }
+                            name="bgColor"
+                            className="h-8 text-xs"
+                            placeholder="#FFFFFF"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <Label className="text-xs">Text</Label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="color"
+                            value={formData.textColor}
+                            onChange={(e) =>
+                              handleInputChange({
+                                target: {
+                                  name: "textColor",
+                                  value: e.target.value,
+                                },
+                              })
+                            }
+                            className="w-7 h-7 rounded-md border cursor-pointer"
+                          />
+                          <Input
+                            value={formData.textColor}
+                            onChange={(e) =>
+                              handleInputChange({
+                                target: {
+                                  name: "textColor",
+                                  value: e.target.value,
+                                },
+                              })
+                            }
+                            name="textColor"
+                            className="h-8 text-xs"
+                            placeholder="#000000"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <Label className="text-xs">Accent</Label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="color"
+                            value={formData.accentColor}
+                            onChange={(e) =>
+                              handleInputChange({
+                                target: {
+                                  name: "accentColor",
+                                  value: e.target.value,
+                                },
+                              })
+                            }
+                            className="w-7 h-7 rounded-md border cursor-pointer"
+                          />
+                          <Input
+                            value={formData.accentColor}
+                            onChange={(e) =>
+                              handleInputChange({
+                                target: {
+                                  name: "accentColor",
+                                  value: e.target.value,
+                                },
+                              })
+                            }
+                            name="accentColor"
+                            className="h-8 text-xs"
+                            placeholder="#2563eb"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Font Family */}
+                    <div className="space-y-2">
+                      <Label htmlFor="fontFamily">Font Family</Label>
+                      <Select
+                        value={formData.fontFamily}
+                        onValueChange={(value) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            fontFamily: value,
+                          }))
+                        }
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select font family" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {FONT_FAMILIES.map((font) => (
+                            <SelectItem key={font.value} value={font.value}>
+                              {font.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Border Radius */}
+                    <div className="space-y-2">
+                      <Label>Border Radius</Label>
+                      <div className="flex gap-2 flex-wrap">
+                        {BORDER_RADIUS_OPTIONS.map((option) => (
+                          <button
+                            key={option.value}
+                            type="button"
+                            className={`flex-1 min-w-[80px] h-10 flex items-center justify-center transition-all ${
+                              formData.borderRadius === option.value
+                                ? "bg-blue-500 text-white"
+                                : "bg-gray-100 hover:bg-gray-200"
+                            } ${option.class}`}
+                            onClick={() =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                borderRadius: option.value,
+                              }))
+                            }
+                          >
+                            <span className="text-xs">{option.label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="pt-2 mt-auto">
+                {/* Content Settings */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                    Content
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="ctaText">Button Text</Label>
+                      <Input
+                        id="ctaText"
+                        name="ctaText"
+                        value={formData.ctaText}
+                        onChange={handleInputChange}
+                        placeholder="Book Now"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Settings */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                    Settings
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="timezone">Timezone</Label>
+                      <Select
+                        value={formData.timezone}
+                        onValueChange={(value) =>
+                          setFormData((prev) => ({ ...prev, timezone: value }))
+                        }
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select timezone" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {TIMEZONES.map((tz) => (
+                            <SelectItem key={tz.value} value={tz.value}>
+                              {tz.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Save Button */}
+                <div className="pt-4">
                   <Button
                     type="submit"
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                    className="w-full bg-blue-500 hover:bg-blue-600 text-white"
                     disabled={isSaving}
                   >
-                    {isSaving ? "Saving..." : "Save Changes"}
+                    {isSaving ? (
+                      <span className="flex items-center gap-2">
+                        <svg
+                          className="animate-spin h-4 w-4 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                        Saving...
+                      </span>
+                    ) : (
+                      "Save Changes"
+                    )}
                   </Button>
                 </div>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
