@@ -25,6 +25,11 @@ export async function GET(request) {
       logoUrl: data.logo_url,
       businessName: data.business_name,
       timezone: data.timezone,
+      textColor: data.text_color,
+      accentColor: data.accent_color,
+      fontFamily: data.font_family,
+      borderRadius: data.border_radius,
+      ctaText: data.cta_text,
     });
   } catch (error) {
     console.error("Error fetching settings:", error);
@@ -41,6 +46,11 @@ export async function PUT(request) {
   const businessName = formData.get("businessName");
   const bgColor = formData.get("bgColor");
   const timezone = formData.get("timezone");
+  const textColor = formData.get("textColor");
+  const accentColor = formData.get("accentColor");
+  const fontFamily = formData.get("fontFamily");
+  const borderRadius = formData.get("borderRadius");
+  const ctaText = formData.get("ctaText");
   const logoFile = formData.get("logoFile");
 
   if (!userId) {
@@ -50,13 +60,29 @@ export async function PUT(request) {
   try {
     let logoUrl = null;
 
-    // Handle logo upload if file exists
-    if (logoFile) {
+    // Handle logo upload if file exists and has size
+    if (logoFile && logoFile.size > 0) {
+      // First check if there's an existing logo to delete
+      const { data: existingSettings } = await supabase
+        .from("form_settings")
+        .select("logo_url")
+        .eq("user_id", userId)
+        .single();
+
+      // Delete old logo if it exists
+      if (existingSettings?.logo_url) {
+        const oldUrlParts = existingSettings.logo_url.split("/form-assets/");
+        if (oldUrlParts.length === 2) {
+          const oldFilePath = `form-logos/${oldUrlParts[1]}`;
+          await supabase.storage.from("form-assets").remove([oldFilePath]);
+        }
+      }
+
+      // Upload new logo
       const fileExt = logoFile.name.split(".").pop();
       const fileName = `${userId}-${Date.now()}.${fileExt}`;
       const filePath = `form-logos/${fileName}`;
 
-      // Upload to Supabase Storage with RLS disabled
       const { error: uploadError } = await supabase.storage
         .from("form-assets")
         .upload(filePath, logoFile, {
@@ -74,13 +100,18 @@ export async function PUT(request) {
       logoUrl = urlData.publicUrl;
     }
 
-    // Update existing settings with RLS policy
+    // Update all settings fields
     const { data, error } = await supabase
       .from("form_settings")
       .update({
         business_name: businessName,
         bg_color: bgColor,
         timezone: timezone,
+        text_color: textColor,
+        accent_color: accentColor,
+        font_family: fontFamily,
+        border_radius: borderRadius,
+        cta_text: ctaText,
         ...(logoUrl && { logo_url: logoUrl }),
       })
       .eq("user_id", userId)
@@ -94,6 +125,11 @@ export async function PUT(request) {
       logoUrl: data.logo_url,
       businessName: data.business_name,
       timezone: data.timezone,
+      textColor: data.text_color,
+      accentColor: data.accent_color,
+      fontFamily: data.font_family,
+      borderRadius: data.border_radius,
+      ctaText: data.cta_text,
     });
   } catch (error) {
     console.error("Error updating settings:", error);
