@@ -12,6 +12,11 @@ const nextConfig = {
         hostname: "nvmjfvxaehroofhpyzfg.supabase.co",
         pathname: "/storage/v1/object/public/form-assets/form-logos/**",
       },
+      {
+        protocol: "https",
+        hostname: "tracker.metricool.com",
+        pathname: "/resources/**",
+      },
     ],
   },
 };
