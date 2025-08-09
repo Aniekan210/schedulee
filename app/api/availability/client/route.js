@@ -182,33 +182,39 @@ function generateTimeSlots(startTime, endTime, intervalMinutes, breaks = []) {
   const [startHour, startMin] = startTime.split(":").map(Number);
   const [endHour, endMin] = endTime.split(":").map(Number);
 
-  let currentHour = startHour;
-  let currentMin = startMin;
+  // Convert everything to minutes for universal handling
+  let currentTime = startHour * 60 + startMin;
+  const endTimeInMinutes = endHour * 60 + endMin;
 
-  while (
-    currentHour < endHour ||
-    (currentHour === endHour && currentMin < endMin)
-  ) {
-    const timeStr = `${String(currentHour).padStart(2, "0")}:${String(
-      currentMin
+  while (currentTime < endTimeInMinutes) {
+    const hours = Math.floor(currentTime / 60);
+    const minutes = currentTime % 60;
+    const timeStr = `${String(hours).padStart(2, "0")}:${String(
+      minutes
     ).padStart(2, "0")}`;
 
-    // ✅ Normalize and compare breaks in HH:mm
-    const isDuringBreak = breaks.some((b) => {
-      const breakStart = b.start_time?.slice(0, 5); // trim to HH:mm
-      const breakEnd = b.end_time?.slice(0, 5);
-      return timeStr >= breakStart && timeStr < breakEnd;
+    // Check if this time is during any break (also converted to minutes)
+    const isDuringBreak = breaks.some((breakItem) => {
+      const [breakStartHour, breakStartMin] = breakItem.start_time
+        .split(":")
+        .map(Number);
+      const [breakEndHour, breakEndMin] = breakItem.end_time
+        .split(":")
+        .map(Number);
+      const breakStart = breakStartHour * 60 + breakStartMin;
+      const breakEnd = breakEndHour * 60 + breakEndMin;
+      return currentTime >= breakStart && currentTime < breakEnd;
     });
 
     if (!isDuringBreak) {
       slots.push(timeStr);
     }
 
-    currentMin += intervalMinutes;
-    if (currentMin >= 60) {
-      currentMin -= 60;
-      currentHour += 1;
-    }
+    // Move to next slot
+    currentTime += intervalMinutes;
+
+    // Prevent infinite loop with invalid intervals
+    if (intervalMinutes <= 0) break;
   }
 
   return slots;

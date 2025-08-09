@@ -17,6 +17,7 @@ import {
   Volume2,
   VolumeX,
   Maximize2,
+  Check,
 } from "lucide-react";
 import { FaPinterestP } from "react-icons/fa";
 
@@ -43,6 +44,7 @@ export default function ScheduleeLandingPage() {
       <main>
         <HeroSection />
         <VideoSection />
+        <WaitlistSection />
         <FeaturesSection />
         <TestimonialsSection />
         <CTASection />
@@ -90,6 +92,12 @@ function Header() {
             href="#testimonials"
           >
             Testimonials
+          </a>
+          <a
+            className="text-sm font-medium no-underline transition-colors duration-200 text-zinc-500 hover:text-zinc-700"
+            href="#waitlist"
+          >
+            Join Beta
           </a>
           <a
             className="text-sm font-medium no-underline transition-colors duration-200 text-zinc-500 hover:text-zinc-700"
@@ -147,6 +155,13 @@ function Header() {
             onClick={toggleMobileMenu}
           >
             Testimonials
+          </a>
+          <a
+            className="text-base font-medium no-underline text-zinc-500 hover:text-zinc-700"
+            href="#waitlist"
+            onClick={toggleMobileMenu}
+          >
+            Join Beta
           </a>
           <a
             className="text-base font-medium no-underline text-zinc-500 hover:text-zinc-700"
@@ -234,8 +249,19 @@ function VideoSection() {
   const [muted, setMuted] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const videoRef = useRef(null);
   const containerRef = useRef(null);
+
+  // Check if mobile device
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
+    };
+    checkIfMobile();
+    window.addEventListener('resize', checkIfMobile);
+    return () => window.removeEventListener('resize', checkIfMobile);
+  }, []);
 
   // Handle play/pause
   const togglePlayPause = async () => {
@@ -251,7 +277,6 @@ function VideoSection() {
       }
     } catch (err) {
       console.error("Playback error:", err);
-      // Fallback to muted autoplay if needed
       videoRef.current.muted = true;
       setMuted(true);
       await videoRef.current.play();
@@ -268,23 +293,49 @@ function VideoSection() {
     }
   };
 
-  // Toggle fullscreen
-  const toggleFullscreen = (e) => {
+  // Toggle fullscreen with landscape orientation for mobile
+  const toggleFullscreen = async (e) => {
     e.stopPropagation();
     const elem = containerRef.current;
     if (!elem) return;
 
     if (!document.fullscreenElement) {
-      if (elem.requestFullscreen) {
-        elem.requestFullscreen().then(() => setIsFullscreen(true));
-      } else if (elem.webkitRequestFullscreen) {
-        elem.webkitRequestFullscreen().then(() => setIsFullscreen(true));
+      try {
+        if (elem.requestFullscreen) {
+          await elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) {
+          await elem.webkitRequestFullscreen();
+        }
+        
+        setIsFullscreen(true);
+        
+        // Lock to landscape on mobile devices when in fullscreen
+        if (isMobile && screen.orientation && screen.orientation.lock) {
+          try {
+            await screen.orientation.lock('landscape');
+          } catch (err) {
+            console.log('Orientation lock failed:', err);
+          }
+        }
+      } catch (err) {
+        console.error('Fullscreen error:', err);
       }
     } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen().then(() => setIsFullscreen(false));
-      } else if (document.webkitExitFullscreen) {
-        document.webkitExitFullscreen().then(() => setIsFullscreen(false));
+      try {
+        // Unlock orientation when exiting fullscreen
+        if (isMobile && screen.orientation && screen.orientation.unlock) {
+          await screen.orientation.unlock();
+        }
+
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          await document.webkitExitFullscreen();
+        }
+        
+        setIsFullscreen(false);
+      } catch (err) {
+        console.error('Exit fullscreen error:', err);
       }
     }
   };
@@ -292,7 +343,17 @@ function VideoSection() {
   // Check when fullscreen changes
   useEffect(() => {
     const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
+      const fullscreen = !!document.fullscreenElement;
+      setIsFullscreen(fullscreen);
+      
+      // Lock to landscape when entering fullscreen on mobile
+      if (fullscreen && isMobile && screen.orientation && screen.orientation.lock) {
+        try {
+          screen.orientation.lock('landscape');
+        } catch (err) {
+          console.log('Orientation lock failed:', err);
+        }
+      }
     };
 
     document.addEventListener("fullscreenchange", handleFullscreenChange);
@@ -305,7 +366,7 @@ function VideoSection() {
         handleFullscreenChange
       );
     };
-  }, []);
+  }, [isMobile]);
 
   return (
     <section
@@ -332,7 +393,9 @@ function VideoSection() {
           {/* Video element */}
           <video
             ref={videoRef}
-            className="absolute top-0 left-0 w-full h-full object-cover"
+            className={`absolute top-0 left-0 w-full h-full ${
+              isFullscreen ? 'object-contain' : 'object-cover'
+            }`}
             playsInline
             muted={muted}
             loop
@@ -677,5 +740,67 @@ function Footer() {
         </p>
       </div>
     </footer>
+  );
+}
+
+function WaitlistSection() {
+  return (
+    <section
+      id="waitlist"
+      className="px-4 py-20 mx-auto max-w-[1200px] sm:py-16"
+    >
+      <div className="px-8 py-12 overflow-hidden text-center bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-sm sm:px-6 sm:py-8">
+        <div className="inline-flex items-center px-3 py-1.5 mb-4 text-xs font-medium text-blue-600 bg-white rounded-full">
+          <Zap size={14} className="mr-1" />
+          Exclusive Opportunity
+        </div>
+        <h2 className="mb-4 text-3xl font-bold text-white sm:text-2xl">
+          Join Our Beta Tester Program
+        </h2>
+        <p className="mx-auto mb-8 text-lg text-blue-100 max-w-[600px]">
+          Be among the first to experience Schedulee.app and get{" "}
+          <strong>free lifetime access</strong> as a thank you for helping us
+          shape the future of Schedulee.
+        </p>
+        <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+          <a
+            href="/waitlist"
+            className="w-full min-w-[220px] no-underline sm:w-auto"
+          >
+            <button
+              className="w-full px-6 py-3 text-base font-semibold transition-all duration-200 bg-white rounded-lg cursor-pointer text-blue-600 hover:bg-blue-50 active:scale-95"
+              aria-label="Join the beta tester waitlist"
+            >
+              Join Waitlist Now
+            </button>
+          </a>
+          <a
+            href="#features"
+            className="w-full min-w-[220px] no-underline sm:w-auto"
+          >
+            <button
+              className="w-full px-6 py-3 text-base font-semibold transition-all duration-200 bg-transparent border rounded-lg cursor-pointer text-white border-white hover:bg-white/10 active:scale-95"
+              aria-label="Learn more about the beta program"
+            >
+              Learn More
+            </button>
+          </a>
+        </div>
+        <div className="flex flex-wrap items-center justify-center gap-4 mt-8 text-sm text-blue-100">
+          <div className="flex items-center gap-2">
+            <Check size={16} className="text-white" />
+            <span>No credit card required</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Check size={16} className="text-white" />
+            <span>Free forever for beta testers</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Check size={16} className="text-white" />
+            <span>Early access to new features</span>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
