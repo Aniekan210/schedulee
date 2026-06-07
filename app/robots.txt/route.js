@@ -15,6 +15,7 @@ Allow: /error
 Allow: /cancel
 Allow: /dashboard/*
 Allow: /waitlist
+Allow: /demo-video.mp4
 
 # Disallow private pages
 Disallow: /book/*
@@ -28,6 +29,6 @@ Sitemap: https://schedulee.app/sitemap.xml
       headers: {
         "content-type": "text/plain",
       },
-    }
+    },
   );
 }
