@@ -44,9 +44,8 @@ export default function ScheduleeLandingPage() {
       <main>
         <HeroSection />
         <VideoSection />
-        <WaitlistSection />
         <FeaturesSection />
-        <TestimonialsSection />
+        {/* <TestimonialsSection /> */}
         <CTASection />
       </main>
       <Footer />
@@ -224,22 +223,6 @@ function HeroSection() {
         <p className="mt-4 text-sm text-zinc-500">
           No credit card required • Cancel anytime
         </p>
-
-        <div className="flex items-center justify-center gap-2 mt-8 text-sm text-zinc-500">
-          <div className="flex -space-x-2">
-            {[24, 35, 57].map((item) => (
-              <img
-                key={item}
-                src={`https://i.pravatar.cc/40?img=${item}`}
-                alt="Happy user"
-                className="w-8 h-8 rounded-full border-2 border-white"
-                width={32}
-                height={32}
-              />
-            ))}
-          </div>
-          <span>Trusted by owners everywhere</span>
-        </div>
       </div>
     </section>
   );
@@ -259,8 +242,8 @@ function VideoSection() {
       setIsMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
     };
     checkIfMobile();
-    window.addEventListener('resize', checkIfMobile);
-    return () => window.removeEventListener('resize', checkIfMobile);
+    window.addEventListener("resize", checkIfMobile);
+    return () => window.removeEventListener("resize", checkIfMobile);
   }, []);
 
   // Handle play/pause
@@ -306,19 +289,19 @@ function VideoSection() {
         } else if (elem.webkitRequestFullscreen) {
           await elem.webkitRequestFullscreen();
         }
-        
+
         setIsFullscreen(true);
-        
+
         // Lock to landscape on mobile devices when in fullscreen
         if (isMobile && screen.orientation && screen.orientation.lock) {
           try {
-            await screen.orientation.lock('landscape');
+            await screen.orientation.lock("landscape");
           } catch (err) {
-            console.log('Orientation lock failed:', err);
+            console.log("Orientation lock failed:", err);
           }
         }
       } catch (err) {
-        console.error('Fullscreen error:', err);
+        console.error("Fullscreen error:", err);
       }
     } else {
       try {
@@ -332,10 +315,10 @@ function VideoSection() {
         } else if (document.webkitExitFullscreen) {
           await document.webkitExitFullscreen();
         }
-        
+
         setIsFullscreen(false);
       } catch (err) {
-        console.error('Exit fullscreen error:', err);
+        console.error("Exit fullscreen error:", err);
       }
     }
   };
@@ -345,13 +328,18 @@ function VideoSection() {
     const handleFullscreenChange = () => {
       const fullscreen = !!document.fullscreenElement;
       setIsFullscreen(fullscreen);
-      
+
       // Lock to landscape when entering fullscreen on mobile
-      if (fullscreen && isMobile && screen.orientation && screen.orientation.lock) {
+      if (
+        fullscreen &&
+        isMobile &&
+        screen.orientation &&
+        screen.orientation.lock
+      ) {
         try {
-          screen.orientation.lock('landscape');
+          screen.orientation.lock("landscape");
         } catch (err) {
-          console.log('Orientation lock failed:', err);
+          console.log("Orientation lock failed:", err);
         }
       }
     };
@@ -363,7 +351,7 @@ function VideoSection() {
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
       document.removeEventListener(
         "webkitfullscreenchange",
-        handleFullscreenChange
+        handleFullscreenChange,
       );
     };
   }, [isMobile]);
@@ -394,7 +382,7 @@ function VideoSection() {
           <video
             ref={videoRef}
             className={`absolute top-0 left-0 w-full h-full ${
-              isFullscreen ? 'object-contain' : 'object-cover'
+              isFullscreen ? "object-contain" : "object-cover"
             }`}
             playsInline
             muted={muted}
@@ -636,8 +624,7 @@ function CTASection() {
           Ready to simplify your scheduling?
         </h2>
         <p className="mx-auto mb-8 text-lg text-zinc-500 max-w-[500px]">
-          Join thousands of business owners who've transformed their appointment
-          booking process.
+          Transform your appointment booking process today.
         </p>
         <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
           <button
@@ -740,67 +727,5 @@ function Footer() {
         </p>
       </div>
     </footer>
-  );
-}
-
-function WaitlistSection() {
-  return (
-    <section
-      id="waitlist"
-      className="px-4 py-20 mx-auto max-w-[1200px] sm:py-16"
-    >
-      <div className="px-8 py-12 overflow-hidden text-center bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-sm sm:px-6 sm:py-8">
-        <div className="inline-flex items-center px-3 py-1.5 mb-4 text-xs font-medium text-blue-600 bg-white rounded-full">
-          <Zap size={14} className="mr-1" />
-          Exclusive Opportunity
-        </div>
-        <h2 className="mb-4 text-3xl font-bold text-white sm:text-2xl">
-          Join Our Beta Tester Program
-        </h2>
-        <p className="mx-auto mb-8 text-lg text-blue-100 max-w-[600px]">
-          Be among the first to experience Schedulee.app and get{" "}
-          <strong>free lifetime access</strong> as a thank you for helping us
-          shape the future of Schedulee.
-        </p>
-        <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-          <a
-            href="/waitlist"
-            className="w-full min-w-[220px] no-underline sm:w-auto"
-          >
-            <button
-              className="w-full px-6 py-3 text-base font-semibold transition-all duration-200 bg-white rounded-lg cursor-pointer text-blue-600 hover:bg-blue-50 active:scale-95"
-              aria-label="Join the beta tester waitlist"
-            >
-              Join Waitlist Now
-            </button>
-          </a>
-          <a
-            href="#features"
-            className="w-full min-w-[220px] no-underline sm:w-auto"
-          >
-            <button
-              className="w-full px-6 py-3 text-base font-semibold transition-all duration-200 bg-transparent border rounded-lg cursor-pointer text-white border-white hover:bg-white/10 active:scale-95"
-              aria-label="Learn more about the beta program"
-            >
-              Learn More
-            </button>
-          </a>
-        </div>
-        <div className="flex flex-wrap items-center justify-center gap-4 mt-8 text-sm text-blue-100">
-          <div className="flex items-center gap-2">
-            <Check size={16} className="text-white" />
-            <span>No credit card required</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Check size={16} className="text-white" />
-            <span>Free forever for beta testers</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Check size={16} className="text-white" />
-            <span>Early access to new features</span>
-          </div>
-        </div>
-      </div>
-    </section>
   );
 }

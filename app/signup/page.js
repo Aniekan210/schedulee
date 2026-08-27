@@ -113,90 +113,13 @@ export default function SignUpPage() {
               Continue with Google
             </Button>
 
-            <div className="flex items-center my-6">
-              <div className="flex-1 h-px bg-gray-200"></div>
-              <span className="mx-4 text-sm text-gray-400">or</span>
-              <div className="flex-1 h-px bg-gray-200"></div>
-            </div>
-
+     
             {error && (
               <div className="mb-4 p-3 text-sm text-red-600 bg-red-50 rounded-md border border-red-100">
                 {error}
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="businessName" className="text-gray-700">
-                  Business Name
-                </Label>
-                <Input
-                  id="businessName"
-                  name="businessName"
-                  type="text"
-                  placeholder="Your Business Name"
-                  className="h-11 rounded-lg focus:ring-blue-500 border-gray-300"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-gray-700">
-                  Email
-                </Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  className="h-11 rounded-lg focus:ring-blue-500 border-gray-300"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-gray-700">
-                  Password
-                </Label>
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  placeholder="••••••••"
-                  className="h-11 rounded-lg focus:ring-blue-500 border-gray-300"
-                  required
-                  minLength={6}
-                />
-              </div>
-
-              <div className="flex items-start gap-2">
-                <input
-                  type="checkbox"
-                  id="acceptedTerms"
-                  name="acceptedTerms"
-                  className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 shrink-0"
-                  required
-                />
-                <Label htmlFor="acceptedTerms" className="text-gray-700 text-sm inline leading-snug">
-                  I agree to the{" "}
-                  <Link href="/terms" className="text-blue-600 inline hover:underline">
-                    Terms of Service
-                  </Link>{" "}
-                  and{" "}
-                  <Link href="/privacy" className="text-blue-600 inline hover:underline">
-                    Privacy Policy
-                  </Link>
-                </Label>
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full h-11 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-medium"
-                disabled={loading}
-              >
-                {loading ? <Spinner /> : "Create Account"}
-              </Button>
-            </form>
           </CardContent>
         ) : (
           <CardContent className="px-8 pb-6 text-center">
