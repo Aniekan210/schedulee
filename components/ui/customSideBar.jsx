@@ -135,14 +135,6 @@ export default function DashboardSidebar({ trialDays = 14, isPaid = false }) {
                   <span className="text-gray-700">{trialDays} days left</span>
                 </div>
               )}
-
-              <Link
-                href="/feature-request"
-                className="block px-2 py-1 hover:text-gray-700 transition-colors"
-                aria-label="Request a new feature"
-              >
-                Request a Feature
-              </Link>
             </div>
 
             {/* Sign Out Button */}
